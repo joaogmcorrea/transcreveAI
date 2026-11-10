@@ -75,7 +75,7 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 - **Resultado na v0.4:** texto selecionável em parágrafos com tempo e "Copiar tudo" (entrou junto com o histórico). Clique para copiar trecho e Exportar ficam para a v0.5 (roadmap).
 
 ### Problemas Conhecidos ou Riscos Futuros
-- Sem teste à mão com áudios longos (30 min ou mais) nem soltando direto no ícone da barra. A prévia ao vivo só existe no Apple Speech; o Parakeet entrega tudo no fim (rápido o bastante).
+- Sem teste à mão com áudios longos (30 min ou mais). Soltar direto no ícone da barra foi testado pelo usuário depois da release. A prévia ao vivo só existe no Apple Speech; o Parakeet entrega tudo no fim (rápido o bastante).
 - O apanhador do arraste só arma para cliques no Dock e no Finder. Arrastes de áudio vindos de outros apps que também usem área própria não abrem o painel (nenhum caso conhecido).
 - O Parakeet usa cerca de 143 MB de memória enquanto está carregado (fica carregado de propósito).
 
@@ -116,7 +116,7 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 - `.gitignore`, `_docs/*`.
 
 ### Problemas Conhecidos ou Riscos Futuros
-- Testado pelo usuário: clique no ícone (depois da correção), abrir ao arrastar e soltar no painel. Sem teste à mão: soltar direto no ícone da barra.
+- Testado pelo usuário: clique no ícone (depois da correção), abrir ao arrastar e soltar no painel. Sem teste à mão: soltar direto no ícone da barra (testado na Sessão 4).
 - A v0.3.0 é a primeira release (10/11/2026). Só os apps instalados a partir dela recebem atualizações; a cópia de debug do DerivedData não se atualiza (o Sparkle fica desligado no DEBUG).
 - **PKG em vez de DMG (dúvida do usuário):** não muda o aviso do Gatekeeper nem a permissão de Acessibilidade, que depende da assinatura do app, e pioraria o Sparkle (senha a cada atualização). Fica o DMG, como no Cutline. O que tira os avisos é o Developer ID com notarização; o que estabiliza a Acessibilidade é um certificado fixo (o autoassinado "TranscreveAI" basta).
 - **A chave de `_privado/` precisa de backup.** Ela está no Dropbox; se se perder, os apps instalados não aceitam versões novas.

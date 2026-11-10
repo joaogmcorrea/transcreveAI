@@ -18,7 +18,7 @@
 *(Mantenha esta seção no topo para registrar mudanças que ainda não geraram uma nova versão. Assim que fechar a versão, renomeie esse bloco para o número da versão e crie um novo `[Unreleased]` aqui em cima).*
 
 ### Adicionado
-- 
+- README do repositório no GitHub (só no repositório, o app não muda): o que faz, como usar, motores e velocidade, formatos, privacidade, instalar e compilar.
 
 ### Corrigido
 - 

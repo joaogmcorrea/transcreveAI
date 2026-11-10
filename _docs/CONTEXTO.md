@@ -30,7 +30,7 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 - **Painel:** transcrevendo (etapa, porcentagem, prévia, Cancelar), pronto (parágrafos com tempo, texto selecionável, "Copiado") e erro (Tentar de novo). **Ícone:** anel com porcentagem, ✓ ao terminar e bolinha vermelha de "não visto". **Som** ao terminar.
 - **Histórico** *(pedido do owner)*: as 3 recentes no painel, "Ver tudo" com busca, reabrir, copiar e apagar, guardado só neste Mac (500 mais recentes) e, por padrão, **só até desligar ou reiniciar** (pedido do owner). Lixeira ao passar o mouse. **Ajustes** de verdade (geral, modelo e idioma padrão, histórico, atualizações), também no botão direito do ícone. Abrir ao arrastar agora vale também para as pilhas do Dock (testado pelo owner). Corrigido: abrir os Ajustes derrubava o app.
 - **FFmpeg embutido** para WebM, WMA, MKV e AMR; os motores ficam no pacote local `files/Pacotes/TranscreveMotores`, testável pelo terminal (`transcrever`).
-- **Testado pelo owner** *(10/11/2026)*: som e bolinha vermelha, fechar ao clicar fora, histórico com lixeira, Ajustes e arrastar do Dock. **Sem teste à mão:** áudios longos (30 min ou mais) e soltar direto no ícone da barra.
+- **Testado pelo owner** *(10/11/2026)*: som e bolinha vermelha, fechar ao clicar fora, histórico com lixeira, Ajustes, arrastar do Dock e, depois da release, soltar direto no ícone da barra. **Sem teste à mão:** áudios longos (30 min ou mais).
 - **Release publicada no GitHub** (v0.4.0, 10/11/2026), ainda com assinatura ad-hoc: os apps na v0.3.0 recebem o aviso do Sparkle.
 
 ### Fase: v0.3.0 — Esqueleto do app de menu bar, primeira release (10/11/2026)
@@ -38,7 +38,7 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 - **Atualizações pelo Sparkle 2**, com a mesma lógica do Cutline: `_dev/distribuir.sh`, chave EdDSA em `_privado/` e um `appcast-<versão>.xml` por versão. O pipeline foi testado localmente (DMG assinado e assinatura conferida). **Primeira release publicada no GitHub** (v0.3.0, 10/11/2026), com assinatura ad-hoc: na primeira abertura é preciso usar "Abrir Mesmo Assim".
 - **Abrir ao arrastar** *(10/11/2026)*: o painel abre sozinho quando um áudio começa a ser arrastado em qualquer app e fecha se o arquivo for solto em outro lugar (opção no menu "…"). **Botão direito no ícone:** Procurar atualizações…, Abrir ao iniciar o Mac e Sair.
 - **Bug corrigido** *(10/11/2026)*: o painel fechava logo depois do clique no ícone (no macOS 26+, o clique também chega ao monitor global).
-- **Testado pelo owner** *(10/11/2026)*: clique no ícone, abrir ao arrastar e soltar no painel. **Sem teste à mão:** soltar direto no ícone da barra.
+- **Testado pelo owner** *(10/11/2026)*: clique no ícone, abrir ao arrastar e soltar no painel. Soltar direto no ícone da barra foi testado depois, na v0.4.0 *(10/11/2026)*.
 
 ### Fase: v0.2.0 — Prova de velocidade dos motores (10/11/2026)
 - **Benchmark** em `_testes/benchmark/`, rodado em 3 notas de voz pt-BR no M4 Pro. Velocidade de transcrição: Parakeet v3 145× tempo real, Apple Speech 73×, whisper.cpp Turbo 25×, Whisper Turbo 22×, Whisper Large v3 3×. O Whisper Large v3 cortou parte de um áudio e o whisper.cpp alucinou uma repetição.
@@ -121,6 +121,7 @@ TranscreveAI/
 ├── _docs/                 # Documentação iterativa do projeto para IAs
 ├── .agent/                # Regras, skills e workflows para outros agentes
 ├── .gitignore             # Exclusões do versionamento
+├── README.md              # Apresentação pública no GitHub (10/11/2026)
 ├── _testes/               # Testes e benchmark
 │   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
 │   ├── audios/            # Áudios de teste (fora do git)
@@ -139,7 +140,7 @@ TranscreveAI/
         ├── Audio/         # Formatos aceitos (a conversão fica no pacote TranscreveMotores)
         ├── Transcription/ # WhisperKit e benchmark local do Automático (v0.6); os motores atuais estão no pacote
         ├── Export/        # Geração de .txt e .md: v0.5
-        └── Storage/       # Preferências; depois histórico
+        └── Storage/       # Preferências e histórico (10/11/2026)
 ```
 
 ---
@@ -153,6 +154,7 @@ TranscreveAI/
 | `_docs/SCRIPTS-LOGIC.md` | Mapeamento exato de onde está rodando cada função, scripts base e endpoints. |
 | `_docs/ROADMAP.md` | Lista completa e ordenada de milestones futuros do projeto. |
 | `_docs/REGRAS_CONDUTA.md` | Restrições rígidas específicas do projeto (ex: "Nunca usar shadow DOM"). |
+| `README.md` | Apresentação pública do projeto no GitHub, em pt-BR: o que faz, como usar, motores, formatos, privacidade, instalar e compilar. Atualizar quando uma versão mudar o que o app faz *(10/11/2026)*. |
 
 ---
 

@@ -9,7 +9,7 @@
 
 ## v0.3.0 — Esqueleto do app de menu bar
 - [x] Projeto Xcode (macOS 26+) em `files/`, com ícone template na barra (`NSStatusItem`) e painel embaixo dele. Não usa o `MenuBarExtra`, porque ele não deixa soltar arquivos no ícone.
-- [x] Área de arrastar no painel e arrastar direto sobre o ícone da barra (o painel foi testado pelo owner; o ícone ainda não).
+- [x] Área de arrastar no painel e arrastar direto sobre o ícone da barra (os dois testados pelo owner; o ícone em 10/11/2026, na v0.4.0).
 - [x] Abrir o painel sozinho ao arrastar um áudio em qualquer app, e menu do botão direito no ícone.
 - [x] Atualizações pelo Sparkle 2 com a mesma lógica do Cutline (`_dev/distribuir.sh`, appcast por versão, chave EdDSA em `_privado/`).
 - [x] Publicar a primeira release (v0.3.0), para que os apps instalados passem a receber atualizações.
