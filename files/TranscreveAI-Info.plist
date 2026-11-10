@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Atualizações e tipos de arquivo do TranscreveAI. O resto do Info.plist é gerado pelo Xcode (GENERATE_INFOPLIST_FILE).
+     Fica fora da pasta TranscreveAI/ porque a pasta sincronizada copiaria o arquivo como recurso. -->
+<plist version="1.0">
+<dict>
+	<!-- Sparkle: o appcast da última versão publicada no GitHub Releases (feito pelo _dev/distribuir.sh) e a chave
+	     pública que confere a assinatura de cada atualização. A chave privada fica fora do repositório (_privado/).
+	     Cada versão lê o appcast com o próprio número: o GitHub conta os downloads de cada arquivo e isso mostra
+	     quantos apps de cada versão procuram atualização, sem nada pessoal. -->
+	<key>SUFeedURL</key>
+	<string>https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/appcast-$(MARKETING_VERSION).xml</string>
+	<key>SUPublicEDKey</key>
+	<string>S4ecI1/ZnWAsYCCoiYgQQHUjjTFx7ZkdQapvdYZy3wA=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
+	<!-- "Abrir com" no Finder e arquivos soltos no ícone do app no Dock/Finder: qualquer áudio ou vídeo. -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Áudio</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.audio</string>
+				<string>public.audiovisual-content</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

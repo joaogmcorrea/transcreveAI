@@ -4,9 +4,9 @@
 
 ---
 
-## Status: v0.2.0 — Benchmark de motores (10/11/2026)
+## Status: v0.3.0 — Esqueleto do app de menu bar (10/11/2026)
 
-Ainda não há código do app. Existem a documentação em `_docs/`, o script de versionamento e o benchmark de motores em `_testes/benchmark/`. O código Swift ficará em `files/` (projeto Xcode a criar), dividido nas camadas abaixo. Preencha cada tabela quando os primeiros arquivos existirem.
+O app existe em `files/`: o ícone na barra de menus, o painel com a área de arrastar (no painel e no ícone), os menus de modelo e idioma, os Ajustes e as atualizações pelo Sparkle (mesma lógica do Cutline). Ainda não transcreve (v0.4). O instalador sai do `_dev/distribuir.sh`.
 
 ---
 
@@ -15,6 +15,7 @@ Ainda não há código do app. Existem a documentação em `_docs/`, o script de
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
 | `_docs/versionar.sh` | Bash | Versionamento via git local. Uso: `./_docs/versionar.sh <X.Y.Z> ["mensagem"]`. Inicializa o repositório se necessário, faz `git add -A`, cria o commit e a tag anotada `vX.Y.Z`. Falha se a tag já existir. Exclusões ficam no `.gitignore`. |
+| `_dev/distribuir.sh` | Bash | Instalador e atualizações (mesma lógica do Cutline). Compila em Release (DerivedData `TranscreveAI-dist`). Assina com o certificado "TranscreveAI" do Acesso às Chaves, se houver (Sparkle de dentro para fora), ou ad-hoc. Monta `_dev/dist/TranscreveAI-<v>.dmg` (app + atalho para Aplicativos), assina o DMG com a chave EdDSA de `_privado/` (`sign_update --ed-key-file`) e escreve `appcast.xml` (com `novidades-<v>.<idioma>.md` em Markdown), mais uma cópia `appcast-<v>.xml` para cada versão já lançada. `--publicar` cria a release `v<v>` no GitHub com o DMG, a cópia `TranscreveAI.dmg` (nome fixo) e os appcasts; as notas vêm de `notas-<v>.md`. |
 
 ---
 
@@ -30,34 +31,51 @@ Mede a velocidade e a qualidade de cada motor em pt-BR. Build, modelos e WAVs fi
 
 ---
 
-## App (`files/App/`)
-Entrada do app, `MenuBarExtra`, ícone/status item (incluindo progresso no ícone e arrastar sobre ele).
+## Projeto Xcode (`files/`)
+Swift 6, isolamento padrão `MainActor`, macOS 26+, sem sandbox, assinatura ad-hoc. Pasta sincronizada: todo arquivo novo dentro de `files/TranscreveAI/` entra no alvo sozinho, sem mexer no `project.pbxproj`. Compilar pela linha de comando: `xcodebuild -project files/TranscreveAI.xcodeproj -scheme TranscreveAI -configuration Debug build`.
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| _(nenhum arquivo ainda)_ | | |
+| `files/TranscreveAI.xcodeproj` | Xcode | Alvo `TranscreveAI` (`io.github.joaogmcorrea.transcreveai`). `MARKETING_VERSION` fica no **projeto** (Debug e Release) e o `CURRENT_PROJECT_VERSION` acompanha: é ele que o Sparkle compara. Dependência SPM: Sparkle 2.10.1. `LSUIElement = YES` (sem Dock). |
+| `files/TranscreveAI-Info.plist` | Plist | Mesclado com o gerado pelo Xcode. Sparkle (`SUFeedURL` = `releases/latest/download/appcast-$(MARKETING_VERSION).xml`, `SUPublicEDKey`, verificação antes de extrair) e `CFBundleDocumentTypes` (áudio/vídeo, para "Abrir com"). Fica fora de `TranscreveAI/` para a pasta sincronizada não copiá-lo como recurso. |
 
 ---
 
-## UI (`files/UI/`)
-Painel da barra de menus (arrastar, progresso, prévia ao vivo, transcrição clicável, recentes), menus de modelo/idioma/opções e anel de ações.
+## App (`files/TranscreveAI/App/`)
+Entrada do app, estado compartilhado e atualizações.
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| _(nenhum arquivo ainda)_ | | |
+| `TranscreveAIApp.swift` | Swift | `@main`, só com a cena `Settings` vazia (exigida pelo SwiftUI). O app de verdade começa no `AppDelegate`. |
+| `AppDelegate.swift` | Swift | Liga o Sparkle (`Atualizacoes.controlador`) e cria a `BarraDeMenus`. `application(_:open:)` recebe os arquivos de "Abrir com". Argumentos de teste: `--abrir-painel`, `--arquivo <caminho>` e `--menu-icone` (abre o menu do botão direito). |
+| `EstadoApp.swift` | Swift | `@Observable`: `arquivo` (`ArquivoAudio`: url, duração, tamanho) e `aviso`. `receber(_:)` aceita o primeiro áudio da lista e lê a duração em segundo plano. |
+| `Atualizacoes.swift` | Swift | Sparkle 2, mesma lógica do Cutline. `SPUStandardUpdaterController` que só inicia fora do DEBUG (`Atualizacoes.ativo`). `LembretesDeAtualizacao` liga os "lembretes discretos" (app sem Dock) e ativa o app antes de mostrar a janela da atualização. |
 
 ---
 
-## Audio (`files/Audio/`)
-Leitura e decodificação: AVFoundation primeiro, FFmpeg para formatos não nativos; conversão para o formato PCM pedido pelo motor.
+## UI (`files/TranscreveAI/UI/`)
+Ícone e painel da barra de menus (mockup, página "Menu bar"). Futuramente: progresso no ícone, transcrição clicável, recentes e anel de ações.
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| _(nenhum arquivo ainda)_ | | |
+| `BarraDeMenus.swift` | Swift (AppKit) | `NSStatusItem` com o símbolo `waveform` (template). A ação dispara no mouse down (`sendAction(on:)`). Clique esquerdo alterna o painel; botão direito ou Control + clique mostra o menu curto (Procurar atualizações…, Abrir ao iniciar o Mac, Sair), com o truque `item.menu = menu; performClick; item.menu = nil`. **Abrir ao arrastar:** com o `DetectorDeArraste`, abre o painel sem ativar o app quando um áudio começa a ser arrastado (preferência `abrirAoArrastar`, ligada por padrão) e fecha 0,5 s depois de soltar se o arquivo não veio para o painel nem para o ícone. **Soltar no ícone:** a janela do ícone é registrada para `.fileURL` e tem esta classe como delegate (`NSDraggingDestination`). Fecha com Esc ou clique fora (monitor global). Só conta o clique que começou fora do ícone depois que o painel abriu, porque o monitor global também recebe o clique do próprio ícone no macOS 26+. Um clique fora que vira arraste não fecha. Abre o seletor de arquivos, as atualizações e a janela de Ajustes. `mostrarPainel` tenta de novo enquanto o ícone ainda não tem posição na tela. |
+| `DetectorDeArraste.swift` | Swift (AppKit) | Monitor global de mouse (sem Acessibilidade). A cada clique guarda o `changeCount` de `NSPasteboard(name: .drag)`; no primeiro `leftMouseDragged` em que ele mudou, lê as URLs de arquivo e, se houver áudio, chama `aoComecar`. No `leftMouseUp`, chama `aoTerminar`. Arquivos "prometidos" (Mail, alguns navegadores) ainda não contam. |
+| `PainelFlutuante.swift` | Swift (AppKit) | `NSPanel` sem borda (nível `popUpMenu`) com `NSVisualEffectView` (`.popover`) e máscara de cantos de 16 pt. Largura fixa de 380. A altura segue o conteúdo SwiftUI (`onGeometryChange`) e o topo fica preso 6 pt abaixo do ícone. |
+| `PainelView.swift` | SwiftUI | Cabeçalho (nome do app ou do arquivo e o menu "…", com Copiar ao terminar, Abrir ao arrastar um áudio, Abrir ao iniciar o Mac, Procurar atualizações…, Ajustes… e Sair), área tracejada (`dropDestination` e clique), menus de modelo e de idioma. Com arquivo: "Áudio recebido", Novo e Mostrar no Finder; durante um arraste, o painel inteiro mostra "Solte para transcrever". |
+| `AjustesView.swift` | SwiftUI | Janela de Ajustes: "Procurar atualizações automaticamente" (ajuste do Sparkle), versão e "Procurar agora". Desligado no DEBUG. |
 
 ---
 
-## Transcription (`files/Transcription/`)
+## Audio (`files/TranscreveAI/Audio/`)
+Leitura e decodificação: AVFoundation primeiro, FFmpeg para formatos não nativos (a partir da v0.4); conversão para o formato PCM pedido pelo motor.
+
+| Arquivo | Tipo | Descrição |
+|---------|------|-----------|
+| `FormatosAudio.swift` | Swift | `aceita(_:)` (UTType `audio`/`audiovisualContent` + extensões extras: opus, ogg, webm, wma, mkv…), `tipos` para o seletor, `duracao(de:)` (AVURLAsset; o Opus do WhatsApp também é lido) e `formatar(duracao:)`. |
+
+---
+
+## Transcription (`files/TranscreveAI/Transcription/`)
 Motores de transcrição (Apple Speech, WhisperKit, Parakeet) atrás de uma interface comum, benchmark local e seleção do modo "Automático".
 
 | Arquivo | Tipo | Descrição |
@@ -66,7 +84,7 @@ Motores de transcrição (Apple Speech, WhisperKit, Parakeet) atrás de uma inte
 
 ---
 
-## Export (`files/Export/`)
+## Export (`files/TranscreveAI/Export/`)
 Geração de `.txt` (só texto) e `.md` (título, metadados e `[mm:ss]` por parágrafo).
 
 | Arquivo | Tipo | Descrição |
@@ -75,12 +93,12 @@ Geração de `.txt` (só texto) e `.md` (título, metadados e `[mm:ss]` por par�
 
 ---
 
-## Storage (`files/Storage/`)
+## Storage (`files/TranscreveAI/Storage/`)
 Histórico de transcrições, preferências e resultados de benchmark em Application Support.
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| _(nenhum arquivo ainda)_ | | |
+| `Preferencias.swift` | Swift | Chaves do UserDefaults (`Preferencia`), `ModeloTranscricao` (Automático, Parakeet v3, Apple Speech, Whisper Turbo; nome, rótulo curto, descrição, motor efetivo), `IdiomaAudio` e `InicioAutomatico` (`SMAppService.mainApp`). |
 
 ---
 

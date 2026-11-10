@@ -45,6 +45,47 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 3 — 10/11/2026 (Esqueleto do app de menu bar e atualizações, v0.3.0)
+
+### Objetivo
+- Criar o projeto Xcode do app de barra de menus (v0.3.0) e tratar as atualizações com a mesma lógica do Cutline (pedido do usuário).
+
+### Descobertas
+- **Lógica de atualização do Cutline** (lida em `../Cutline`): Sparkle 2 (2.10.1) com `SPUStandardUpdaterController(startingUpdater: !DEBUG)`. O `SUFeedURL` aponta para `releases/latest/download/appcast-$(MARKETING_VERSION).xml`: cada versão lê o próprio appcast, e o contador de downloads do GitHub mostra quantos apps de cada versão existem. Por isso toda release leva uma cópia do appcast para cada versão já lançada. Também usa `SUPublicEDKey`, `SUEnableAutomaticChecks` e `SUVerifyUpdateBeforeExtraction`. A chave privada é a semente do CryptoKit em base64, guardada em `_privado/` (`sign_update --ed-key-file`). O `distribuir.sh` monta o DMG e o appcast e, com `--publicar`, cria a release. Lá, "versionar = publicar": é a release, não o push, que atualiza os apps.
+- **Diferença de estrutura:** no Cutline o repositório público é só `files/`, e a raiz é um git privado local. No TranscreveAI a raiz inteira é o repositório público (decisão da Sessão 1). O `_dev/` e o `_privado/` seguem a mesma ideia, com `/_privado/` e os DMGs/appcasts no `.gitignore`.
+- **`MenuBarExtra` não serve:** ele não expõe o `NSStatusItem`, então não dá para soltar arquivos no ícone. A solução é `NSStatusItem` + `NSPanel` próprio. Para soltar no ícone, a janela do botão é registrada para `.fileURL` e a `BarraDeMenus` vira o delegate dela (o `NSWindow` repassa os eventos de arrastar ao delegate).
+- **Bug achado pelo usuário (corrigido):** no macOS 26+, o clique no ícone da barra também chega ao monitor **global** de eventos, como se viesse de outro app. A ação do botão dispara no mouse down. Por isso o "soltar" (mouse up) do próprio clique que abriu o painel era lido como "clique fora" e o fechava na hora: ele só ficava aberto se a pessoa arrastasse antes de soltar. Correção: só fecha um clique que **começou** fora do ícone depois que o painel abriu (`cliqueForaPendente`) e ignora eventos sobre o ícone.
+- **Abrir ao arrastar (pedido do usuário):** a técnica do Dropover/Yoink. Um monitor global de mouse (não exige Acessibilidade) compara o `changeCount` de `NSPasteboard(name: .drag)` entre o mouse down e o primeiro mouse dragged. Se mudou e tem URL de arquivo de áudio, é um arraste de áudio. O painel abre sem ativar o app (`orderFrontRegardless`), para não atrapalhar o arraste. Arquivos prometidos (Mail, alguns navegadores) não trazem URL e ficaram de fora. Confirmado pelo usuário em 10/11/2026: funciona arrastando do Finder.
+- **Menu do botão direito no ícone:** `sendAction(on: [.leftMouseDown, .rightMouseDown])` e, no botão direito, `item.menu = menu; button.performClick(nil); item.menu = nil` (menu no lugar certo e ícone destacado). O usuário pediu os itens como "check for updates / close / open on startup"; ficaram em pt-BR pela regra da interface.
+- **Logo depois da abertura**, a janela do ícone ainda está em `y = 0`: abrir o painel ali o joga para fora da tela. O `mostrarPainel` tenta de novo a cada 0,1 s até o ícone ter posição.
+- **O AVFoundation do macOS 27 lê a duração do Opus do WhatsApp.** Falta confirmar se ele também decodifica o áudio (v0.4).
+- **App sem Dock + Sparkle:** é preciso implementar `supportsGentleScheduledUpdateReminders` no `SPUStandardUserDriverDelegate` e ativar o app antes da janela da atualização.
+- **Assinatura ad-hoc:** a cada versão, o macOS pode pedir de novo as permissões (Acessibilidade, no anel da v0.8). O Cutline resolve com um certificado autoassinado no Acesso às Chaves. Aqui o `distribuir.sh` procura o certificado "TranscreveAI".
+
+### Decisões Tomadas
+- Bundle ID `io.github.joaogmcorrea.transcreveai` (o mesmo padrão do Cutline). `MARKETING_VERSION` no projeto, com `CURRENT_PROJECT_VERSION = $(MARKETING_VERSION)`.
+- O "…" do painel ganhou "Procurar atualizações…" e "Ajustes…". Os Ajustes abrem numa `NSWindow` própria, porque o `openSettings` do SwiftUI não funciona confiavelmente fora das cenas.
+- Clique fora fecha o painel, mas um clique fora que vira arraste não fecha (para trazer um arquivo do Finder até o painel aberto).
+- O arquivo recebido mostra "Áudio recebido" até a transcrição chegar, na v0.4.
+
+### Arquivos Modificados/Criados
+- `files/` — projeto Xcode, `TranscreveAI-Info.plist` e os fontes em `TranscreveAI/{App,UI,Audio,Storage}`.
+- `_dev/distribuir.sh` — o mesmo do Cutline, adaptado.
+- `_privado/` — par de chaves EdDSA (fora do git).
+- `.gitignore`, `_docs/*`.
+
+### Problemas Conhecidos ou Riscos Futuros
+- Testado pelo usuário: clique no ícone (depois da correção), abrir ao arrastar e soltar no painel. Sem teste à mão: soltar direto no ícone da barra.
+- A v0.3.0 é a primeira release (10/11/2026). Só os apps instalados a partir dela recebem atualizações; a cópia de debug do DerivedData não se atualiza (o Sparkle fica desligado no DEBUG).
+- **PKG em vez de DMG (dúvida do usuário):** não muda o aviso do Gatekeeper nem a permissão de Acessibilidade, que depende da assinatura do app, e pioraria o Sparkle (senha a cada atualização). Fica o DMG, como no Cutline. O que tira os avisos é o Developer ID com notarização; o que estabiliza a Acessibilidade é um certificado fixo (o autoassinado "TranscreveAI" basta).
+- **A chave de `_privado/` precisa de backup.** Ela está no Dropbox; se se perder, os apps instalados não aceitam versões novas.
+
+### Dicas para Próximas Sessões
+- Para ver o painel sem clicar: rode o app com `--abrir-painel` ou `--arquivo <caminho>` e tire uma foto com `screencapture -x -R 1200,0,720,620`.
+- Para testar o pipeline de distribuição sem publicar: `./_dev/distribuir.sh` (gera tudo em `_dev/dist/`). Para conferir a assinatura: CryptoKit `isValidSignature` com o `SUPublicEDKey`.
+
+---
+
 ## Sessão 2 — 10/11/2026 (Benchmark de motores, v0.2.0)
 
 ### Objetivo

@@ -31,6 +31,17 @@
 
 ---
 
+## [0.3.0] - 10/11/2026
+
+### Adicionado
+- App de barra de menus em `files/` (projeto Xcode, macOS 26+): ícone na barra e painel embaixo dele, como no mockup. Aceita áudio solto no painel, no ícone ou por "Abrir com". Menus de modelo e de idioma, menu "…" e janela de Ajustes. Testado pelo owner, menos soltar direto no ícone.
+- Atualizações pelo Sparkle 2 com a mesma lógica do Cutline: `_dev/distribuir.sh` (DMG, appcast assinado com EdDSA e uma cópia por versão), "Procurar atualizações…" e ajuste para procurar automaticamente. Chave privada em `_privado/`, fora do git.
+- O painel abre sozinho quando um áudio começa a ser arrastado em qualquer app (Finder, Mesa, Downloads) e fecha se ele for solto em outro lugar. Opção "Abrir ao arrastar um áudio" no menu "…", ligada por padrão. Testado pelo owner.
+- Menu do botão direito no ícone da barra: Procurar atualizações…, Abrir ao iniciar o Mac e Sair do TranscreveAI.
+- Primeira release no GitHub (DMG + appcast): a partir desta versão, os apps instalados recebem as próximas atualizações.
+
+---
+
 ## [0.2.0] - 10/11/2026
 
 ### Adicionado

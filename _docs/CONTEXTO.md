@@ -25,6 +25,13 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 
 > **Agentes de IA:** Atualizem esta seção a cada nova fase completada, versão lançada ou marco importante atingido. Adicionem a nova fase no topo e movam as anteriores para baixo.
 
+### Fase: v0.3.0 — Esqueleto do app de menu bar, primeira release (10/11/2026)
+- **App em `files/`**: ícone na barra de menus (`NSStatusItem`) e painel sem borda embaixo dele (`NSPanel` + SwiftUI), como no mockup. Aceita áudio solto no painel, no ícone da barra ou por "Abrir com". Tem os menus de modelo e de idioma, e o "…" com Copiar ao terminar, Abrir ao iniciar o Mac, Procurar atualizações, Ajustes e Sair. Ainda não transcreve (v0.4).
+- **Atualizações pelo Sparkle 2**, com a mesma lógica do Cutline: `_dev/distribuir.sh`, chave EdDSA em `_privado/` e um `appcast-<versão>.xml` por versão. O pipeline foi testado localmente (DMG assinado e assinatura conferida). **Primeira release publicada no GitHub** (v0.3.0, 10/11/2026), com assinatura ad-hoc: na primeira abertura é preciso usar "Abrir Mesmo Assim".
+- **Abrir ao arrastar** *(10/11/2026)*: o painel abre sozinho quando um áudio começa a ser arrastado em qualquer app e fecha se o arquivo for solto em outro lugar (opção no menu "…"). **Botão direito no ícone:** Procurar atualizações…, Abrir ao iniciar o Mac e Sair.
+- **Bug corrigido** *(10/11/2026)*: o painel fechava logo depois do clique no ícone (no macOS 26+, o clique também chega ao monitor global).
+- **Testado pelo owner** *(10/11/2026)*: clique no ícone, abrir ao arrastar e soltar no painel. **Sem teste à mão:** soltar direto no ícone da barra.
+
 ### Fase: v0.2.0 — Prova de velocidade dos motores (10/11/2026)
 - **Benchmark** em `_testes/benchmark/`, rodado em 3 notas de voz pt-BR no M4 Pro. Velocidade de transcrição: Parakeet v3 145× tempo real, Apple Speech 73×, whisper.cpp Turbo 25×, Whisper Turbo 22×, Whisper Large v3 3×. O Whisper Large v3 cortou parte de um áudio e o whisper.cpp alucinou uma repetição.
 - **Motores aprovados**: "Automático" = Parakeet v3, com Apple Speech de reserva (sem download, usado enquanto o Parakeet baixa) e Whisper Large v3 Turbo como opção de qualidade. Whisper Large v3 e whisper.cpp ficaram fora do app. Detalhes em `_docs/MEMORIA.md`, Sessão 2.
@@ -35,7 +42,8 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 
 ### Pendências para Futuro (Roadmap Curto)
 - [x] Benchmark de motores em pt-BR (concluído na v0.2.0, 10/11/2026).
-- [ ] Criar o projeto Xcode (app de menu bar com `MenuBarExtra`, macOS 26+).
+- [x] Criar o projeto Xcode (app de menu bar, macOS 26+), com atualizações pelo Sparkle (v0.3.0, 10/11/2026).
+- [ ] Criar o certificado de assinatura "TranscreveAI" no Acesso às Chaves antes do anel (v0.8), para o macOS não pedir de novo a permissão de Acessibilidade a cada versão.
 - [ ] Pipeline de áudio: AVFoundation + FFmpeg embutido.
 - [ ] Painel: área de arrastar, progresso, prévia ao vivo, transcrição clicável, exportação `.txt` / `.md`.
 - [ ] Progresso no ícone, notificação e "Copiar ao terminar".
@@ -57,11 +65,12 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
   - **Apple Speech (`SpeechAnalyzer` / `SpeechTranscriber`)**: motor nativo, sem download (73× tempo real). É a reserva, usada na primeira execução enquanto o Parakeet baixa e compila.
   - **WhisperKit (Argmax)**: só o Whisper Large v3 Turbo (cerca de 1,6 GB, 22× tempo real), como opção de qualidade baixada sob demanda. O Whisper Large v3 completo e o whisper.cpp ficaram fora: foram lentos ou instáveis no benchmark.
   - **FFmpeg (build LGPL, linkagem dinâmica)**: decodifica formatos que o AVFoundation não lê (OGG, Opus, WebM, WMA, MKV etc.). Embutido no app.
+  - **Sparkle 2 (2.10.1, SPM)**: atualizações automáticas pelo GitHub Releases, conferidas com EdDSA (`SUPublicEDKey`), com a mesma lógica do Cutline. Desligado nos builds de debug *(10/11/2026)*.
   - **Atalho global do anel**: biblioteca a definir (ex.: KeyboardShortcuts) ou API nativa. "Segurar e soltar" exige monitor global de eventos.
 
 ### Hospedagem / Infraestrutura
-- **Ambiente de Deploy:** local only. App para uso próprio, assinado localmente, **fora da App Store e sem sandbox**, porque o atalho global e o "Colar no app" precisam da permissão de Acessibilidade.
-- **Processo de Deploy:** build pelo Xcode e cópia para `/Applications`.
+- **Ambiente de Deploy:** **fora da App Store e sem sandbox**, porque o atalho global e o "Colar no app" precisam da permissão de Acessibilidade. Instalador DMG no GitHub Releases (`joaogmcorrea/transcreveAI`), atualizado pelo Sparkle 2 com a mesma lógica do Cutline *(10/11/2026)*.
+- **Processo de Deploy:** `./_dev/distribuir.sh --publicar` depois do commit e da tag da versão (skill `versionamento`). O script gera o DMG assinado com EdDSA, o `appcast.xml` e as cópias `appcast-<versão>.xml`, e cria a release. Quem atualiza os apps instalados é a **release**, não o push. A chave privada fica em `_privado/` e **não pode se perder**: sem ela, os apps instalados não aceitam novas versões *(10/11/2026)*.
 - **Versionamento local:** git (commit + tag `vX.Y.Z` via `_docs/versionar.sh`).
 
 ### Design System / UI
@@ -106,13 +115,18 @@ TranscreveAI/
 │   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
 │   ├── audios/            # Áudios de teste (fora do git)
 │   └── resultados/        # Saídas e relatório do benchmark (fora do git)
-└── files/                 # ← ARQUIVOS DO APP AQUI (projeto Xcode)
-    ├── App/               # Entrada do app, MenuBarExtra, ícone e status item
-    ├── UI/                # Painel, lista de transcrição, anel de ações, componentes
-    ├── Audio/             # Leitura e decodificação (AVFoundation + FFmpeg)
-    ├── Transcription/     # Motores (Apple Speech, WhisperKit, Parakeet) e seleção automática
-    ├── Export/            # Geração de .txt e .md
-    └── Storage/           # Histórico, preferências e resultados de benchmark
+├── _dev/                  # Distribuição: distribuir.sh e dist/ (notas versionadas; DMGs e appcasts fora do git)
+├── _privado/              # Chave EdDSA das atualizações (fora do git; fazer backup)
+└── files/                 # ← ARQUIVOS DO APP AQUI
+    ├── TranscreveAI.xcodeproj
+    ├── TranscreveAI-Info.plist   # Chaves do Sparkle e tipos de arquivo
+    └── TranscreveAI/      # Pasta sincronizada do alvo (arquivo novo entra sozinho)
+        ├── App/           # Entrada do app, estado e atualizações (Sparkle)
+        ├── UI/            # Ícone da barra, painel, Ajustes; depois transcrição e anel
+        ├── Audio/         # Formatos aceitos e leitura (AVFoundation; FFmpeg na v0.4)
+        ├── Transcription/ # Motores (Parakeet, Apple Speech, WhisperKit): v0.4
+        ├── Export/        # Geração de .txt e .md: v0.5
+        └── Storage/       # Preferências; depois histórico
 ```
 
 ---

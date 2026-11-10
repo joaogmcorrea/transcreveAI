@@ -33,3 +33,4 @@ Estas regras devem ser seguidas estritamente durante o desenvolvimento.
 - **Mockup antes de tela nova:** mudanças visuais relevantes começam por um mockup aprovado pelo usuário.
 - **Interface em pt-BR:** todos os textos visíveis no app em português do Brasil.
 - **Uso próprio, sem sandbox:** não cortar funções que dependem de Acessibilidade (atalho global, colar no app) para caber na App Store.
+- **Chave das atualizações:** `_privado/chave-atualizacoes-ed25519.txt` nunca entra no git, em mensagens ou em logs. Sem ela, os apps instalados não aceitam versões novas. Toda release publicada tem número maior que a anterior, porque o Sparkle compara o `CFBundleVersion`.

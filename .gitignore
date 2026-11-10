@@ -17,6 +17,13 @@ Models/
 models/
 *.mlmodelc/
 
+# Chaves das atualizações (Sparkle EdDSA): nunca em repositório
+/_privado/
+
+# Gerado pelo _dev/distribuir.sh
+/_dev/dist/*.dmg
+/_dev/dist/appcast*.xml
+
 # Testes: áudios e resultados (contêm conteúdo pessoal)
 _testes/audios/
 _testes/resultados/
