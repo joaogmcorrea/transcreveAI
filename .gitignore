@@ -1,0 +1,21 @@
+.DS_Store
+node_modules/
+.env
+*.log
+
+# Xcode / Swift
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+.build/
+.swiftpm/
+
+# Modelos de IA baixados (Whisper, Parakeet etc.)
+Models/
+models/
+*.mlmodelc/
+
+# Áudios de teste locais
+files/
