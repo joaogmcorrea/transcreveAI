@@ -31,6 +31,17 @@
 
 ---
 
+## [0.2.0] - 10/11/2026
+
+### Adicionado
+- Benchmark de motores de transcrição em `_testes/benchmark/` (CLI Swift `bench`, `rodar.sh`, `relatorio.py`): Apple Speech, Parakeet v3, Whisper Large v3 Turbo, Whisper Large v3 e whisper.cpp como base.
+- Motores do app definidos pelo benchmark: Parakeet v3 como padrão do "Automático", Apple Speech como reserva sem download e Whisper Large v3 Turbo como opção de qualidade.
+
+### Alterado
+- `files/` passa a ser a pasta dos arquivos do app (versionada). Os áudios de teste vão para `_testes/audios/` (fora do git).
+
+---
+
 ## [0.1.0] - 10/11/2026
 
 ### Adicionado

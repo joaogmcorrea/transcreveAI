@@ -3,8 +3,9 @@
 > **Para Agentes de IA:** Lista ordenada dos marcos do projeto. Ao concluir um marco, marque-o, registre a versão no `CHANGELOG.md` e atualize o "Status Atual" do `CONTEXTO.md`. A referência visual de todos os marcos de UI é o mockup aprovado (página "Menu bar" do canvas "TranscreveAI Mockup").
 
 ## v0.2.0 — Prova de velocidade
-- [ ] Teste comparando Apple Speech, Parakeet v3, Whisper Large v3 Turbo e Whisper Large v3 com áudios reais em pt-BR (`files/`).
-- [ ] Medir tempo (× tempo real) e qualidade de cada um. Definir o motor padrão inicial e a lista final de modelos.
+- [x] Teste comparando Apple Speech, Parakeet v3, Whisper Large v3 Turbo e Whisper Large v3 com áudios reais em pt-BR (`_testes/audios/`), via `_testes/benchmark/rodar.sh`.
+- [x] Medir o tempo (× tempo real) de cada motor. Resultado na Sessão 2 da `MEMORIA.md`.
+- [x] Aprovar o motor padrão e a lista final de modelos: Parakeet v3 (Automático), Apple Speech (reserva, sem download) e Whisper Large v3 Turbo (qualidade).
 
 ## v0.3.0 — Esqueleto do app de menu bar
 - [ ] Projeto Xcode (macOS 26+), `MenuBarExtra` com painel e ícone template.
@@ -12,7 +13,7 @@
 
 ## v0.4.0 — Pipeline de áudio e transcrição
 - [ ] Decodificação com AVFoundation + FFmpeg embutido (qualquer formato).
-- [ ] Transcrição com o motor padrão, progresso no painel e prévia ao vivo.
+- [ ] Transcrição com Parakeet v3 (FluidAudio), com progresso no painel e prévia ao vivo. Na primeira execução, usar o Apple Speech enquanto o Parakeet baixa e compila.
 - [ ] Progresso no ícone quando o painel está fechado.
 
 ## v0.5.0 — Resultado e exportação
@@ -22,7 +23,7 @@
 
 ## v0.6.0 — Modelos e modo Automático
 - [ ] Seletor de modelo e de idioma.
-- [ ] Download opcional dos modelos extras, uma única vez.
+- [ ] Download do Whisper Large v3 Turbo (WhisperKit) sob demanda, uma única vez.
 - [ ] Benchmark local e modo "Automático" (mais rápido instalado) como padrão.
 
 ## v0.7.0 — Fluxo sem abrir o painel
@@ -36,3 +37,4 @@
 ## v1.0.0 — Polimento
 - [ ] Ícone do app, estados de erro, testes com áudios longos e variados.
 - [ ] Revisão final de velocidade e de UI contra o mockup.
+- [ ] Repetir o benchmark com áudio longo (30 min ou mais) e `referencia.txt` para medir a qualidade real (WER).

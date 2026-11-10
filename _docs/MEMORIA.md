@@ -45,6 +45,42 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 2 — 10/11/2026 (Benchmark de motores, v0.2.0)
+
+### Objetivo
+- Medir velocidade e qualidade dos motores candidatos em pt-BR e escolher o padrão do modo "Automático".
+
+### Descobertas
+- **Máquina de teste:** M4 Pro, 24 GB, macOS 27.0.1, Xcode 27.2, Swift 6.4.2. O Apple Speech (`SpeechTranscriber`) suporta pt-BR e o modelo já vem instalado.
+- **Áudios:** 3 notas de voz do WhatsApp (Opus; 22 s, 40 s e 88 s), fala informal. Ainda falta testar um áudio longo (30 min ou mais).
+- **Velocidade (transcrição, sem a carga do modelo):** Parakeet v3 **145×** tempo real · Apple Speech **73×** · whisper.cpp Turbo 25× · Whisper Turbo (WhisperKit) 22× · Whisper Large v3 (WhisperKit) **3×**.
+- **Carga do modelo:** Apple 0,1 s (sem download) · Parakeet 0,2 s com cache (42 s na primeira compilação) · WhisperKit cerca de 5–6 s a cada carga (cerca de 150 s na primeira compilação) · whisper.cpp 0,6 s.
+- **Memória do processo:** Apple 21 MB (o trabalho roda num processo do sistema) · Parakeet 143 MB · Whisper Turbo 306 MB · Whisper Large 759 MB · whisper.cpp 1,9 GB.
+- **Falhas observadas:** o Whisper Large v3 **cortou a segunda metade** do áudio de 40 s (85 de cerca de 132 palavras) e foi o mais lento. O whisper.cpp **repetiu uma frase inventada** (alucinação) no áudio de 88 s. Apple e Parakeet não tiveram cortes nem repetições.
+- **Qualidade (avaliação qualitativa, sem referência):** Whisper Turbo e Parakeet têm boa pontuação e texto fiel nos áudios mais claros. O Apple Speech acerta bem as palavras, mas pontua pouco em trechos longos. Todos erram em nomes próprios e na fala mais informal.
+- **Armadilha do benchmark:** usar o Whisper Large v3 como pseudo-referência favorece os outros Whisper e pune quem acerta o trecho que ele cortou. Só um `referencia.txt` (transcrição correta) mede a qualidade de verdade. O Whisper escreve números como algarismos ("1, 2, 3"), o que também conta como erro no WER.
+- **Dropbox:** modelos e builds ficam em `~/Library/Caches/TranscreveBench` para não sincronizar cerca de 7 GB.
+
+### Decisões Tomadas
+- **Aprovado pelo usuário (10/11/2026):** "Automático" = **Parakeet v3**. Na primeira execução, enquanto ele baixa (cerca de 470 MB) e compila, o app usa o **Apple Speech**. Manter o **Whisper Turbo** como opção de qualidade. **Retirar** do app o Whisper Large v3 (lento e com corte) e o whisper.cpp (alucinação, 1,9 GB de RAM, sem ganho de velocidade sobre o WhisperKit).
+
+### Arquivos Modificados/Criados
+- `_testes/benchmark/` — `Package.swift`, `Sources/bench/main.swift`, `rodar.sh`, `relatorio.py`.
+- `.gitignore` — `_testes/audios/` e `_testes/resultados/` fora do git. `files/` volta a ser versionada (pasta do app).
+
+### Padrões Identificados
+- O relatório sinaliza "incompleto" (menos de 75% da mediana de palavras) e "repetição" (6 palavras repetidas). A sugestão do "Automático" ignora os motores com alertas.
+
+### Problemas Conhecidos ou Riscos Futuros
+- Os áudios curtos não mostram o comportamento em gravações longas (memória, cortes, deriva). Rodar de novo com um áudio de 30 min ou mais antes da v1.0.
+- O Parakeet v3 é multilíngue europeu: confirmar a qualidade em sotaques e gírias brasileiras com mais amostras.
+
+### Dicas para Próximas Sessões
+- Para repetir o teste: coloque áudios em `_testes/audios/` (com `nome.txt` de referência, se houver) e rode `./_testes/benchmark/rodar.sh`. Se o cache foi apagado, rode `preparar` antes.
+- Nunca copie trechos dos áudios de teste para os docs: o repositório é público.
+
+---
+
 ## Sessão 1 — 10/11/2026 (Setup, escopo e mockup da UI)
 
 ### Objetivo

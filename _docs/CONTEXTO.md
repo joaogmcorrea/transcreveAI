@@ -25,17 +25,22 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 
 > **Agentes de IA:** Atualizem esta seção a cada nova fase completada, versão lançada ou marco importante atingido. Adicionem a nova fase no topo e movam as anteriores para baixo.
 
+### Fase: v0.2.0 — Prova de velocidade dos motores (10/11/2026)
+- **Benchmark** em `_testes/benchmark/`, rodado em 3 notas de voz pt-BR no M4 Pro. Velocidade de transcrição: Parakeet v3 145× tempo real, Apple Speech 73×, whisper.cpp Turbo 25×, Whisper Turbo 22×, Whisper Large v3 3×. O Whisper Large v3 cortou parte de um áudio e o whisper.cpp alucinou uma repetição.
+- **Motores aprovados**: "Automático" = Parakeet v3, com Apple Speech de reserva (sem download, usado enquanto o Parakeet baixa) e Whisper Large v3 Turbo como opção de qualidade. Whisper Large v3 e whisper.cpp ficaram fora do app. Detalhes em `_docs/MEMORIA.md`, Sessão 2.
+
 ### Fase: Setup Inicial — Documentação e mockup de UI (10/11/2026)
 - **Mockup interativo da UI**: canvas externo "TranscreveAI Mockup" com duas versões, janela e menu bar. **Formato escolhido: menu bar** (página "Menu bar" do canvas). A página "Janela" fica só como referência.
 - **Documentação e versionamento**: `_docs/` preenchido com o escopo do projeto e git iniciado na `v0.1.0`.
 
 ### Pendências para Futuro (Roadmap Curto)
-- [ ] Benchmark de motores em pt-BR (velocidade × qualidade): Apple Speech, Parakeet v3, Whisper Large v3 Turbo e Whisper Large v3.
+- [x] Benchmark de motores em pt-BR (concluído na v0.2.0, 10/11/2026).
 - [ ] Criar o projeto Xcode (app de menu bar com `MenuBarExtra`, macOS 26+).
 - [ ] Pipeline de áudio: AVFoundation + FFmpeg embutido.
 - [ ] Painel: área de arrastar, progresso, prévia ao vivo, transcrição clicável, exportação `.txt` / `.md`.
 - [ ] Progresso no ícone, notificação e "Copiar ao terminar".
 - [ ] Anel de ações com atalho global ⌥ Espaço.
+- [ ] Repetir o benchmark com áudio longo (30 min ou mais) e transcrição de referência antes da v1.0.
 
 Lista completa e ordenada em `_docs/ROADMAP.md`.
 
@@ -48,9 +53,9 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
 - **Banco de Dados:** sem banco servidor. Histórico e preferências salvos localmente em Application Support. A escolha entre SwiftData e JSON fica para a implementação.
 - **Styling:** SwiftUI nativo seguindo as Human Interface Guidelines do macOS.
 - **Bibliotecas Externas:**
-  - **Apple Speech (`SpeechAnalyzer` / `SpeechTranscriber`)**: motor nativo, sem download de modelo. Candidato a padrão mais rápido, mas a qualidade em pt-BR ainda precisa ser medida.
-  - **WhisperKit (Argmax)**: Whisper Large v3 e v3 Turbo em CoreML. Modelos opcionais baixados uma única vez.
-  - **FluidAudio**: Parakeet TDT v3 em CoreML, opcional. A validar no benchmark.
+  - **FluidAudio (Parakeet TDT v3, CoreML)**: **motor padrão do "Automático"** (decidido em 10/11/2026). Foi o mais rápido no benchmark (145× tempo real no M4 Pro); baixa cerca de 470 MB uma única vez.
+  - **Apple Speech (`SpeechAnalyzer` / `SpeechTranscriber`)**: motor nativo, sem download (73× tempo real). É a reserva, usada na primeira execução enquanto o Parakeet baixa e compila.
+  - **WhisperKit (Argmax)**: só o Whisper Large v3 Turbo (cerca de 1,6 GB, 22× tempo real), como opção de qualidade baixada sob demanda. O Whisper Large v3 completo e o whisper.cpp ficaram fora: foram lentos ou instáveis no benchmark.
   - **FFmpeg (build LGPL, linkagem dinâmica)**: decodifica formatos que o AVFoundation não lê (OGG, Opus, WebM, WMA, MKV etc.). Embutido no app.
   - **Atalho global do anel**: biblioteca a definir (ex.: KeyboardShortcuts) ou API nativa. "Segurar e soltar" exige monitor global de eventos.
 
@@ -90,15 +95,18 @@ BenchmarkModelo  — modelo e velocidade medida no Mac do usuário (× tempo rea
 
 ## Estrutura de Pastas
 
-> **Convenção para Agentes:** O código-fonte Swift fica em `TranscreveAI/` (projeto Xcode, ainda a criar). A documentação fica em `_docs/` e os áudios de teste em `files/` (fora do git). A estrutura interna abaixo é a planejada; ajuste aqui se mudar.
+> **Convenção para Agentes:** Os arquivos do app (projeto Xcode e código Swift) ficam em `files/`. Testes e benchmark ficam em `_testes/`, e os áudios de teste em `_testes/audios/` (fora do git). A documentação fica em `_docs/`. Modelos, builds e WAVs temporários ficam em `~/Library/Caches/TranscreveBench`, nunca dentro do Dropbox. A estrutura interna de `files/` é a planejada; ajuste aqui se mudar.
 
 ```text
 TranscreveAI/
 ├── _docs/                 # Documentação iterativa do projeto para IAs
 ├── .agent/                # Regras, skills e workflows para outros agentes
 ├── .gitignore             # Exclusões do versionamento
-├── files/                 # Áudios de teste locais (fora do git)
-└── TranscreveAI/          # ← CÓDIGO FONTE AQUI (projeto Xcode)
+├── _testes/               # Testes e benchmark
+│   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
+│   ├── audios/            # Áudios de teste (fora do git)
+│   └── resultados/        # Saídas e relatório do benchmark (fora do git)
+└── files/                 # ← ARQUIVOS DO APP AQUI (projeto Xcode)
     ├── App/               # Entrada do app, MenuBarExtra, ícone e status item
     ├── UI/                # Painel, lista de transcrição, anel de ações, componentes
     ├── Audio/             # Leitura e decodificação (AVFoundation + FFmpeg)

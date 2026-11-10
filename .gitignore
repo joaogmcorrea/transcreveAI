@@ -17,5 +17,6 @@ Models/
 models/
 *.mlmodelc/
 
-# Áudios de teste locais
-files/
+# Testes: áudios e resultados (contêm conteúdo pessoal)
+_testes/audios/
+_testes/resultados/
