@@ -128,7 +128,7 @@ TranscreveAI/
 │   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
 │   ├── audios/            # Áudios de teste (fora do git)
 │   └── resultados/        # Saídas e relatório do benchmark (fora do git)
-├── _dev/                  # Distribuição (distribuir.sh, dist/) e a receita do FFmpeg (ffmpeg/compilar.sh)
+├── _dev/                  # Distribuição (distribuir.sh, dist/), a receita do FFmpeg (ffmpeg/compilar.sh) e os GIFs do README (gifs/, 10/11/2026)
 ├── _privado/              # Chave EdDSA das atualizações (fora do git; fazer backup)
 └── files/                 # ← ARQUIVOS DO APP AQUI
     ├── TranscreveAI.xcodeproj

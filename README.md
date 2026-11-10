@@ -8,6 +8,8 @@ Drop an audio file on the icon and the text shows up in seconds. Your audio neve
 
 > The app's interface is in Brazilian Portuguese. It transcribes Portuguese, English and Spanish, and Parakeet detects the language on its own.
 
+![Click the menu bar icon, drop an audio file on the panel and get the text, already copied](_dev/gifs/soltar.gif)
+
 ---
 
 ## Why
@@ -23,7 +25,11 @@ There are four ways to hand it an audio file:
 - **Start dragging** an audio file in Finder, on the Desktop or from a Dock stack. The panel opens by itself and closes again if you drop the file somewhere else.
 - **Open With › TranscreveAI** in Finder.
 
+![Dragging an audio file from a Dock stack opens the panel by itself](_dev/gifs/dock.gif)
+
 You can close the panel while it works. The icon shows the progress, plays a sound when it's done, and keeps a red dot until you look at the result. The text is already on the clipboard ("Copiar ao terminar", on by default).
+
+![With the panel closed, the menu bar icon shows the progress, a check mark and then a red dot](_dev/gifs/painel-fechado.gif)
 
 Right-click the icon for Check for Updates, Settings, Open at Login and Quit. Press Esc or click anywhere outside to close the panel.
 
@@ -107,7 +113,7 @@ open files/TranscreveAI.xcodeproj
 |---|---|
 | `files/` | The app: Xcode project, SwiftUI/AppKit code, FFmpeg and licenses |
 | `files/Pacotes/TranscreveMotores/` | The transcription engines (a Swift package you can run from the terminal) |
-| `_dev/` | Release and FFmpeg build scripts, plus the notes for each version |
+| `_dev/` | Release and FFmpeg build scripts, the notes for each version, and the README animations (`_dev/gifs/`) |
 | `_docs/` | Context, decisions, changelog and roadmap (in Portuguese) |
 | `_testes/benchmark/` | The engine benchmark |
 

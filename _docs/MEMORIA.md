@@ -47,6 +47,8 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 
 ## Sessão 4 — 10/11/2026 (Transcrição, histórico e Ajustes, v0.4.0)
 
+> **Depois da release** *(10/11/2026)*: README em inglês, licença MIT e GIFs do README. Os GIFs são **desenhados** (`_dev/gifs/animacoes.swift`), não gravados: gravar a tela mostraria a mesa, as janelas e os ícones do usuário, e simular arrastes exigiria permissão de Acessibilidade. O owner pediu "estilo video-tutorial flat". Um GIF de 1200 px com *dither* `sierra2_4a` ficou com 3,3 MB; com `bayer:bayer_scale=5` e 128 cores, 2 MB, sem faixas visíveis nas sombras (`dither=none` mostra faixas). Cuidado no desenho: `NSGraphicsContext(bitmapImageRep:)` já desenha em pontos; aplicar a escala 2× de novo dobra tudo.
+
 ### Objetivo
 - v0.4.0: transcrever de verdade (Parakeet v3 + Apple Speech de reserva), com progresso no painel e no ícone e FFmpeg embutido. Pedidos do usuário no meio: som ao terminar, bolinha vermelha de "não visto", garantia de que a transcrição continua com o painel fechado, fechar sem atraso ao clicar fora, histórico (com lixeira e só da sessão), Ajustes de verdade (também no botão direito) e abrir ao arrastar das pilhas do Dock.
 
