@@ -80,6 +80,7 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
 - **Ambiente de Deploy:** **fora da App Store e sem sandbox**, porque o atalho global e o "Colar no app" precisam da permissão de Acessibilidade. Instalador DMG no GitHub Releases (`joaogmcorrea/transcreveAI`), atualizado pelo Sparkle 2 com a mesma lógica do Cutline *(10/11/2026)*.
 - **Processo de Deploy:** `./_dev/distribuir.sh --publicar` depois do commit e da tag da versão (skill `versionamento`). O script gera o DMG assinado com EdDSA, o `appcast.xml` e as cópias `appcast-<versão>.xml`, e cria a release. Quem atualiza os apps instalados é a **release**, não o push. A chave privada fica em `_privado/` e **não pode se perder**: sem ela, os apps instalados não aceitam novas versões *(10/11/2026)*.
 - **Versionamento local:** git (commit + tag `vX.Y.Z` via `_docs/versionar.sh`).
+- **Licença:** MIT, em nome de João Corrêa (`LICENSE` na raiz), escolhida pelo owner. Os componentes de terceiros mantêm as suas (`files/LICENCAS.md`) *(10/11/2026)*.
 
 ### Design System / UI
 - **Cores Principais:**
@@ -122,6 +123,7 @@ TranscreveAI/
 ├── .agent/                # Regras, skills e workflows para outros agentes
 ├── .gitignore             # Exclusões do versionamento
 ├── README.md              # Apresentação pública no GitHub (10/11/2026)
+├── LICENSE                # Licença MIT do projeto, em nome de João Corrêa (10/11/2026)
 ├── _testes/               # Testes e benchmark
 │   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
 │   ├── audios/            # Áudios de teste (fora do git)
@@ -154,7 +156,7 @@ TranscreveAI/
 | `_docs/SCRIPTS-LOGIC.md` | Mapeamento exato de onde está rodando cada função, scripts base e endpoints. |
 | `_docs/ROADMAP.md` | Lista completa e ordenada de milestones futuros do projeto. |
 | `_docs/REGRAS_CONDUTA.md` | Restrições rígidas específicas do projeto (ex: "Nunca usar shadow DOM"). |
-| `README.md` | Apresentação pública do projeto no GitHub, em pt-BR: o que faz, como usar, motores, formatos, privacidade, instalar e compilar. Atualizar quando uma versão mudar o que o app faz *(10/11/2026)*. |
+| `README.md` | Apresentação pública do projeto no GitHub, **em inglês** (pedido do owner; a interface do app e os docs seguem em pt-BR): o que faz, como usar, motores, formatos, privacidade, instalar e compilar. Atualizar quando uma versão mudar o que o app faz *(10/11/2026)*. |
 
 ---
 

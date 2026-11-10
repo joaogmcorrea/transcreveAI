@@ -1,54 +1,56 @@
 # TranscreveAI
 
-Transcrição de áudio local, rápida e minimalista, na barra de menus do macOS.
+Fast, minimal, on-device audio transcription in the macOS menu bar.
 
-Solte um áudio no ícone e o texto aparece em segundos. O áudio nunca sai do seu Mac.
+Drop an audio file on the icon and the text shows up in seconds. Your audio never leaves your Mac.
 
-**[Baixar a versão mais recente (DMG)](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg)** · [Todas as versões](https://github.com/joaogmcorrea/transcreveAI/releases) · Requer macOS 26 ou mais novo
+**[Download the latest version (DMG)](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg)** · [All releases](https://github.com/joaogmcorrea/transcreveAI/releases) · Requires macOS 26 or later
+
+> The app's interface is in Brazilian Portuguese. It transcribes Portuguese, English and Spanish, and Parakeet detects the language on its own.
 
 ---
 
-## Por quê
+## Why
 
-Os apps de transcrição costumam ser lentos e cheios de opções na tela. O TranscreveAI faz uma coisa só: recebe um áudio e devolve o texto, o mais rápido possível. Fica na barra de menus, sem janela e sem ícone no Dock.
+Transcription apps tend to be slow and crowded with options. TranscreveAI does one thing: it takes an audio file and gives you the text back as fast as possible. It lives in the menu bar, with no window and no Dock icon.
 
-## Como usar
+## How to use
 
-Há quatro jeitos de entregar um áudio:
+There are four ways to hand it an audio file:
 
-- **Clique no ícone** da barra de menus e solte o arquivo no painel (ou clique na área para escolher o arquivo).
-- **Solte direto no ícone** da barra.
-- **Comece a arrastar** um áudio no Finder, na Mesa ou nas pilhas do Dock: o painel abre sozinho e fecha se você soltar em outro lugar.
-- **Abrir com › TranscreveAI** no Finder.
+- **Click the menu bar icon** and drop the file on the panel, or click the drop area to pick a file.
+- **Drop it right on the menu bar icon.**
+- **Start dragging** an audio file in Finder, on the Desktop or from a Dock stack. The panel opens by itself and closes again if you drop the file somewhere else.
+- **Open With › TranscreveAI** in Finder.
 
-Pode fechar o painel no meio da transcrição. O ícone mostra o progresso, toca um som ao terminar e fica com uma bolinha vermelha até você ver o resultado. O texto já vai para a área de transferência ("Copiar ao terminar", ligado por padrão).
+You can close the panel while it works. The icon shows the progress, plays a sound when it's done, and keeps a red dot until you look at the result. The text is already on the clipboard ("Copiar ao terminar", on by default).
 
-O botão direito no ícone abre Procurar atualizações…, Ajustes…, Abrir ao iniciar o Mac e Sair. Esc ou um clique fora fecham o painel.
+Right-click the icon for Check for Updates, Settings, Open at Login and Quit. Press Esc or click anywhere outside to close the panel.
 
-## O que faz
+## Features
 
-- **Transcrição local:** nada vai para a nuvem.
-- **Texto em parágrafos** com o tempo de cada um, selecionável, e "Copiar tudo".
-- **Histórico** com busca: reabrir, copiar e apagar (lixeira ao passar o mouse). Por padrão, ele é apagado quando você desliga ou reinicia o Mac. Dá para mudar isso em Ajustes › Histórico.
-- **Modelo e idioma** no rodapé do painel e em Ajustes. Idiomas: Auto, Português, English e Español.
-- **Atualizações automáticas** pelo [Sparkle](https://sparkle-project.org), conferidas com assinatura EdDSA.
+- **On-device transcription:** nothing goes to the cloud.
+- **Text in paragraphs**, each with its timestamp. The text is selectable, and there's a "Copy all" button.
+- **History** with search: reopen, copy or delete past transcriptions (a trash button shows on hover). By default, history is erased when you shut down or restart the Mac. You can change that in Settings › History.
+- **Model and language** pickers at the bottom of the panel and in Settings. Languages: Auto, Portuguese, English and Spanish.
+- **Automatic updates** through [Sparkle](https://sparkle-project.org), verified with EdDSA signatures.
 
-## Motores
+## Engines
 
-| Modelo | Para quê | Download |
+| Model | Best for | Download |
 |---|---|---|
-| **Automático** (padrão) | Usa sempre o mais rápido instalado. Hoje é o Parakeet v3. | — |
-| **Parakeet v3** (NVIDIA, pelo [FluidAudio](https://github.com/FluidInference/FluidAudio)) | O mais rápido. Detecta o idioma sozinho. | 470 MB, uma vez |
-| **Apple Speech** | Nativo do macOS. Mostra a prévia ao vivo. | Sem download |
-| **Whisper Large v3 Turbo** | Alternativa de qualidade | Em breve |
+| **Automático** (default) | Always picks the fastest installed engine. Today that's Parakeet v3. | — |
+| **Parakeet v3** (NVIDIA, through [FluidAudio](https://github.com/FluidInference/FluidAudio)) | The fastest. Detects the language by itself. | 470 MB, once |
+| **Apple Speech** | Built into macOS. Shows a live preview. | None |
+| **Whisper Large v3 Turbo** | Higher-quality alternative | Coming soon |
 
-Na primeira transcrição, o Apple Speech cuida do arquivo enquanto o Parakeet baixa e é preparado para o Neural Engine (cerca de 14 s, uma vez só). Daí em diante, o Automático usa o Parakeet.
+On the first transcription, Apple Speech handles the file while Parakeet downloads and gets compiled for the Neural Engine (about 14 s, only once). From then on, Automático uses Parakeet.
 
-### Velocidade
+### Speed
 
-Benchmark com 3 notas de voz em português num Mac com M4 Pro. Os números são o tempo de áudio transcrito por segundo de trabalho: 145× quer dizer 1 minuto de áudio em menos de meio segundo.
+Benchmark with 3 Portuguese voice notes on a Mac with an M4 Pro. The numbers are seconds of audio transcribed per second of work: 145× means one minute of audio in under half a second.
 
-| Motor | Velocidade |
+| Engine | Speed |
 |---|---|
 | Parakeet v3 | 145× |
 | Apple Speech | 73× |
@@ -56,32 +58,32 @@ Benchmark com 3 notas de voz em português num Mac com M4 Pro. Os números são 
 | Whisper Large v3 Turbo | 22× |
 | Whisper Large v3 | 3× |
 
-Dentro do app, com o modelo já carregado, o Parakeet transcreveu 3 minutos de áudio em 0,77 s (224×). Ainda falta medir com áudios longos (30 minutos ou mais), antes da v1.0. O whisper.cpp e o Whisper Large v3 ficaram fora do app.
+Inside the app, with the model already loaded, Parakeet transcribed 3 minutes of audio in 0.77 s (224×). Long recordings (30 minutes or more) haven't been measured yet; that comes before v1.0. whisper.cpp and Whisper Large v3 were left out of the app.
 
-## Formatos
+## Formats
 
-- **Pelo próprio macOS:** MP3, M4A/AAC, MP4/MOV, WAV, AIFF, FLAC, OGG e Opus (áudio do WhatsApp).
-- **Pelo FFmpeg embutido** (9.0.2, LGPL): WebM, WMA, MKV e AMR.
+- **Opened by macOS itself:** MP3, M4A/AAC, MP4/MOV, WAV, AIFF, FLAC, OGG and Opus (WhatsApp voice notes).
+- **Through the bundled FFmpeg** (9.0.2, LGPL): WebM, WMA, MKV and AMR.
 
-## Privacidade
+## Privacy
 
-O áudio e o texto ficam no Mac. O app só usa a internet para:
+Audio and text stay on your Mac. The app only goes online to:
 
-- baixar o modelo Parakeet uma vez, do Hugging Face;
-- baixar o pacote de idioma do Apple Speech, se o macOS ainda não tiver;
-- procurar atualizações no GitHub.
+- download the Parakeet model once, from Hugging Face;
+- download Apple Speech's language pack, if macOS doesn't have it yet;
+- check for updates on GitHub.
 
-O histórico fica em `~/Library/Application Support/TranscreveAI/Historico`, e o modelo em `~/Library/Application Support/TranscreveAI/Modelos`.
+History is stored in `~/Library/Application Support/TranscreveAI/Historico` and the model in `~/Library/Application Support/TranscreveAI/Modelos`.
 
-## Instalar
+## Install
 
-1. Baixe o [`TranscreveAI.dmg`](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg) e arraste o TranscreveAI para Aplicativos.
-2. Na primeira abertura, o macOS avisa que não pode verificar o app, porque ele ainda não tem assinatura paga da Apple. Vá em **Ajustes do Sistema › Privacidade e Segurança** e clique em **Abrir Mesmo Assim**.
-3. O ícone aparece na barra de menus. As próximas versões chegam sozinhas.
+1. Download [`TranscreveAI.dmg`](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg) and drag TranscreveAI to Applications.
+2. The first time you open it, macOS says it can't verify the app, because it isn't signed with a paid Apple developer certificate yet. Go to **System Settings › Privacy & Security** and click **Open Anyway**.
+3. The icon shows up in the menu bar. New versions arrive on their own.
 
-## Compilar
+## Build from source
 
-Testado com o Xcode 27.2 e o macOS 26 ou mais novo.
+Tested with Xcode 27.2 on macOS 26 or later.
 
 ```bash
 git clone https://github.com/joaogmcorrea/transcreveAI.git
@@ -89,40 +91,42 @@ cd transcreveAI
 open files/TranscreveAI.xcodeproj
 ```
 
-- O binário do FFmpeg já vem no repositório (`files/Vendor/ffmpeg/`). Para recompilar: `_dev/ffmpeg/compilar.sh`.
-- Para testar os motores pelo terminal, sem o app:
+- The FFmpeg binary is already in the repository (`files/Vendor/ffmpeg/`). To rebuild it, run `_dev/ffmpeg/compilar.sh`.
+- To try the engines from the terminal, without the app:
 
   ```bash
-  swift run --package-path files/Pacotes/TranscreveMotores transcrever caminho/do/audio.m4a parakeet
+  swift run --package-path files/Pacotes/TranscreveMotores transcrever path/to/audio.m4a parakeet
   ```
 
-  O motor pode ser `parakeet` ou `apple`, seguido do idioma, se quiser.
-- As releases saem por `_dev/distribuir.sh`. Ele precisa da chave EdDSA do projeto, que não está no repositório.
+  The engine can be `parakeet` or `apple`, optionally followed by a language code.
+- Releases are made with `_dev/distribuir.sh`. It needs the project's EdDSA key, which isn't in the repository.
 
-## Estrutura
+## Project layout
 
-| Pasta | O que tem |
+| Folder | Contents |
 |---|---|
-| `files/` | O app: projeto Xcode, código SwiftUI/AppKit, FFmpeg e licenças |
-| `files/Pacotes/TranscreveMotores/` | Os motores de transcrição (pacote Swift, testável pelo terminal) |
-| `_dev/` | Scripts de distribuição e da compilação do FFmpeg, e as notas de cada versão |
-| `_docs/` | Contexto, decisões, changelog e roadmap (em português) |
-| `_testes/benchmark/` | O benchmark dos motores |
+| `files/` | The app: Xcode project, SwiftUI/AppKit code, FFmpeg and licenses |
+| `files/Pacotes/TranscreveMotores/` | The transcription engines (a Swift package you can run from the terminal) |
+| `_dev/` | Release and FFmpeg build scripts, plus the notes for each version |
+| `_docs/` | Context, decisions, changelog and roadmap (in Portuguese) |
+| `_testes/benchmark/` | The engine benchmark |
 
-## Próximos passos
+## What's next
 
-- **v0.5:** clicar num trecho para copiar e exportar `.txt` / `.md`.
+- **v0.5:** click a passage to copy it, and export to `.txt` / `.md`.
 - **v0.6:** Whisper Large v3 Turbo.
-- **v0.7:** notificação ao terminar.
-- **v0.8:** anel de ações com o atalho ⌥ Espaço.
-- **v1.0:** polimento e testes com áudios longos.
+- **v0.7:** a notification when a transcription finishes.
+- **v0.8:** an action ring on the ⌥ Space shortcut.
+- **v1.0:** polish and tests with long recordings.
 
-O roadmap completo fica em [`_docs/ROADMAP.md`](_docs/ROADMAP.md), e o que mudou em cada versão, em [`_docs/CHANGELOG.md`](_docs/CHANGELOG.md).
+The full roadmap is in [`_docs/ROADMAP.md`](_docs/ROADMAP.md), and the changes in each version are in [`_docs/CHANGELOG.md`](_docs/CHANGELOG.md) (both in Portuguese).
 
-## Licenças de terceiros
+## License
 
-Sparkle (MIT), FluidAudio (Apache 2.0), FFmpeg (LGPL 2.1) e o modelo Parakeet TDT 0.6B v3 (CC BY 4.0). Os detalhes estão em [`files/LICENCAS.md`](files/LICENCAS.md).
+TranscreveAI's code is released under the [MIT License](LICENSE).
+
+Third-party components keep their own licenses: Sparkle (MIT), FluidAudio (Apache 2.0), FFmpeg (LGPL 2.1) and the Parakeet TDT 0.6B v3 model (CC BY 4.0). Details in [`files/LICENCAS.md`](files/LICENCAS.md).
 
 ---
 
-Feito por [João Corrêa](https://github.com/joaogmcorrea).
+Made by [João Corrêa](https://github.com/joaogmcorrea).
