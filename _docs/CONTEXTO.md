@@ -25,6 +25,14 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 
 > **Agentes de IA:** Atualizem esta seção a cada nova fase completada, versão lançada ou marco importante atingido. Adicionem a nova fase no topo e movam as anteriores para baixo.
 
+### Fase: v0.4.0 — Transcrição, histórico e Ajustes (10/11/2026)
+- **Transcreve de verdade:** "Automático" = Parakeet v3 (224× tempo real num áudio de 3 min no M4 Pro). Na primeira vez, o Apple Speech transcreve enquanto o Parakeet baixa (470 MB) e compila (cerca de 14 s, uma vez por app). O Parakeet fica carregado na memória depois disso e é aquecido na abertura do app. Escolher o Apple Speech à mão mostra a prévia ao vivo. O Whisper Turbo aparece como "em breve" (v0.6).
+- **Painel:** transcrevendo (etapa, porcentagem, prévia, Cancelar), pronto (parágrafos com tempo, texto selecionável, "Copiado") e erro (Tentar de novo). **Ícone:** anel com porcentagem, ✓ ao terminar e bolinha vermelha de "não visto". **Som** ao terminar.
+- **Histórico** *(pedido do owner)*: as 3 recentes no painel, "Ver tudo" com busca, reabrir, copiar e apagar, guardado só neste Mac (500 mais recentes) e, por padrão, **só até desligar ou reiniciar** (pedido do owner). Lixeira ao passar o mouse. **Ajustes** de verdade (geral, modelo e idioma padrão, histórico, atualizações), também no botão direito do ícone. Abrir ao arrastar agora vale também para as pilhas do Dock (testado pelo owner). Corrigido: abrir os Ajustes derrubava o app.
+- **FFmpeg embutido** para WebM, WMA, MKV e AMR; os motores ficam no pacote local `files/Pacotes/TranscreveMotores`, testável pelo terminal (`transcrever`).
+- **Testado pelo owner** *(10/11/2026)*: som e bolinha vermelha, fechar ao clicar fora, histórico com lixeira, Ajustes e arrastar do Dock. **Sem teste à mão:** áudios longos (30 min ou mais) e soltar direto no ícone da barra.
+- **Release publicada no GitHub** (v0.4.0, 10/11/2026), ainda com assinatura ad-hoc: os apps na v0.3.0 recebem o aviso do Sparkle.
+
 ### Fase: v0.3.0 — Esqueleto do app de menu bar, primeira release (10/11/2026)
 - **App em `files/`**: ícone na barra de menus (`NSStatusItem`) e painel sem borda embaixo dele (`NSPanel` + SwiftUI), como no mockup. Aceita áudio solto no painel, no ícone da barra ou por "Abrir com". Tem os menus de modelo e de idioma, e o "…" com Copiar ao terminar, Abrir ao iniciar o Mac, Procurar atualizações, Ajustes e Sair. Ainda não transcreve (v0.4).
 - **Atualizações pelo Sparkle 2**, com a mesma lógica do Cutline: `_dev/distribuir.sh`, chave EdDSA em `_privado/` e um `appcast-<versão>.xml` por versão. O pipeline foi testado localmente (DMG assinado e assinatura conferida). **Primeira release publicada no GitHub** (v0.3.0, 10/11/2026), com assinatura ad-hoc: na primeira abertura é preciso usar "Abrir Mesmo Assim".
@@ -44,9 +52,9 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 - [x] Benchmark de motores em pt-BR (concluído na v0.2.0, 10/11/2026).
 - [x] Criar o projeto Xcode (app de menu bar, macOS 26+), com atualizações pelo Sparkle (v0.3.0, 10/11/2026).
 - [ ] Criar o certificado de assinatura "TranscreveAI" no Acesso às Chaves antes do anel (v0.8), para o macOS não pedir de novo a permissão de Acessibilidade a cada versão.
-- [ ] Pipeline de áudio: AVFoundation + FFmpeg embutido.
-- [ ] Painel: área de arrastar, progresso, prévia ao vivo, transcrição clicável, exportação `.txt` / `.md`.
-- [ ] Progresso no ícone, notificação e "Copiar ao terminar".
+- [x] Pipeline de áudio: AVFoundation + FFmpeg embutido (v0.4.0, 10/11/2026).
+- [ ] Painel: transcrição clicável e exportação `.txt` / `.md` (v0.5). Área de arrastar, progresso e prévia ao vivo prontos na v0.4.0 *(10/11/2026)*.
+- [ ] Notificação ao terminar (v0.7). Progresso no ícone, som e "Copiar ao terminar" prontos na v0.4.0 *(10/11/2026)*.
 - [ ] Anel de ações com atalho global ⌥ Espaço.
 - [ ] Repetir o benchmark com áudio longo (30 min ou mais) e transcrição de referência antes da v1.0.
 
@@ -64,7 +72,7 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
   - **FluidAudio (Parakeet TDT v3, CoreML)**: **motor padrão do "Automático"** (decidido em 10/11/2026). Foi o mais rápido no benchmark (145× tempo real no M4 Pro); baixa cerca de 470 MB uma única vez.
   - **Apple Speech (`SpeechAnalyzer` / `SpeechTranscriber`)**: motor nativo, sem download (73× tempo real). É a reserva, usada na primeira execução enquanto o Parakeet baixa e compila.
   - **WhisperKit (Argmax)**: só o Whisper Large v3 Turbo (cerca de 1,6 GB, 22× tempo real), como opção de qualidade baixada sob demanda. O Whisper Large v3 completo e o whisper.cpp ficaram fora: foram lentos ou instáveis no benchmark.
-  - **FFmpeg (build LGPL, linkagem dinâmica)**: decodifica formatos que o AVFoundation não lê (OGG, Opus, WebM, WMA, MKV etc.). Embutido no app.
+  - **FFmpeg 9.0.2 (LGPL 2.1)**: binário mínimo próprio (só decodifica áudio e grava WAV, universal, 8,2 MB), em `Contents/Helpers/ffmpeg` e chamado como processo separado. Compilado por `_dev/ffmpeg/compilar.sh`. No macOS 27 ele só é preciso para WebM, WMA, MKV e AMR: o sistema já abre MP3, M4A/AAC, MP4/MOV, WAV, AIFF, FLAC, OGG e **Opus (WhatsApp)** *(10/11/2026)*.
   - **Sparkle 2 (2.10.1, SPM)**: atualizações automáticas pelo GitHub Releases, conferidas com EdDSA (`SUPublicEDKey`), com a mesma lógica do Cutline. Desligado nos builds de debug *(10/11/2026)*.
   - **Atalho global do anel**: biblioteca a definir (ex.: KeyboardShortcuts) ou API nativa. "Segurar e soltar" exige monitor global de eventos.
 
@@ -96,9 +104,11 @@ BenchmarkModelo  — modelo e velocidade medida no Mac do usuário (× tempo rea
 ### Regras de Negócio Core
 - **Velocidade primeiro:** o modelo padrão é sempre "Automático", que usa o modelo instalado mais rápido medido no próprio Mac. O usuário pode trocar manualmente pelo seletor.
 - **100% local:** nenhum áudio ou texto sai do Mac. A rede só é usada para baixar modelos opcionais, com consentimento.
-- **Qualquer formato:** tenta o AVFoundation primeiro e cai para o FFmpeg. Se nada decodificar, mostra um erro claro.
+- **Qualquer formato:** tenta o AVFoundation primeiro e cai para o FFmpeg embutido (WAV 16 kHz mono temporário, apagado no fim). Se nada decodificar, mostra um erro claro.
+- **Idioma no Apple Speech:** ele não detecta o idioma sozinho; no "Auto" usa **pt-BR** (o idioma do sistema errava num Mac em inglês). O Parakeet detecta sozinho *(10/11/2026)*.
+- **Segundo plano:** fechar o painel só esconde a janela; a transcrição continua (sem App Nap nem sono do Mac) até terminar ou até o Cancelar. Ao terminar com o painel fechado: som, ✓ no ícone e bolinha vermelha até abrir o painel *(10/11/2026)*.
 - **Exportação:** `.txt` = só o texto, em parágrafos. `.md` = título, metadados (duração, idioma, data) e `**[mm:ss]**` em cada parágrafo.
-- **Copiar ao terminar:** ligado por padrão. Ao concluir, a transcrição inteira vai para a área de transferência.
+- **Copiar ao terminar:** ligado por padrão. Ao concluir, a transcrição inteira (parágrafos separados por linha em branco) vai para a área de transferência. **Som ao terminar** (Glass; Basso no erro) também vem ligado.
 
 ---
 
@@ -115,16 +125,19 @@ TranscreveAI/
 │   ├── benchmark/         # Pacote Swift do benchmark de motores (v0.2.0)
 │   ├── audios/            # Áudios de teste (fora do git)
 │   └── resultados/        # Saídas e relatório do benchmark (fora do git)
-├── _dev/                  # Distribuição: distribuir.sh e dist/ (notas versionadas; DMGs e appcasts fora do git)
+├── _dev/                  # Distribuição (distribuir.sh, dist/) e a receita do FFmpeg (ffmpeg/compilar.sh)
 ├── _privado/              # Chave EdDSA das atualizações (fora do git; fazer backup)
 └── files/                 # ← ARQUIVOS DO APP AQUI
     ├── TranscreveAI.xcodeproj
     ├── TranscreveAI-Info.plist   # Chaves do Sparkle e tipos de arquivo
+    ├── LICENCAS.md + LICENSE-*.txt   # Licenças de terceiros (Sparkle, FluidAudio, fastcluster)
+    ├── Pacotes/TranscreveMotores/   # Pacote Swift local: Parakeet, Apple Speech, conversão, parágrafos e o CLI `transcrever`
+    ├── Vendor/ffmpeg/     # FFmpeg mínimo (binário + licença + versão), gerado por _dev/ffmpeg/compilar.sh
     └── TranscreveAI/      # Pasta sincronizada do alvo (arquivo novo entra sozinho)
         ├── App/           # Entrada do app, estado e atualizações (Sparkle)
         ├── UI/            # Ícone da barra, painel, Ajustes; depois transcrição e anel
-        ├── Audio/         # Formatos aceitos e leitura (AVFoundation; FFmpeg na v0.4)
-        ├── Transcription/ # Motores (Parakeet, Apple Speech, WhisperKit): v0.4
+        ├── Audio/         # Formatos aceitos (a conversão fica no pacote TranscreveMotores)
+        ├── Transcription/ # WhisperKit e benchmark local do Automático (v0.6); os motores atuais estão no pacote
         ├── Export/        # Geração de .txt e .md: v0.5
         └── Storage/       # Preferências; depois histórico
 ```

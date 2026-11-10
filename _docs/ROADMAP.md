@@ -15,14 +15,14 @@
 - [x] Publicar a primeira release (v0.3.0), para que os apps instalados passem a receber atualizações.
 
 ## v0.4.0 — Pipeline de áudio e transcrição
-- [ ] Decodificação com AVFoundation + FFmpeg embutido (qualquer formato).
-- [ ] Transcrição com Parakeet v3 (FluidAudio), com progresso no painel e prévia ao vivo. Na primeira execução, usar o Apple Speech enquanto o Parakeet baixa e compila.
-- [ ] Progresso no ícone quando o painel está fechado.
+- [x] Decodificação com AVFoundation + FFmpeg embutido (qualquer formato).
+- [x] Transcrição com Parakeet v3 (FluidAudio), com progresso no painel e prévia ao vivo. Na primeira execução, usar o Apple Speech enquanto o Parakeet baixa e compila.
+- [x] Progresso no ícone quando o painel está fechado, ✓ e bolinha vermelha de "não visto", e som ao terminar.
 
 ## v0.5.0 — Resultado e exportação
-- [ ] Lista de trechos clicável (copia o trecho) e "Copiar tudo".
+- [ ] Lista de trechos clicável (copia o trecho). ~~"Copiar tudo"~~ feito na v0.4.
 - [ ] Exportar `.txt` e `.md` (⌘E / ⇧⌘E).
-- [ ] Histórico local e lista de recentes no painel.
+- [x] Histórico local e lista de recentes no painel (adiantado na v0.4, pedido do owner), com busca e Ajustes para guardar ou limpar.
 
 ## v0.6.0 — Modelos e modo Automático
 - [ ] Seletor de modelo e de idioma.
@@ -30,8 +30,8 @@
 - [ ] Benchmark local e modo "Automático" (mais rápido instalado) como padrão.
 
 ## v0.7.0 — Fluxo sem abrir o painel
-- [ ] "Copiar ao terminar" (ligado por padrão) e notificação ao terminar.
-- [ ] Menu "…": Copiar ao terminar, Abrir ao iniciar o Mac, Ajustes, Sair.
+- [ ] Notificação ao terminar. ~~"Copiar ao terminar" (ligado por padrão)~~ feito na v0.4.
+- [x] Menu "…": Copiar ao terminar, Abrir ao iniciar o Mac, Ajustes, Sair (v0.3; Som ao terminar e Abrir ao arrastar na v0.4).
 
 ## v0.8.0 — Anel de ações
 - [ ] Atalho global ⌥ Espaço (segurar e soltar), com pedido de permissão de Acessibilidade.

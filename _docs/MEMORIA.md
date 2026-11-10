@@ -45,6 +45,47 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 4 — 10/11/2026 (Transcrição, histórico e Ajustes, v0.4.0)
+
+### Objetivo
+- v0.4.0: transcrever de verdade (Parakeet v3 + Apple Speech de reserva), com progresso no painel e no ícone e FFmpeg embutido. Pedidos do usuário no meio: som ao terminar, bolinha vermelha de "não visto", garantia de que a transcrição continua com o painel fechado, fechar sem atraso ao clicar fora, histórico (com lixeira e só da sessão), Ajustes de verdade (também no botão direito) e abrir ao arrastar das pilhas do Dock.
+
+### Descobertas
+- **Formatos nativos no macOS 27** (testado com `AVAudioFile` e `AVAssetReader`): MP3, M4A/AAC, MP4, FLAC, OGG/Vorbis e **Opus em OGG (WhatsApp)** abrem direto. **WebM, WMA e MKV não** (e AMR não foi testado: o FFmpeg do Homebrew não tem o encoder). O FFmpeg ficou só para esses.
+- **FluidAudio traz 57 MB a mais** (normalização de texto NeMo, TTS, separação de falantes). Com `traits: []` na dependência sai só o ASR. Como o Xcode não escolhe traits num pacote remoto, os motores foram para um pacote local (`files/Pacotes/TranscreveMotores`) que declara a dependência assim. Bônus: dá para testar pelo terminal (`transcrever`). App de debug: 14 MB.
+- **Download do Parakeet:** `AsrModels.downloadAndLoad(to:)` recebe a pasta do próprio modelo (`.../Modelos/parakeet-tdt-0.6b-v3`), não a pasta-mãe. O `fractionCompleted` vai de 0 a 50% no download e de 50 a 100% na compilação (`DownloadPhase.downloading`/`.compiling`). Download de cerca de 34 s; a compilação para o Neural Engine leva cerca de 14 s **na primeira carga de cada app** (o terminal e o app compilam cada um a sua), e depois só 0,1–0,2 s.
+- **Apple Speech + idioma do sistema = desastre:** num Mac em inglês, com áudio em português, o texto sai ilegível. O motor não detecta o idioma, então no "Auto" usa pt-BR.
+- **Glitches de pontuação:** o Parakeet às vezes solta um "." numa pausa (vira frase própria), e o Apple Speech começa um resultado com o ponto do anterior (". Parte dois"). Os dois foram corrigidos no pacote. O Apple Speech também pula números em fala sintética ("Parte" sem o número); o Parakeet acerta.
+- **Velocidade no app real:** Parakeet a 224× tempo real (3 min em 0,77 s); Apple Speech a cerca de 85× (3 min em 1,7 s, com prévia ao vivo).
+- **Barra de progresso nativa** (`ProgressView(value:)`) anima atrasada em relação ao número; trocada por uma barra própria.
+- **Ícone com bolinha:** desenhar o símbolo + bolinha numa imagem colorida deixa o símbolo cinza (perde o tratamento de template da barra). Solução: símbolo template e uma `NSView` vermelha por cima do botão.
+- **Painel aberto por argumento logo na abertura** pode precisar de mais tentativas até o ícone ter posição (o limite subiu para 5 s).
+- **Ajustes "não fazia nada" (relato do usuário) = o app caía:** `NSHostingController` com `sizingOptions = [.preferredContentSize]` + `Form` agrupado com `fixedSize` → `NSGenericException` ("more Update Constraints in Window passes than there are views"). Janela de tamanho fixo resolve. Sintoma enganoso: o app some da barra, e para quem usa parece que nada aconteceu. Diagnóstico: rodar o binário direto e ler a saída (o log mostra a exceção).
+- **Histórico só da sessão (pedido do usuário):** o `kern.boottime` muda a cada desligar ou reiniciar; anotado em `sessao.txt`, se não bate ao abrir, o histórico é apagado (padrão ligado; Ajustes permite manter). Testado com `CFFIXED_USER_HOME` apontando para uma pasta pessoal de mentira, para não tocar no histórico real. Cuidado: o `sed` em `sysctl -n kern.boottime` precisa pegar o `sec` do começo, não o `usec`.
+- **Arrastar do Dock não abria o painel (relato do usuário; resolvido, testado por ele):** a primeira hipótese (o Dock não entrega os eventos) estava **errada**. Um diagnóstico separado (`swiftc`, registrando a cada 50 ms o botão, os eventos globais e o `changeCount`) mostrou que o mouse down, o movimento e o `pressedMouseButtons` chegam normalmente, mas que **o `changeCount` de `NSPasteboard(name: .drag)` nunca muda** num arraste vindo do Dock. O Dock usa uma área de arraste própria, com nome que outros processos não enxergam (o dev do Yoink relatou o mesmo em 2011). Solução: o `ApanhadorDeArraste`, uma janela transparente da tela inteira, armada só quando o clique cai numa janela do Dock ou do Finder e o ponteiro anda 6 pt. Quem *recebe* o arraste ganha a área certa em `draggingPasteboard`. Ela lê, avisa e sai da frente. Detalhes: com o Dock em ocultar automaticamente, a lista de janelas não mostra o Dock enquanto ele está escondido; a origem do clique sai da `windowNumber` do evento global. O `log show` não mostrou os registros deste build de teste (ficaram em nível debug).
+- **Diagnosticar arrastes:** os registros `info`/`debug` não ficam guardados; use `log stream --debug --predicate 'subsystem == "io.github.joaogmcorrea.transcreveai"'` durante o teste e **sem** `| tail` (só mostra no fim). Um diagnóstico em processo separado foi o que resolveu.
+- **Histórico (pedido do usuário):** índice + um JSON por transcrição em Application Support/TranscreveAI/Historico, limite de 500. Os testes automáticos gravam no histórico real do usuário: apagar as entradas de teste depois (as do scratchpad).
+- **Fechar ao clicar fora tinha atraso (relato do usuário):** o fechamento esperava o mouse up para não atrapalhar o arraste de um arquivo até o painel aberto. Agora fecha no mouse down (esquerdo, direito ou outro). O arraste continua coberto porque o `DetectorDeArraste` reabre o painel quando um arraste de áudio começa. Com "Abrir ao arrastar" desligado, resta soltar no ícone.
+
+### Decisões Tomadas
+- **Automático:** Parakeet se estiver pronto ou baixado; senão Apple Speech neste arquivo + download do Parakeet em segundo plano (nota no painel). Se o Parakeet falhar no Automático, o Apple Speech tenta.
+- **Segundo plano garantido:** fechar o painel não interrompe nada (a tarefa vive no `EstadoApp`); `ProcessInfo.beginActivity(.userInitiated, .idleSystemSleepDisabled)` durante a transcrição evita App Nap e sono do Mac.
+- **Fim:** som Glass (Basso no erro), opção "Som ao terminar" no "…" (ligada); "Copiar ao terminar" passou a funcionar; ícone com ✓ por 4 s e depois bolinha vermelha até abrir o painel.
+- **FFmpeg próprio** (9.0.2, LGPL, sem dependências, universal, 8,2 MB) como programa separado em `Contents/Helpers`, com a receita em `_dev/ffmpeg/compilar.sh` e o binário versionado em `files/Vendor/ffmpeg/`. Licenças de terceiros em `files/LICENCAS.md`.
+- **Resultado na v0.4:** texto selecionável em parágrafos com tempo e "Copiar tudo" (entrou junto com o histórico). Clique para copiar trecho e Exportar ficam para a v0.5 (roadmap).
+
+### Problemas Conhecidos ou Riscos Futuros
+- Sem teste à mão com áudios longos (30 min ou mais) nem soltando direto no ícone da barra. A prévia ao vivo só existe no Apple Speech; o Parakeet entrega tudo no fim (rápido o bastante).
+- O apanhador do arraste só arma para cliques no Dock e no Finder. Arrastes de áudio vindos de outros apps que também usem área própria não abrem o painel (nenhum caso conhecido).
+- O Parakeet usa cerca de 143 MB de memória enquanto está carregado (fica carregado de propósito).
+
+### Dicas para Próximas Sessões
+- Testar motores sem o app: `swift run --package-path files/Pacotes/TranscreveMotores --scratch-path ~/Library/Caches/TranscreveAI-motores transcrever <áudio> [parakeet|apple] [idioma]` (`TRANSCREVE_FRASES=1` mostra os tempos).
+- Testar o app sem clicar: `--arquivo <caminho>` (painel aberto) e `--arquivo-fundo <caminho>` (painel fechado, para ver o ícone). `defaults write io.github.joaogmcorrea.transcreveai modelo apple` força o Apple Speech; `somAoTerminar -bool false` silencia os testes.
+- Evitar testes com o painel aberto enquanto o usuário usa o Mac: ele cobre a tela e um clique dele fecha o painel.
+
+---
+
 ## Sessão 3 — 10/11/2026 (Esqueleto do app de menu bar e atualizações, v0.3.0)
 
 ### Objetivo

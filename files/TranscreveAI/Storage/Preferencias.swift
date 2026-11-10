@@ -6,6 +6,12 @@ enum Preferencia {
     static let modelo = "modelo"
     static let idioma = "idioma"
     static let copiarAoTerminar = "copiarAoTerminar"
+    /// Som do sistema quando a transcrição termina (padrão: ligado).
+    static let somAoTerminar = "somAoTerminar"
+    /// Guardar cada transcrição no histórico local (padrão: ligado).
+    static let guardarHistorico = "guardarHistorico"
+    /// O histórico vale só até desligar ou reiniciar o Mac (padrão: ligado, pedido do owner).
+    static let historicoSoNaSessao = "historicoSoNaSessao"
     /// Abrir o painel sozinho quando um áudio começa a ser arrastado em qualquer app (padrão: ligado).
     static let abrirAoArrastar = "abrirAoArrastar"
 
@@ -19,6 +25,15 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
     case automatico, parakeet, apple, whisperTurbo
 
     var id: String { rawValue }
+
+    /// O escolhido no painel (o Whisper Turbo ainda não existe: vale como Automático).
+    static var atual: ModeloTranscricao {
+        let salvo = ModeloTranscricao(rawValue: UserDefaults.standard.string(forKey: Preferencia.modelo) ?? "")
+        return salvo?.disponivel == true ? salvo! : .automatico
+    }
+
+    /// O Whisper Turbo (WhisperKit) entra na v0.6.
+    var disponivel: Bool { self != .whisperTurbo }
 
     var nome: String {
         switch self {
@@ -44,7 +59,7 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
         case .automatico: "Usa sempre o mais rápido instalado. Hoje: Parakeet v3."
         case .parakeet: "O mais rápido · download único (470 MB)"
         case .apple: "Nativo do macOS · sem download"
-        case .whisperTurbo: "Alternativa de qualidade · download único (1,6 GB)"
+        case .whisperTurbo: "Alternativa de qualidade · em breve"
         }
     }
 
@@ -58,6 +73,23 @@ enum IdiomaAudio: String, CaseIterable, Identifiable {
     case auto, portugues = "pt", ingles = "en", espanhol = "es"
 
     var id: String { rawValue }
+
+    static var atual: IdiomaAudio {
+        IdiomaAudio(rawValue: UserDefaults.standard.string(forKey: Preferencia.idioma) ?? "") ?? .auto
+    }
+
+    /// Parakeet: `nil` detecta o idioma sozinho.
+    var codigoParakeet: String? { self == .auto ? nil : rawValue }
+
+    /// Apple Speech: não detecta sozinho; no "Auto" vale pt-BR (o motor trata `nil` assim).
+    var codigoApple: String? {
+        switch self {
+        case .auto: nil
+        case .portugues: "pt-BR"
+        case .ingles: "en-US"
+        case .espanhol: "es-ES"
+        }
+    }
 
     var nome: String {
         switch self {

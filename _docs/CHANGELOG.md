@@ -20,14 +20,31 @@
 ### Adicionado
 - 
 
-### Alterado
-- 
-
 ### Corrigido
 - 
 
-### Removido
-- 
+---
+
+## [0.4.0] - 10/11/2026
+
+### Adicionado
+- Transcrição de verdade: Parakeet v3 no "Automático" (o mais rápido) e Apple Speech de reserva enquanto o Parakeet baixa (470 MB, uma vez). Painel com progresso, prévia ao vivo (Apple Speech), parágrafos com tempo e texto selecionável. Sem teste à mão com áudios longos.
+- Progresso no ícone da barra (anel com porcentagem), ✓ ao terminar e bolinha vermelha até abrir o painel. Som ao terminar (opção no "…").
+- "Copiar ao terminar" passou a copiar o texto ao concluir.
+- FFmpeg embutido (9.0.2, LGPL) para WebM, WMA, MKV e AMR; o macOS já abre MP3, M4A, MP4, WAV, FLAC, OGG e Opus.
+- Licenças de terceiros em `files/LICENCAS.md`.
+- Histórico local das transcrições (pedido do owner): as 3 recentes no painel, "Ver tudo" com busca, reabrir, copiar e apagar; guarda as 500 mais recentes, só neste Mac. "Copiar tudo" no resultado.
+- Ajustes de verdade: geral, modelo e idioma padrão, histórico (guardar, limpar) e atualizações. Também no botão direito do ícone.
+- Lixeira ao passar o mouse nos itens do histórico (pedido do owner).
+
+### Alterado
+- A transcrição continua em segundo plano com o painel fechado, sem App Nap nem sono do Mac.
+- O painel fecha no instante do clique fora (antes, só quando o botão do mouse era solto, o que dava um atraso). Pedido do owner.
+- O histórico vale só para a sessão do Mac: ao desligar ou reiniciar, é apagado (pedido do owner; opção em Ajustes › Histórico).
+- "Abrir ao arrastar um áudio" também funciona arrastando das pilhas do Dock, não só do Finder (pedido do owner; testado pelo owner). O Dock não usa a área de arraste comum: uma janela transparente aparece por um instante para receber o arraste e ler o arquivo.
+
+### Corrigido
+- Abrir os Ajustes derrubava o app (ciclo de layout da janela); agora ela tem tamanho fixo. Achado pelo owner ("não acontece nada").
 
 ---
 

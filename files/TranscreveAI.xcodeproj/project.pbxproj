@@ -8,11 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		7C5A00000000000000000010 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 7C5A00000000000000000011 /* Sparkle */; };
+		7C5A00000000000000000014 /* TranscreveMotores in Frameworks */ = {isa = PBXBuildFile; productRef = 7C5A00000000000000000015 /* TranscreveMotores */; };
+		7C5A00000000000000000017 /* ffmpeg in Copiar FFmpeg */ = {isa = PBXBuildFile; fileRef = 7C5A00000000000000000018 /* ffmpeg */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7C5A00000000000000000019 /* Copiar FFmpeg */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
+			files = (
+				7C5A00000000000000000017 /* ffmpeg in Copiar FFmpeg */,
+			);
+			name = "Copiar FFmpeg";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		7C5A00000000000000000001 /* TranscreveAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TranscreveAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C5A00000000000000000013 /* TranscreveAI-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TranscreveAI-Info.plist"; sourceTree = "<group>"; };
+		7C5A00000000000000000018 /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Vendor/ffmpeg/ffmpeg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -29,6 +46,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C5A00000000000000000010 /* Sparkle in Frameworks */,
+				7C5A00000000000000000014 /* TranscreveMotores in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +58,7 @@
 			children = (
 				7C5A00000000000000000002 /* TranscreveAI */,
 				7C5A00000000000000000013 /* TranscreveAI-Info.plist */,
+				7C5A00000000000000000018 /* ffmpeg */,
 				7C5A00000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +81,7 @@
 				7C5A00000000000000000007 /* Sources */,
 				7C5A00000000000000000003 /* Frameworks */,
 				7C5A00000000000000000008 /* Resources */,
+				7C5A00000000000000000019 /* Copiar FFmpeg */,
 			);
 			buildRules = (
 			);
@@ -73,6 +93,7 @@
 			name = TranscreveAI;
 			packageProductDependencies = (
 				7C5A00000000000000000011 /* Sparkle */,
+				7C5A00000000000000000015 /* TranscreveMotores */,
 			);
 			productName = TranscreveAI;
 			productReference = 7C5A00000000000000000001 /* TranscreveAI.app */;
@@ -103,6 +124,7 @@
 			mainGroup = 7C5A00000000000000000004;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				7C5A00000000000000000016 /* XCLocalSwiftPackageReference "Pacotes/TranscreveMotores" */,
 				7C5A00000000000000000012 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -157,7 +179,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.4.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -180,7 +202,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 0.4.0;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
@@ -267,6 +289,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		7C5A00000000000000000016 /* XCLocalSwiftPackageReference "Pacotes/TranscreveMotores" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Pacotes/TranscreveMotores;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		7C5A00000000000000000012 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -283,6 +312,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7C5A00000000000000000012 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		7C5A00000000000000000015 /* TranscreveMotores */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TranscreveMotores;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

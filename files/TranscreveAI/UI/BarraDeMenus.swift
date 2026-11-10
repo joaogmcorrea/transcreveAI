@@ -5,14 +5,21 @@ import SwiftUI
 /// quando um áudio começa a ser arrastado em qualquer app e mostra um menu curto no clique com o botão direito.
 final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
     private let estado: EstadoApp
-    private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+    private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private let simbolo: NSImage? = {
+        let imagem = NSImage(systemSymbolName: "waveform", accessibilityDescription: "TranscreveAI")
+        imagem?.isTemplate = true
+        return imagem
+    }()
+    private var progressoNoIcone: Double?
+    private var concluidoAte: Date?
+    /// Terminou (ou falhou) com o painel fechado e a pessoa ainda não abriu: bolinha vermelha no ícone.
+    private var resultadoNaoVisto = false
     private let painel = PainelFlutuante()
     private let detector = DetectorDeArraste()
     private var janelaAjustes: NSWindow?
     private var monitores: [Any] = []
     private var iconeNaTela: NSRect = .zero
-    private var cliqueForaPendente = false
-    private var arrastouFora = false
     private var abertoPorArraste = false
     private var arquivoAntesDoArraste: UUID?
 
@@ -21,11 +28,15 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         super.init()
         painel.definirConteudo(PainelView(
             estado: estado,
+            historico: .compartilhado,
             escolherArquivo: { [weak self] in self?.escolherArquivo() },
             procurarAtualizacoes: { [weak self] in self?.procurarAtualizacoes() },
             abrirAjustes: { [weak self] in self?.abrirAjustes() },
             sair: { NSApp.terminate(nil) }))
         configurarIcone()
+        estado.aoMudarProgresso = { [weak self] fracao, fim in
+            self?.atualizarIcone(fracao: fracao, fim: fim)
+        }
         detector.aoComecar = { [weak self] in self?.arrasteComecou() }
         detector.aoTerminar = { [weak self] in self?.arrasteTerminou() }
         detector.ligar()
@@ -35,9 +46,9 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     private func configurarIcone() {
         guard let botao = item.button else { return }
-        let imagem = NSImage(systemSymbolName: "waveform", accessibilityDescription: "TranscreveAI")
-        imagem?.isTemplate = true
-        botao.image = imagem
+        botao.image = simbolo
+        botao.imagePosition = .imageLeft
+        botao.font = .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         botao.toolTip = "TranscreveAI: clique ou solte um áudio aqui"
         botao.target = self
         botao.action = #selector(cliqueNoIcone)
@@ -51,11 +62,12 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
             DispatchQueue.main.async { [weak self] in self?.aceitarArquivosNoIcone() }
             return
         }
-        janela.registerForDraggedTypes([.fileURL])
+        janela.registerForDraggedTypes([.fileURL, NSPasteboard.PasteboardType("NSFilenamesPboardType")])
         janela.delegate = self
     }
 
-    /// Clique esquerdo abre ou fecha o painel; botão direito (ou Control + clique) mostra o menu curto.
+    /// Clique esquerdo abre ou fecha o painel; botão direito (ou Control + clique) mostra o menu curto
+    /// (Procurar atualizações…, Ajustes…, Abrir ao iniciar o Mac, Sair).
     @objc private func cliqueNoIcone() {
         let evento = NSApp.currentEvent
         if evento?.type == .rightMouseDown || evento?.modifierFlags.contains(.control) == true {
@@ -63,6 +75,94 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         } else {
             painel.isVisible ? fecharPainel() : mostrarPainel()
         }
+    }
+
+    // MARK: Progresso no ícone
+
+    /// Com o painel fechado, o ícone vira um anel com a porcentagem. Ao terminar, mostra um ✓ por alguns
+    /// segundos e depois a bolinha vermelha, que fica até a pessoa abrir o painel (no erro, só a bolinha).
+    private func atualizarIcone(fracao: Double?, fim: EstadoApp.Fim?) {
+        progressoNoIcone = fracao
+        if fim != nil && !painel.isVisible {
+            resultadoNaoVisto = true
+            if fim == .pronto {
+                let ate = Date().addingTimeInterval(4)
+                concluidoAte = ate
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4.1) { [weak self] in
+                    guard let self, self.concluidoAte == ate else { return }
+                    self.concluidoAte = nil
+                    self.redesenharIcone()
+                }
+            }
+        }
+        if fim == nil && fracao == nil { resultadoNaoVisto = false }  // "Novo": nada pendente
+        redesenharIcone()
+    }
+
+    private func redesenharIcone() {
+        guard let botao = item.button else { return }
+        if painel.isVisible {
+            concluidoAte = nil
+            resultadoNaoVisto = false
+            botao.image = simbolo
+            botao.title = ""
+        } else if let fracao = progressoNoIcone {
+            botao.image = Self.anel(fracao)
+            botao.title = " \(Int(fracao * 100))%"
+        } else if concluidoAte != nil {
+            let pronto = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "Transcrição pronta")
+            pronto?.isTemplate = true
+            botao.image = pronto
+            botao.title = ""
+        } else {
+            botao.image = simbolo
+            botao.title = ""
+        }
+        mostrarBolinha(resultadoNaoVisto && !painel.isVisible && progressoNoIcone == nil && concluidoAte == nil)
+    }
+
+    /// A bolinha vermelha fica numa camada por cima do botão: o símbolo continua "template" e o macOS o pinta
+    /// na cor certa da barra (desenhar tudo numa imagem colorida deixava o símbolo cinza).
+    private lazy var bolinha: NSView = {
+        let ponto = NSView(frame: NSRect(x: 0, y: 0, width: 7, height: 7))
+        ponto.wantsLayer = true
+        ponto.layer?.backgroundColor = NSColor.systemRed.cgColor
+        ponto.layer?.cornerRadius = 3.5
+        ponto.isHidden = true
+        ponto.setAccessibilityLabel("Transcrição nova")
+        return ponto
+    }()
+
+    private func mostrarBolinha(_ visivel: Bool) {
+        guard let botao = item.button else { return }
+        if bolinha.superview == nil { botao.addSubview(bolinha) }
+        let x = botao.bounds.midX + 3
+        let y = botao.isFlipped ? 2.5 : botao.bounds.height - 2.5 - bolinha.frame.height
+        bolinha.setFrameOrigin(NSPoint(x: x, y: y))
+        bolinha.isHidden = !visivel
+    }
+
+    private static func anel(_ fracao: Double) -> NSImage {
+        let imagem = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { area in
+            let centro = NSPoint(x: area.midX, y: area.midY)
+            let raio: CGFloat = 6.25
+            let trilho = NSBezierPath()
+            trilho.appendArc(withCenter: centro, radius: raio, startAngle: 0, endAngle: 360)
+            trilho.lineWidth = 2
+            NSColor.black.withAlphaComponent(0.3).setStroke()
+            trilho.stroke()
+            let arco = NSBezierPath()
+            arco.appendArc(
+                withCenter: centro, radius: raio, startAngle: 90,
+                endAngle: 90 - 360 * CGFloat(max(0.02, min(1, fracao))), clockwise: true)
+            arco.lineWidth = 2
+            arco.lineCapStyle = .round
+            NSColor.black.setStroke()
+            arco.stroke()
+            return true
+        }
+        imagem.isTemplate = true
+        return imagem
     }
 
     // MARK: Menu do botão direito
@@ -77,6 +177,10 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         atualizacoes.target = self
         atualizacoes.isEnabled = Atualizacoes.atualizador.canCheckForUpdates
         menu.addItem(atualizacoes)
+
+        let ajustes = NSMenuItem(title: "Ajustes…", action: #selector(abrirAjustesPeloMenu), keyEquivalent: ",")
+        ajustes.target = self
+        menu.addItem(ajustes)
 
         let inicio = NSMenuItem(
             title: "Abrir ao iniciar o Mac", action: #selector(alternarInicioAutomatico), keyEquivalent: "")
@@ -98,6 +202,8 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     @objc private func procurarAtualizacoesPeloMenu() { procurarAtualizacoes() }
 
+    @objc private func abrirAjustesPeloMenu() { abrirAjustes() }
+
     @objc private func alternarInicioAutomatico() { InicioAutomatico.definir(!InicioAutomatico.ativo) }
 
     @objc private func sairDoApp() { NSApp.terminate(nil) }
@@ -106,7 +212,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     /// Logo depois da abertura do app o ícone ainda não tem lugar na barra: tenta de novo em instantes.
     /// `ativar: false` (aberto por um arraste) não tira o foco do app de onde o arquivo vem.
-    func mostrarPainel(ativar: Bool = true, tentativas: Int = 20) {
+    func mostrarPainel(ativar: Bool = true, tentativas: Int = 50) {
         guard let botao = item.button, let janela = botao.window, janela.frame.minY > 0 else {
             if tentativas > 0 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
@@ -120,6 +226,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         if ativar { NSApp.activate() }
         painel.mostrar(abaixoDe: icone, tornarChave: ativar)
         botao.highlight(true)
+        redesenharIcone()
         instalarMonitores()
     }
 
@@ -128,6 +235,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         item.button?.highlight(false)
         removerMonitores()
         abertoPorArraste = false
+        redesenharIcone()
     }
 
     private func escolherArquivo() {
@@ -150,20 +258,23 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         Atualizacoes.atualizador.checkForUpdates()
     }
 
-    private func abrirAjustes() {
+    func abrirAjustes() {
         fecharPainel()
         if janelaAjustes == nil {
-            let controlador = NSHostingController(rootView: AjustesView())
-            controlador.sizingOptions = [.preferredContentSize]
+            // Tamanho fixo: deixar a janela seguir o Form agrupado criava um ciclo de layout que derrubava o app.
+            let controlador = NSHostingController(rootView: AjustesView(historico: .compartilhado))
+            controlador.sizingOptions = []
             let janela = NSWindow(contentViewController: controlador)
             janela.title = "Ajustes do TranscreveAI"
             janela.styleMask = [.titled, .closable]
+            janela.setContentSize(AjustesView.tamanho)
             janela.isReleasedWhenClosed = false
             janela.center()
             janelaAjustes = janela
         }
         NSApp.activate()
         janelaAjustes?.makeKeyAndOrderFront(nil)
+        janelaAjustes?.orderFrontRegardless()
     }
 
     // MARK: Abrir sozinho ao arrastar um áudio
@@ -194,15 +305,14 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     // MARK: Fechar ao clicar fora
 
-    /// Fecha com Esc ou com um clique fora. Um clique fora que vira arraste não fecha: a pessoa pode
-    /// estar trazendo um arquivo do Finder para o painel.
+    /// Fecha com Esc ou no instante em que o botão do mouse desce fora do painel (sem esperar soltar).
+    /// Quem estava trazendo um arquivo do Finder não perde nada: o painel reabre sozinho quando o arraste
+    /// de um áudio começa ("Abrir ao arrastar um áudio"), e soltar no ícone da barra também funciona.
     private func instalarMonitores() {
         guard monitores.isEmpty else { return }
-        cliqueForaPendente = false
-        arrastouFora = false
-        let tipos: NSEvent.EventTypeMask = [.leftMouseDown, .leftMouseDragged, .leftMouseUp, .rightMouseDown]
-        if let fora = NSEvent.addGlobalMonitorForEvents(matching: tipos, handler: { [weak self] evento in
-            MainActor.assumeIsolated { self?.cliqueFora(evento) }
+        let tipos: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        if let fora = NSEvent.addGlobalMonitorForEvents(matching: tipos, handler: { [weak self] _ in
+            MainActor.assumeIsolated { self?.cliqueFora() }
         }) {
             monitores.append(fora)
         }
@@ -220,25 +330,11 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         monitores.removeAll()
     }
 
-    /// No macOS 26+ o clique no ícone da barra também chega ao monitor global, como se fosse de outro app:
-    /// o "soltar" do clique que abriu o painel o fechava na hora. Por isso só fecha um clique que **começou**
-    /// fora do ícone depois que o painel abriu (e que não virou arraste).
-    private func cliqueFora(_ evento: NSEvent) {
+    /// No macOS 26+ o clique no próprio ícone da barra também chega a este monitor, como se fosse de outro app.
+    /// Esse clique é ignorado aqui: quem abre e fecha pelo ícone é a ação do botão.
+    private func cliqueFora() {
         let noIcone = iconeNaTela.insetBy(dx: -4, dy: -4).contains(NSEvent.mouseLocation)
-        switch evento.type {
-        case .leftMouseDown:
-            cliqueForaPendente = !noIcone
-            arrastouFora = false
-        case .leftMouseDragged:
-            if cliqueForaPendente { arrastouFora = true }
-        case .leftMouseUp:
-            if cliqueForaPendente && !arrastouFora { fecharPainel() }
-            cliqueForaPendente = false
-        case .rightMouseDown:
-            if !noIcone { fecharPainel() }
-        default:
-            break
-        }
+        if !noIcone { fecharPainel() }
     }
 
     // MARK: Soltar no ícone
@@ -260,8 +356,6 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
     }
 
     private func audios(em info: NSDraggingInfo) -> [URL] {
-        let urls = info.draggingPasteboard.readObjects(
-            forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
-        return urls.filter(FormatosAudio.aceita)
+        DetectorDeArraste.arquivos(em: info.draggingPasteboard).filter(FormatosAudio.aceita)
     }
 }

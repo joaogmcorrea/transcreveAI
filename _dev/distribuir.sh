@@ -46,7 +46,7 @@ if security find-identity -v -p codesigning | grep -q "\"$CERTIFICADO\""; then
     # De dentro para fora, como pede o Sparkle (sem --deep).
     SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
     for parte in "$SPARKLE"/Versions/B/XPCServices/*.xpc "$SPARKLE/Versions/B/Autoupdate" \
-                 "$SPARKLE/Versions/B/Updater.app" "$SPARKLE" "$APP"; do
+                 "$SPARKLE/Versions/B/Updater.app" "$SPARKLE" "$APP/Contents/Helpers/ffmpeg" "$APP"; do
         codesign --force --sign "$CERTIFICADO" --preserve-metadata=entitlements "$parte"
     done
 else
