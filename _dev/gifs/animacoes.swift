@@ -262,10 +262,10 @@ func barraDeMenus(_ e: EstadoDoIcone) {
 
     var x: CGFloat = 20
     x += texto("Finder", x: x, y: 14, fonte(13, .bold), Cor.tinta).width + 18
-    for item in ["Arquivo", "Editar", "Visualizar", "Ir", "Janela", "Ajuda"] {
+    for item in ["File", "Edit", "View", "Go", "Window", "Help"] {
         x += texto(item, x: x, y: 14, fonte(13), Cor.tinta).width + 17
     }
-    texto("Ter 10:41", x: 784, y: 14, fonte(13, .medium), Cor.tinta, alinhar: .direita)
+    texto("Tue 10:41", x: 784, y: 14, fonte(13, .medium), Cor.tinta, alinhar: .direita)
     simbolo("battery.75percent", x: 690, y: 14, tamanho: 13, Cor.tinta)
     simbolo("wifi", x: 652, y: 14, tamanho: 13, Cor.tinta, peso: .medium)
 
@@ -394,10 +394,10 @@ func janelaDoFinder(_ r: CGRect) {
     for (i, cor) in [NSColor(0xFF5F57), NSColor(0xFEBC2E), NSColor(0x28C840)].enumerated() {
         circulo(CGPoint(x: r.minX + 18 + CGFloat(i) * 19, y: r.minY + 20), 6, cor)
     }
-    texto("Favoritos", x: r.minX + 16, y: r.minY + 52, fonte(11, .semibold), Cor.cinza.a(0.8))
+    texto("Favorites", x: r.minX + 16, y: r.minY + 52, fonte(11, .semibold), Cor.cinza.a(0.8))
     let itens: [(String, String)] = [
-        ("clock", "Recentes"), ("square.grid.2x2", "Aplicativos"), ("desktopcomputer", "Mesa"),
-        ("doc", "Documentos"), ("arrow.down.circle", "Downloads"),
+        ("clock", "Recents"), ("square.grid.2x2", "Applications"), ("desktopcomputer", "Desktop"),
+        ("doc", "Documents"), ("arrow.down.circle", "Downloads"),
     ]
     for (i, item) in itens.enumerated() {
         let y = r.minY + 76 + CGFloat(i) * 26
@@ -567,31 +567,31 @@ func conteudo(_ c: Conteudo, _ r: CGRect) {
             simbolo("tray.and.arrow.down", x: quadrado.midX, y: quadrado.midY, tamanho: 26,
                     misturar(Cor.cinza, Cor.branco, x))
         }
-        texto("Arraste um áudio aqui", x: area.midX, y: topo + 83, fonte(17, .semibold), Cor.tinta.a(1 - x),
+        texto("Drop an audio file here", x: area.midX, y: topo + 83, fonte(17, .semibold), Cor.tinta.a(1 - x),
               alinhar: .centro)
-        texto("Solte para transcrever", x: area.midX, y: topo + 83, fonte(17, .semibold), Cor.tinta.a(x),
+        texto("Release to transcribe", x: area.midX, y: topo + 83, fonte(17, .semibold), Cor.tinta.a(x),
               alinhar: .centro)
-        texto("ou clique para escolher um arquivo", x: area.midX, y: topo + 104, fonte(12.5), Cor.cinza,
+        texto("or click to choose a file", x: area.midX, y: topo + 104, fonte(12.5), Cor.cinza,
               alinhar: .centro)
         let linha = area.maxY + 12
-        let modelo = botaoPequeno("Mais rápido", simbolo: "bolt", x: r.minX, y: linha, seta: true)
+        let modelo = botaoPequeno("Fastest", simbolo: "bolt", x: r.minX, y: linha, seta: true)
         _ = botaoPequeno("Auto", simbolo: "globe", x: modelo.maxX + 8, y: linha, seta: true)
 
     case .trabalhando(let demo, let fracao):
         cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · Parakeet v3")
         let topo = r.minY + 46
-        texto("Transcrevendo…", x: r.minX, y: topo + 8, fonte(12.5, .medium), Cor.tinta)
+        texto("Transcribing…", x: r.minX, y: topo + 8, fonte(12.5, .medium), Cor.tinta)
         texto("\(Int(fracao * 100))%", x: r.maxX, y: topo + 8, fonte(12.5, numeros: true), Cor.cinza, alinhar: .direita)
         let trilho = CGRect(x: r.minX, y: topo + 23, width: r.width, height: 6)
         caixa(trilho, raio: 3, Cor.preto.a(0.1))
         caixa(CGRect(x: trilho.minX, y: trilho.minY, width: max(6, trilho.width * fracao), height: 6), raio: 3, Cor.azul)
         let dica = topo + 29 + 12
-        bloco("Pode fechar o painel: o progresso fica no ícone da barra.", x: r.minX, y: dica, largura: r.width - 96,
+        bloco("You can close the panel: progress shows on the menu bar icon.", x: r.minX, y: dica, largura: r.width - 96,
               fonte(11.5), Cor.cinza)
-        _ = botaoPequeno("Cancelar", simbolo: nil, direita: r.maxX, y: dica + 3)
+        _ = botaoPequeno("Cancel", simbolo: nil, direita: r.maxX, y: dica + 3)
 
     case .pronto(let demo, let revelar):
-        cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · transcrito em \(demo.tempo) · Parakeet v3")
+        cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · transcribed in \(demo.tempo) · Parakeet v3")
         let caixaDoTexto = CGRect(x: r.minX, y: r.minY + 46, width: r.width, height: alturaDosParagrafos(demo))
         caixa(caixaDoTexto, raio: 12, Cor.preto.a(0.05))
         var y = caixaDoTexto.minY + 12
@@ -609,10 +609,10 @@ func conteudo(_ c: Conteudo, _ r: CGRect) {
         }
         let linha = caixaDoTexto.maxY + 12
         simbolo("arrow.uturn.backward", x: r.minX + 7, y: linha + 11, tamanho: 11, Cor.tinta, peso: .medium)
-        texto("Novo", x: r.minX + 19, y: linha + 11, fonte(13), Cor.tinta)
+        texto("New", x: r.minX + 19, y: linha + 11, fonte(13), Cor.tinta)
         let copiado = saida(fase(Double(revelar), 0.7, 1))
         camada(copiado) {
-            let b = botaoPequeno("Copiado", simbolo: "checkmark", direita: r.maxX, y: linha + 1)
+            let b = botaoPequeno("Copied", simbolo: "checkmark", direita: r.maxX, y: linha + 1)
             _ = b
         }
     }
@@ -644,35 +644,35 @@ let pontoDeSoltar = CGPoint(x: 600, y: 170)
 // MARK: - Conteúdo das demonstrações (texto inventado)
 
 let reuniao = Demo(
-    arquivo: Arquivo(nome: "reuniao.m4a", extensao: "m4a", cor: NSColor(0xFF9500), simbolo: "waveform"),
-    duracao: "12:48", tempo: "3,4 s",
+    arquivo: Arquivo(nome: "meeting.m4a", extensao: "m4a", cor: NSColor(0xFF9500), simbolo: "waveform"),
+    duracao: "12:48", tempo: "3.4 s",
     paragrafos: [
-        ("0:00", "Bom dia, pessoal. Vamos começar pelos números da semana e depois falamos do lançamento."),
-        ("0:18", "As vendas subiram doze por cento, puxadas pelo plano anual que entrou na segunda."),
-        ("0:41", "Próximos passos: revisar o orçamento até sexta e marcar a apresentação com o time."),
+        ("0:00", "Good morning, everyone. Let's start with this week's numbers, then the launch."),
+        ("0:18", "Sales went up twelve percent, driven by the annual plan that went live on Monday."),
+        ("0:41", "Next steps: review the budget by Friday and schedule the presentation with the team."),
     ])
 
 let entrevista = Demo(
-    arquivo: Arquivo(nome: "entrevista.opus", extensao: "opus", cor: NSColor(0xAF52DE), simbolo: "waveform"),
-    duracao: "6:12", tempo: "1,7 s",
+    arquivo: Arquivo(nome: "interview.opus", extensao: "opus", cor: NSColor(0xAF52DE), simbolo: "waveform"),
+    duracao: "6:12", tempo: "1.7 s",
     paragrafos: [
-        ("0:00", "Obrigado por receber a gente. Para começar, conta um pouco da sua trajetória."),
-        ("0:09", "Comecei como designer, mas logo fui para produto, e foi aí que tudo mudou."),
-        ("0:27", "O que eu aprendi é que o mais difícil é decidir o que fica de fora."),
+        ("0:00", "Thanks for having us. To start, tell us a little about your career so far."),
+        ("0:09", "I started out as a designer, but soon moved into product, and that changed everything."),
+        ("0:27", "What I learned is that the hardest part is deciding what to leave out."),
     ])
 
 let podcast = Demo(
     arquivo: Arquivo(nome: "podcast-ep12.mp3", extensao: "mp3", cor: NSColor(0xFF2D55), simbolo: "waveform"),
-    duracao: "38:20", tempo: "10,2 s",
+    duracao: "38:20", tempo: "10.2 s",
     paragrafos: [
-        ("0:00", "Olá, e bem-vindos a mais um episódio. Hoje o assunto é produtividade no dia a dia."),
-        ("0:14", "A primeira dica é simples: anote antes de começar o que precisa estar pronto no fim."),
-        ("0:36", "A segunda é proteger um bloco de tempo sem reuniões, todo dia, no mesmo horário."),
+        ("0:00", "Hi, and welcome to another episode. Today we're talking about everyday productivity."),
+        ("0:14", "The first tip is simple: before you start, write down what has to be done by the end."),
+        ("0:36", "The second is to protect a block of time with no meetings, every day, at the same hour."),
     ])
 
-let pdf = Arquivo(nome: "relatorio.pdf", extensao: "pdf", cor: NSColor(0xFF3B30), simbolo: "doc.richtext")
-let foto = Arquivo(nome: "equipe.jpg", extensao: "jpg", cor: NSColor(0x34C759), simbolo: "photo")
-let notas = Arquivo(nome: "notas.txt", extensao: "txt", cor: NSColor(0x8E8E93), simbolo: "doc.text")
+let pdf = Arquivo(nome: "report.pdf", extensao: "pdf", cor: NSColor(0xFF3B30), simbolo: "doc.richtext")
+let foto = Arquivo(nome: "team.jpg", extensao: "jpg", cor: NSColor(0x34C759), simbolo: "photo")
+let notas = Arquivo(nome: "notes.txt", extensao: "txt", cor: NSColor(0x8E8E93), simbolo: "doc.text")
 
 let janela = CGRect(x: 36, y: 108, width: 352, height: 300)
 let gradeDoFinder: [CGPoint] = [

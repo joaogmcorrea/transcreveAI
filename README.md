@@ -6,7 +6,7 @@ Drop an audio file on the icon and the text shows up in seconds. Your audio neve
 
 **[Download the latest version (DMG)](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg)** · [All releases](https://github.com/joaogmcorrea/transcreveAI/releases) · Requires macOS 26 or later
 
-> The app's interface is in Brazilian Portuguese. It transcribes Portuguese, English and Spanish, and Parakeet detects the language on its own.
+> The app's interface is in Brazilian Portuguese (the animations below show it in English). It transcribes Portuguese, English and Spanish, and Parakeet detects the language on its own.
 
 ![Click the menu bar icon, drop an audio file on the panel and get the text, already copied](_dev/gifs/soltar.gif)
 

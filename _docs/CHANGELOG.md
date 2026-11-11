@@ -20,7 +20,7 @@
 ### Adicionado
 - README do repositório no GitHub, em inglês (só no repositório, o app não muda): o que faz, como usar, motores e velocidade, formatos, privacidade, instalar e compilar.
 - Licença MIT do projeto (`LICENSE` na raiz), pedido do owner. As licenças de terceiros continuam em `files/LICENCAS.md`.
-- GIFs animados no README, em estilo de vídeo-tutorial flat (pedido do owner): soltar e transcrever, arrastar da pilha do Dock e painel fechado com o progresso no ícone. Desenhados quadro a quadro por `_dev/gifs/animacoes.swift`, sem gravação de tela.
+- GIFs animados no README, em estilo de vídeo-tutorial flat (pedido do owner): soltar e transcrever, arrastar da pilha do Dock e painel fechado com o progresso no ícone. Desenhados quadro a quadro por `_dev/gifs/animacoes.swift`, sem gravação de tela. Tudo em inglês, legendas e interface desenhada (pedido do owner, 11/11/2026); o README avisa que o app é em português.
 
 ### Corrigido
 - 
