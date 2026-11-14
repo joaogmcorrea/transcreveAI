@@ -49,7 +49,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         botao.image = simbolo
         botao.imagePosition = .imageLeft
         botao.font = .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
-        botao.toolTip = "TranscreveAI: clique ou solte um áudio aqui"
+        botao.toolTip = String(localized: "TranscreveAI: clique ou solte um áudio aqui")
         botao.target = self
         botao.action = #selector(cliqueNoIcone)
         botao.sendAction(on: [.leftMouseDown, .rightMouseDown])
@@ -110,7 +110,8 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
             botao.image = Self.anel(fracao)
             botao.title = " \(Int(fracao * 100))%"
         } else if concluidoAte != nil {
-            let pronto = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "Transcrição pronta")
+            let pronto = NSImage(
+                systemSymbolName: "checkmark", accessibilityDescription: String(localized: "Transcrição pronta"))
             pronto?.isTemplate = true
             botao.image = pronto
             botao.title = ""
@@ -129,7 +130,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         ponto.layer?.backgroundColor = NSColor.systemRed.cgColor
         ponto.layer?.cornerRadius = 3.5
         ponto.isHidden = true
-        ponto.setAccessibilityLabel("Transcrição nova")
+        ponto.setAccessibilityLabel(String(localized: "Transcrição nova"))
         return ponto
     }()
 
@@ -173,24 +174,28 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         menu.autoenablesItems = false
 
         let atualizacoes = NSMenuItem(
-            title: "Procurar atualizações…", action: #selector(procurarAtualizacoesPeloMenu), keyEquivalent: "")
+            title: String(localized: "Procurar atualizações…"), action: #selector(procurarAtualizacoesPeloMenu),
+            keyEquivalent: "")
         atualizacoes.target = self
         atualizacoes.isEnabled = Atualizacoes.atualizador.canCheckForUpdates
         menu.addItem(atualizacoes)
 
-        let ajustes = NSMenuItem(title: "Ajustes…", action: #selector(abrirAjustesPeloMenu), keyEquivalent: ",")
+        let ajustes = NSMenuItem(
+            title: String(localized: "Ajustes…"), action: #selector(abrirAjustesPeloMenu), keyEquivalent: ",")
         ajustes.target = self
         menu.addItem(ajustes)
 
         let inicio = NSMenuItem(
-            title: "Abrir ao iniciar o Mac", action: #selector(alternarInicioAutomatico), keyEquivalent: "")
+            title: String(localized: "Abrir ao iniciar o Mac"), action: #selector(alternarInicioAutomatico),
+            keyEquivalent: "")
         inicio.target = self
         inicio.state = InicioAutomatico.ativo ? .on : .off
         menu.addItem(inicio)
 
         menu.addItem(.separator())
 
-        let sair = NSMenuItem(title: "Sair do TranscreveAI", action: #selector(sairDoApp), keyEquivalent: "q")
+        let sair = NSMenuItem(
+            title: String(localized: "Sair do TranscreveAI"), action: #selector(sairDoApp), keyEquivalent: "q")
         sair.target = self
         menu.addItem(sair)
 
@@ -242,8 +247,8 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         fecharPainel()
         NSApp.activate()
         let seletor = NSOpenPanel()
-        seletor.title = "Escolher áudio"
-        seletor.prompt = "Transcrever"
+        seletor.title = String(localized: "Escolher áudio")
+        seletor.prompt = String(localized: "Transcrever")
         seletor.allowsMultipleSelection = false
         seletor.canChooseDirectories = false
         seletor.allowedContentTypes = FormatosAudio.tipos
@@ -265,7 +270,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
             let controlador = NSHostingController(rootView: AjustesView(historico: .compartilhado))
             controlador.sizingOptions = []
             let janela = NSWindow(contentViewController: controlador)
-            janela.title = "Ajustes do TranscreveAI"
+            janela.title = String(localized: "Ajustes do TranscreveAI")
             janela.styleMask = [.titled, .closable]
             janela.setContentSize(AjustesView.tamanho)
             janela.isReleasedWhenClosed = false

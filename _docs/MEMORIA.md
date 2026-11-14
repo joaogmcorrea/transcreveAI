@@ -45,6 +45,68 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 6 — 14/11/2026 (Site pronto para subir ao servidor, v0.4.1)
+
+### Objetivo
+Pedido do owner: "deixe a landing page pronta para fazer deploy no meu servidor".
+
+### Descobertas
+- **O servidor é a Hostinger do Cutline** (LiteSpeed, lê `.htaccess`), atrás do Cloudflare; o Cutline fica em `public_html/cutline/` e é servido em `cutline.joaocorrea.design` (ver `Vibecoding/Cutline/_docs/SITE.md`). O Cutline sobe à mão o conteúdo de uma pasta gerada (`build.py` → `site/`); o TranscreveAI segue o mesmo caminho, com um zip para o "Extrair" do Gerenciador de Arquivos.
+- **Trocar a URL com `history.replaceState` muda a base dos caminhos relativos:** uma `<img src="cutline.png">` montada depois de ir de `/` para `/pt/` pediria `/pt/cutline.png`. Por isso a página fixa a raiz (`BASE`) na abertura e monta a imagem com o endereço completo. A imagem que já estava no HTML não é afetada (o endereço foi resolvido ao carregar).
+- **Imagem de compartilhamento sem gancho de teste:** o Chrome sem janela, pelo protocolo do DevTools (Node 24 tem `WebSocket` embutido), dá dois cliques de verdade (`Input.dispatchMouseEvent`) no áudio da mesa. A transcrição de exemplo leva 3,4 s, dentro dos 5 s de ativação do clique, então o "Copiado" aparece se a área de transferência for liberada (`Browser.grantPermissions` com `clipboardSanitizedWrite`). 960×504 a 1,25× dá 1200×630 no layout de computador (acima de 760 px).
+- **O `.ico` aceita PNG dentro:** dá para escrever o `favicon.ico` sem ImageMagick (cabeçalho de 6 bytes + 16 por imagem).
+
+### Decisões Tomadas
+- **Endereço `transcreveai.joaocorrea.design`**, no padrão do Cutline, confirmado pelo owner (14/11/2026). Mudar: `SITE` no `gerar.py` ou `--site`.
+- **Uma URL por idioma** (`/`, `/pt/`, `/es/`), como no Cutline. `/` (x-default) continua detectando o idioma (escolha salva, navegador); `/pt/` e `/es/` abrem no próprio idioma mesmo com outra escolha salva. Escolher no menu muda a URL.
+- **Sem redirecionamento para HTTPS no `.htaccess`:** com o Cloudflare em SSL "Flexible", entraria em laço; fica com o "Always Use HTTPS" do Cloudflare. **Sem CSP:** a página é toda inline, e o Cloudflare injeta o beacon do Web Analytics.
+- `_site/dist/` e o zip ficam fora do git; `_site/imagens/` entra (desenhá-las precisa do Chrome).
+- **Versão 0.4.1, não 0.5.0** (escolha do owner): a regra do CHANGELOG pediria subir o MINOR, mas o ROADMAP reserva a v0.5.0 para o trecho clicável e a exportação, e o CONTEXTO cita v0.6 (Whisper) e v0.8 (anel). Uma versão entre marcos usa o PATCH para não renumerar o plano.
+- **Link do site** no README e no campo "Website" do repositório (`gh repo edit --homepage`), pedido do owner.
+- **`xcodebuild -quiet` mostra "error: the following command failed with exit code 0"** quando um passo de compilação só emite avisos: não é falha (o build termina com código 0 e o app sai).
+
+### Problemas Conhecidos ou Riscos Futuros
+- O site fala de coisas que a v0.4.0 ainda não tem (app em três idiomas, clicar para copiar): publicar junto com a próxima versão.
+- O `.htaccess` não foi testado num LiteSpeed (só a sintaxe do Apache, que ele lê). Conferir os cabeçalhos com `curl -I` depois de subir.
+
+## Sessão 5 — 11/11/2026 (App em três idiomas e landing page)
+
+### Objetivo
+Pedido do owner: "deixe o app em ingles, portugues e espanhol" e "crie uma landing page para ele, similar à essa https://vorssaint.com porém incorporando um pouco do design system que usamos no cutline".
+
+### Descobertas
+- **vorssaint.com** é uma mesa de macOS inteira desenhada no navegador: barra de menus com o idioma (EN), ícones na mesa (Ajustes, Download, GitHub), Dock e a janela de Ajustes do app aberta, com barra lateral. No celular continua mesa, com os ícones e o Dock.
+- **Design system do site do Cutline:** `Vibecoding/Cutline/_design/site-design-system/` (README, `tokens.css`, `components.css`, `patterns.md`, `check.py`). O `check.py` aceita um HTML e confere tokens, cores e durações soltas; `/* check: allow */` libera uma linha.
+- **A Vinila é por domínio:** o kit do Adobe Fonts do Cutline (`jjn5pbx`) só vale para `cutline.joaocorrea.design` e `localhost` e não pode ser reaproveitado. Sem kit, a página mostra as fontes de reserva (Arial no tamanho da Vinila).
+- **O app não tem ícone próprio** (sem `Assets.xcassets`): a landing usa uma marca provisória (onda branca num quadrado violeta).
+- **Armadilha de layout:** numa janela `display: grid` com altura fixa, a linha implícita cresce com o conteúdo e a rolagem interna não acontece; precisa de `grid-template-rows: minmax(0, 1fr)`. Um `<span>` de barra precisa de `display: block` para a largura valer.
+- **Armadilha de arraste:** depois de soltar fora do próprio botão, o `click` não vem, e a trava que engole o clique do arraste ficava ligada e engolia o próximo clique. Solução: soltar a trava num `setTimeout(0)`.
+- **Painel do navegador em 2º plano:** a rolagem suave e as transições podem não andar; para conferir, rolar com `scrollTop` e ler o estado por JavaScript.
+- **Tradução do app:** `files/TranscreveAI/` é pasta sincronizada, então os `.xcstrings` entram no alvo sozinhos. Os literais do SwiftUI já eram extraídos pelo compilador; faltavam os `String` em variável, enums, `NSMenuItem`, `NSOpenPanel`, dicas e acessibilidade (agora com `String(localized:)`). O catálogo precisa de valores `pt-BR` explícitos (iguais às chaves): sem eles não sai `pt-BR.lproj` e quem tem "pt-BR, en" veria inglês. O pacote TranscreveMotores ganhou `defaultLocalization: "pt-BR"` e catálogo próprio (`bundle: .module`); o CLI `transcrever` mostra os erros no idioma do sistema.
+- **Idioma escolhido pelo macOS:** (pt-BR, en) dá português; (en-BR, pt-BR) dá inglês; es-MX dá espanhol; só francês dá pt-BR (a região de desenvolvimento). **O Mac do owner lista en-BR primeiro**: o app vai aparecer em inglês para ele; para manter em português, Ajustes do Sistema › Geral › Idioma e Região › Aplicativos › TranscreveAI › Português. Decimais e horas seguem a região do Mac, não só o idioma ("3,4 s" com inglês num Mac com região Brasil).
+- **Info.plist:** não há textos de permissão; o único texto traduzível é o tipo de documento "Áudio" (`InfoPlist.xcstrings`). Os catálogos foram conferidos por um script que cruza as chaves extraídas pelo compilador com as traduções e os especificadores (no scratchpad da sessão, não no repositório).
+
+### Decisões Tomadas
+- **Landing = uma mesa de macOS** (primeira versão, substituída no mesmo dia pelo redesenho abaixo).
+- **Bolinha vermelha:** fica vermelha porque é assim no app (exceção ao "nada de vermelho" do Cutline).
+- **Arquivo de verdade solto na página:** não é lido nem enviado; o painel diz que é só uma demonstração e oferece o download.
+- **Idioma do app:** segue o macOS (sem seletor no app), com o português como língua de origem do catálogo. No seletor de idioma do áudio, os nomes ficam no próprio idioma (Português, English, Español), como no seletor do sistema; só "Auto" é traduzido.
+- **Copiar (11/11/2026, owner):** clicar no texto copia tudo e o aviso "Copiado" aparece por 2 s (app, site e GIFs). Escolha: o texto deixou de ser selecionável, porque o clique da seleção e o clique de copiar brigariam. O "Clique para copiar" fica no rodapé, não sobre o texto (no canto, cobria a primeira linha). No navegador do painel, a API da área de transferência é negada: o site usa `execCommand("copy")` primeiro, no clique, e a API como reserva.
+- **Espanhol:** "tu Mac", nunca "la Mac"/"esta Mac" (mesma regra do Cutline: nada de artigo antes de "Mac"); "la app" no feminino; "tú".
+
+### Redesenho do site, a pedido do owner (11/11/2026)
+- O owner não quer landing tradicional (hero, argumentos, seções): quer **a tela de um Mac que se usa**, com mensagens sutis, como o vorssaint.com. A primeira versão misturava os dois (janela de "Ajustes" com hero e seções) e foi refeita.
+- **O que tem:** barra de menus (o app da frente muda: Finder, TextEdit, TranscreveAI), ícone do app com o menu do botão direito, idioma (EN/PT/ES) e relógio; arquivos na mesa (TranscreveAI.dmg baixa de verdade, dois áudios, Leia-me no TextEdit); Finder com Recentes, Aplicativos, Mesa, Documentos e Downloads; Dock com o download do DMG, os Ajustes do app (engrenagem; reabre o app se ele foi fechado), GitHub, Buy Me a Coffee (bloco amarelo com uma xícara, leva a buymeacoffee.com/joaocorrea; rótulo nos três idiomas), a pilha de Downloads em leque (arrastar um áudio dela abre o painel sozinho) e, à direita dela, o Cutline (abre o site dele). Sem Finder nem Lixo no Dock, a pedido do owner (11/11/2026); o Finder continua no "Escolher áudio" e no "Mostrar no Finder" dos Ajustes.
+- **O app imitado:** painel com o "…" (Copiar ao terminar, Som, Abrir ao arrastar, Abrir ao iniciar, Procurar atualizações, Ajustes, Sair), menus de modelo e idioma, Recentes e "Ver tudo" com busca, clicar na área abre o Finder em modo "Escolher áudio", Ajustes como os do app (os interruptores valem na demonstração), "Procurar atualizações" com o alerta do Sparkle, Sair tira o ícone da barra e o Dock abre de novo. Apple Speech leva o dobro do tempo e mostra a prévia ao vivo. Arquivo que não é áudio solto no ícone dá o erro do app.
+- **Do design system do Cutline, só** o papel de parede (o KV) e as cores dos ícones; o resto é macOS (o violeta como cor de interface "não tem nada a ver com o macOS", disse o owner). Sem Vinila, então o kit de fonte deixou de ser pendência.
+- **Armadilha:** um `id` repetido entre o sprite de ícones (`<symbol id="clock">`) e um elemento (`#clock`) fez o relógio sumir: o `querySelector` achou o símbolo primeiro. Conferir ids duplicados ao mexer na página.
+
+- **Armadilha do Dock no celular (11/11/2026):** o desenho da pasta (58 px) é mais largo que o bloco da pilha (44 px no celular). Num `display: grid` ele vazava só para a direita e encostava no Cutline. Agora o bloco é `flex` centrado e a pasta `flex: none`, o que divide o excesso para os dois lados. O Dock tem `width: max-content` e os ícones `flex: none`, para nunca espremer. Com 7 ícones, de 372 px para baixo o Dock usa ícones de 40 px; acima disso, 46 px no celular e 56 px no computador. Conferido em 320, 360, 375, 768 e 1440 px.
+
+### Problemas Conhecidos ou Riscos Futuros
+- O site ainda não tem endereço. Não tem imagem de compartilhamento (`og:image`) nem uma URL por idioma (`/pt/`, `/es/` com `hreflang`), como a do Cutline. *(14/11/2026: resolvido pelo `_site/gerar.py`, Sessão 6; endereço `transcreveai.joaocorrea.design`, confirmado pelo owner.)*
+- A landing já fala do app em três idiomas: publicar junto com a versão que traz a tradução.
+
 ## Sessão 4 — 10/11/2026 (Transcrição, histórico e Ajustes, v0.4.0)
 
 > **Depois da release** *(10/11/2026)*: README em inglês, licença MIT e GIFs do README. Os GIFs são **desenhados** (`_dev/gifs/animacoes.swift`), não gravados: gravar a tela mostraria a mesa, as janelas e os ícones do usuário, e simular arrastes exigiria permissão de Acessibilidade. O owner pediu "estilo video-tutorial flat". Um GIF de 1200 px com *dither* `sierra2_4a` ficou com 3,3 MB; com `bayer:bayer_scale=5` e 128 cores, 2 MB, sem faixas visíveis nas sombras (`dither=none` mostra faixas). Cuidado no desenho: `NSGraphicsContext(bitmapImageRep:)` já desenha em pontos; aplicar a escala 2× de novo dobra tudo. *(11/11/2026)* O owner pediu os GIFs **todos em inglês**, não só as legendas: menus, Finder, painel, nomes de arquivo e transcrições. O README diz que o app real é em português. Ao mudar textos, conferir com `QUADRO` se o parágrafo não quebra em 3 linhas (o painel cresce e cobre mais da cena).

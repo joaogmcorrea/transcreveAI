@@ -498,7 +498,8 @@ struct Demo {
 enum Conteudo {
     case vazio(arrastando: CGFloat)
     case trabalhando(Demo, fracao: CGFloat)
-    case pronto(Demo, revelar: CGFloat)
+    /// `aviso`: o "Copied" que aparece por 2 s embaixo do painel depois de copiar (0 a 1).
+    case pronto(Demo, revelar: CGFloat, aviso: CGFloat = 0)
 }
 
 let larguraDoPainel: CGFloat = 380
@@ -517,7 +518,7 @@ func alturaInterna(_ c: Conteudo) -> CGFloat {
     switch c {
     case .vazio: 30 + 12 + 188 + 12 + 22
     case .trabalhando: 34 + 12 + 29 + 12 + 30
-    case .pronto(let demo, _): 34 + 12 + alturaDosParagrafos(demo) + 12 + 24
+    case .pronto(let demo, _, _): 34 + 12 + alturaDosParagrafos(demo) + 12 + 24
     }
 }
 
@@ -590,7 +591,7 @@ func conteudo(_ c: Conteudo, _ r: CGRect) {
               fonte(11.5), Cor.cinza)
         _ = botaoPequeno("Cancel", simbolo: nil, direita: r.maxX, y: dica + 3)
 
-    case .pronto(let demo, let revelar):
+    case .pronto(let demo, let revelar, let aviso):
         cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · transcribed in \(demo.tempo) · Parakeet v3")
         let caixaDoTexto = CGRect(x: r.minX, y: r.minY + 46, width: r.width, height: alturaDosParagrafos(demo))
         caixa(caixaDoTexto, raio: 12, Cor.preto.a(0.05))
@@ -610,10 +611,17 @@ func conteudo(_ c: Conteudo, _ r: CGRect) {
         let linha = caixaDoTexto.maxY + 12
         simbolo("arrow.uturn.backward", x: r.minX + 7, y: linha + 11, tamanho: 11, Cor.tinta, peso: .medium)
         texto("New", x: r.minX + 19, y: linha + 11, fonte(13), Cor.tinta)
-        let copiado = saida(fase(Double(revelar), 0.7, 1))
-        camada(copiado) {
-            let b = botaoPequeno("Copied", simbolo: "checkmark", direita: r.maxX, y: linha + 1)
-            _ = b
+        // O texto já foi copiado ao terminar: o aviso "Copied" aparece por 2 s, embaixo e no centro (como no app).
+        if aviso > 0 {
+            let f = fonte(12.5, .medium)
+            let w = medir("Copied", f).width + 42
+            let pilula = CGRect(x: r.midX - w / 2, y: linha - 1 + (1 - saida(aviso)) * 6, width: w, height: 26)
+            camada(aviso) {
+                comSombra(raio: 8, y: 3, alfa: 0.18) { caixa(pilula, raio: 13, Cor.branco) }
+                borda(pilula, raio: 13, Cor.preto.a(0.1))
+                simbolo("checkmark", x: pilula.minX + 17, y: pilula.midY, tamanho: 11, Cor.tinta, peso: .semibold)
+                texto("Copied", x: pilula.minX + 28, y: pilula.midY, f, Cor.tinta)
+            }
         }
     }
 }
@@ -714,7 +722,7 @@ func soltar(_ t: Double) {
         painel(abertura: 1, .trabalhando(reuniao, fracao: 1), para: .pronto(reuniao, revelar: 0),
                transicao: fase(t, 6.35, 6.7))
     } else {
-        painel(abertura: 1, .pronto(reuniao, revelar: revelar))
+        painel(abertura: 1, .pronto(reuniao, revelar: revelar, aviso: fase(t, 7.2, 7.45) * (1 - fase(t, 9.2, 9.5))))
     }
 
     let p = ponto([
@@ -761,7 +769,7 @@ func arrastarDoDock(_ t: Double) {
         painel(abertura: 1, .trabalhando(entrevista, fracao: 1), para: .pronto(entrevista, revelar: 0),
                transicao: fase(t, 6.45, 6.8))
     } else {
-        painel(abertura: 1, .pronto(entrevista, revelar: revelar))
+        painel(abertura: 1, .pronto(entrevista, revelar: revelar, aviso: fase(t, 7.3, 7.55) * (1 - fase(t, 9.3, 9.6))))
     }
 
     let item = posicoesDoLeque[1]

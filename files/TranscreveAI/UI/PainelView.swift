@@ -45,12 +45,21 @@ struct PainelView: View {
             case .trabalhando(let trabalho):
                 Andamento(trabalho: trabalho, cancelar: estado.cancelar)
             case .pronto(let transcricao):
-                Resultado(transcricao: transcricao, nota: estado.notaDoModelo, novo: estado.limpar)
+                Resultado(transcricao: transcricao, nota: estado.notaDoModelo, copiar: estado.copiarResultado, novo: estado.limpar)
             case .erro(let mensagem):
                 Falha(mensagem: mensagem, tentarDeNovo: estado.tentarDeNovo, novo: estado.limpar)
             }
         }
         .padding(14)
+        .overlay(alignment: .bottom) {
+            if estado.mostrandoCopiado {
+                AvisoCopiado()
+                    .padding(.bottom, 12)
+                    .transition(.opacity.combined(with: .offset(y: 6)))
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: estado.mostrandoCopiado)
         .overlay {
             // Com um arquivo na tela não há área tracejada: o painel inteiro vira o alvo.
             if arrastando && estado.arquivo != nil { soltarPorCima }
@@ -130,7 +139,7 @@ struct PainelView: View {
             if let data = transcricao.doHistorico {
                 partes.append(Historico.quando(data))
             } else {
-                partes.append("transcrito em \(Self.segundos(transcricao.segundos))")
+                partes.append(String(localized: "transcrito em \(Self.segundos(transcricao.segundos))"))
             }
             partes.append(transcricao.motor.nome)
         default:
@@ -141,9 +150,10 @@ struct PainelView: View {
         return partes.joined(separator: " · ")
     }
 
+    /// "3,4 s" (ou "3.4 s", conforme o formato de números do Mac); de um minuto para cima, "1:05".
     static func segundos(_ valor: TimeInterval) -> String {
         if valor >= 60 { return FormatosAudio.formatar(duracao: valor) }
-        let numero = valor.formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "pt_BR")))
+        let numero = valor.formatted(.number.precision(.fractionLength(1)))
         return "\(numero) s"
     }
 
@@ -301,10 +311,12 @@ private struct Andamento: View {
 
     private var titulo: String {
         switch trabalho.etapa {
-        case .convertendo: "Convertendo o áudio…"
+        case .convertendo: String(localized: "Convertendo o áudio…")
         case .preparandoModelo:
-            trabalho.baixando != nil ? "Baixando o \(trabalho.motor.nome) (uma vez só)…" : "Preparando o \(trabalho.motor.nome)…"
-        case .transcrevendo: "Transcrevendo…"
+            trabalho.baixando != nil
+                ? String(localized: "Baixando o \(trabalho.motor.nome) (uma vez só)…")
+                : String(localized: "Preparando o \(trabalho.motor.nome)…")
+        case .transcrevendo: String(localized: "Transcrevendo…")
         }
     }
 
@@ -320,8 +332,9 @@ private struct Andamento: View {
 private struct Resultado: View {
     let transcricao: EstadoApp.Transcricao
     let nota: String?
+    let copiar: () -> Void
     let novo: () -> Void
-    @State private var copiadoAgora = false
+    @State private var sobre = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -333,6 +346,7 @@ private struct Resultado: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.05)))
             } else {
+                // Clicar no texto copia tudo (pedido do owner): no lugar do botão "Copiar tudo".
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(Array(transcricao.paragrafos.enumerated()), id: \.offset) { _, paragrafo in
@@ -349,12 +363,19 @@ private struct Resultado: View {
                             }
                         }
                     }
-                    .textSelection(.enabled)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: copiar)
                 }
                 .frame(maxHeight: 312)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.05)))
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(sobre ? 0.08 : 0.05)))
+                .onHover { dentro in withAnimation(.easeOut(duration: 0.15)) { sobre = dentro } }
+                .pointerStyle(.link)
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint(Text("Clique para copiar"))
+                .accessibilityAction(.default, copiar)
             }
 
             if let nota {
@@ -370,23 +391,29 @@ private struct Resultado: View {
                 }
                 .buttonStyle(.borderless)
                 Spacer()
-                if !transcricao.paragrafos.isEmpty {
-                    Button {
-                        EstadoApp.copiarTexto(transcricao.paragrafos)
-                        copiadoAgora = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { copiadoAgora = false }
-                    } label: {
-                        if copiadoAgora || transcricao.copiado {
-                            Label("Copiado", systemImage: "checkmark")
-                        } else {
-                            Label("Copiar tudo", systemImage: "doc.on.doc")
-                        }
-                    }
-                    .controlSize(.small)
-                    .help(transcricao.copiado ? "O texto já está na área de transferência; clique para copiar de novo" : "Copiar o texto inteiro")
+                // Com o mouse sobre o texto, no lugar onde ficava o botão "Copiar tudo".
+                if sobre {
+                    Label("Clique para copiar", systemImage: "doc.on.doc")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
                 }
             }
         }
+    }
+}
+
+/// "Copiado" por 2 s, embaixo no painel, depois de copiar um texto (clique no texto, histórico ou ao terminar).
+private struct AvisoCopiado: View {
+    var body: some View {
+        Label("Copiado", systemImage: "checkmark")
+            .font(.system(size: 12.5, weight: .medium))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.regularMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+            .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
+            .accessibilityAddTraits(.isStaticText)
     }
 }
 

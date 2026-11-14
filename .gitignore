@@ -27,3 +27,7 @@ models/
 # Testes: áudios e resultados (contêm conteúdo pessoal)
 _testes/audios/
 _testes/resultados/
+
+# Site: gerado por _site/gerar.py (a fonte é _site/index.html + _site/imagens/)
+/_site/dist/
+/_site/*.zip

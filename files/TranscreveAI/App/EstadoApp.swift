@@ -39,6 +39,9 @@ final class EstadoApp {
     private(set) var notaDoModelo: String?
     /// O painel mostra a lista completa do histórico em vez da área de arrastar.
     var mostrandoHistorico = false
+    /// O aviso "Copiado" que aparece por 2 s no painel depois de copiar um texto.
+    private(set) var mostrandoCopiado = false
+    private var tarefaDoCopiado: Task<Void, Never>?
 
     enum Fim { case pronto, erro }
 
@@ -60,7 +63,7 @@ final class EstadoApp {
     @discardableResult
     func receber(_ urls: [URL]) -> Bool {
         guard let url = urls.first(where: FormatosAudio.aceita) else {
-            aviso = urls.isEmpty ? nil : "Esse arquivo não parece ser um áudio."
+            aviso = urls.isEmpty ? nil : String(localized: "Esse arquivo não parece ser um áudio.")
             return false
         }
         tarefa?.cancel()
@@ -92,7 +95,7 @@ final class EstadoApp {
     func abrir(_ resumo: Historico.Resumo) {
         guard let paragrafos = Historico.compartilhado.paragrafos(de: resumo.id) else {
             Historico.compartilhado.apagar(resumo.id)
-            aviso = "Não encontrei essa transcrição no histórico."
+            aviso = String(localized: "Não encontrei essa transcrição no histórico.")
             return
         }
         tarefa?.cancel()
@@ -110,7 +113,26 @@ final class EstadoApp {
     func copiar(_ resumo: Historico.Resumo) -> Bool {
         guard let paragrafos = Historico.compartilhado.paragrafos(de: resumo.id) else { return false }
         Self.copiarTexto(paragrafos)
+        avisarCopiado()
         return true
+    }
+
+    /// Copia o texto inteiro da transcrição aberta (clique no texto do painel).
+    func copiarResultado() {
+        guard case .pronto(let transcricao) = fase, !transcricao.paragrafos.isEmpty else { return }
+        Self.copiarTexto(transcricao.paragrafos)
+        avisarCopiado()
+    }
+
+    /// Mostra o "Copiado" por 2 s; uma cópia nova reinicia a contagem.
+    func avisarCopiado() {
+        mostrandoCopiado = true
+        tarefaDoCopiado?.cancel()
+        tarefaDoCopiado = Task {
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else { return }
+            mostrandoCopiado = false
+        }
     }
 
     static func copiarTexto(_ paragrafos: [Segmento]) {
@@ -163,6 +185,7 @@ final class EstadoApp {
             let copiado = copiarSePedido(paragrafos)
             Historico.compartilhado.adicionar(arquivo: arquivo ?? alvo, paragrafos: paragrafos, motor: motor, segundos: segundos)
             fase = .pronto(Transcricao(paragrafos: paragrafos, motor: motor, segundos: segundos, copiado: copiado))
+            if copiado { avisarCopiado() }
             tocarSom("Glass")
             aoMudarProgresso?(nil, .pronto)
         } catch is CancellationError {
@@ -251,22 +274,25 @@ final class EstadoApp {
 
     private func baixarParakeetEmSegundoPlano() {
         guard notaDoModelo == nil else { return }
-        notaDoModelo = "Baixando o Parakeet v3 (470 MB) para as próximas transcrições…"
+        notaDoModelo = String(localized: "Baixando o Parakeet v3 (470 MB) para as próximas transcrições…")
         Task {
             do {
                 try await MotorParakeet.compartilhado.preparar { [weak self] preparo in
                     Task { @MainActor in
                         switch preparo {
                         case .baixando(let fracao):
-                            self?.notaDoModelo = "Baixando o Parakeet v3 para as próximas transcrições… \(Int(fracao * 100))%"
+                            self?.notaDoModelo = String(
+                                localized: "Baixando o Parakeet v3 para as próximas transcrições… \(Int(fracao * 100))%")
                         case .compilando:
-                            self?.notaDoModelo = "Preparando o Parakeet v3 para as próximas transcrições…"
+                            self?.notaDoModelo = String(
+                                localized: "Preparando o Parakeet v3 para as próximas transcrições…")
                         }
                     }
                 }
                 notaDoModelo = nil
             } catch {
-                notaDoModelo = "Não consegui baixar o Parakeet v3; o Apple Speech continua transcrevendo."
+                notaDoModelo = String(
+                    localized: "Não consegui baixar o Parakeet v3; o Apple Speech continua transcrevendo.")
             }
         }
     }

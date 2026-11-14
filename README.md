@@ -6,7 +6,9 @@ Drop an audio file on the icon and the text shows up in seconds. Your audio neve
 
 **[Download the latest version (DMG)](https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg)** · [All releases](https://github.com/joaogmcorrea/transcreveAI/releases) · Requires macOS 26 or later
 
-> The app's interface is in Brazilian Portuguese (the animations below show it in English). It transcribes Portuguese, English and Spanish, and Parakeet detects the language on its own.
+**Website: [transcreveai.joaocorrea.design](https://transcreveai.joaocorrea.design)**, a Mac desktop in your browser where you can try the app before installing it.
+
+> The app comes in English, Portuguese and Spanish and follows your Mac's language. It transcribes all three, and Parakeet detects the language on its own.
 
 ![Click the menu bar icon, drop an audio file on the panel and get the text, already copied](_dev/gifs/soltar.gif)
 
@@ -27,7 +29,7 @@ There are four ways to hand it an audio file:
 
 ![Dragging an audio file from a Dock stack opens the panel by itself](_dev/gifs/dock.gif)
 
-You can close the panel while it works. The icon shows the progress, plays a sound when it's done, and keeps a red dot until you look at the result. The text is already on the clipboard ("Copiar ao terminar", on by default).
+You can close the panel while it works. The icon shows the progress, plays a sound when it's done, and keeps a red dot until you look at the result. The text is already on the clipboard ("Copy When Done", on by default).
 
 ![With the panel closed, the menu bar icon shows the progress, a check mark and then a red dot](_dev/gifs/painel-fechado.gif)
 
@@ -36,7 +38,7 @@ Right-click the icon for Check for Updates, Settings, Open at Login and Quit. Pr
 ## Features
 
 - **On-device transcription:** nothing goes to the cloud.
-- **Text in paragraphs**, each with its timestamp. The text is selectable, and there's a "Copy all" button.
+- **Text in paragraphs**, each with its timestamp. Click the text to copy all of it; a "Copied" toast confirms it.
 - **History** with search: reopen, copy or delete past transcriptions (a trash button shows on hover). By default, history is erased when you shut down or restart the Mac. You can change that in Settings › History.
 - **Model and language** pickers at the bottom of the panel and in Settings. Languages: Auto, Portuguese, English and Spanish.
 - **Automatic updates** through [Sparkle](https://sparkle-project.org), verified with EdDSA signatures.
@@ -114,6 +116,7 @@ open files/TranscreveAI.xcodeproj
 | `files/` | The app: Xcode project, SwiftUI/AppKit code, FFmpeg and licenses |
 | `files/Pacotes/TranscreveMotores/` | The transcription engines (a Swift package you can run from the terminal) |
 | `_dev/` | Release and FFmpeg build scripts, the notes for each version, and the README animations (`_dev/gifs/`) |
+| `_site/` | The [website](https://transcreveai.joaocorrea.design): a Mac desktop where you can try the app (`index.html`), and `gerar.py`, which builds it for the server |
 | `_docs/` | Context, decisions, changelog and roadmap (in Portuguese) |
 | `_testes/benchmark/` | The engine benchmark |
 

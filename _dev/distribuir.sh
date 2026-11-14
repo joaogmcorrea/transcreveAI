@@ -7,8 +7,9 @@
 #       ./_dev/distribuir.sh --publicar  → também cria a release v<versão> no GitHub com eles e a cópia TranscreveAI.dmg
 #                                           (gh logado; as notas da release vêm de dist/notas-<versão>.md, se existir)
 #
-# Janela de atualização: dist/novidades-<versão>.<idioma>.md (pt-BR, en…), em Markdown e em tom de conversa, vão para o
-# appcast; o Sparkle mostra a do idioma do Mac. As notas técnicas ficam na release, com o link no fim do texto.
+# Janela de atualização: dist/novidades-<versão>.<idioma>.md (pt-BR, en, es: os idiomas do app), em Markdown e em tom de
+# conversa, vão para o appcast, cada uma com o seu xml:lang. O Sparkle mostra a do idioma do Mac; se nenhuma bater, a en
+# (quando existe). Só com a pt-BR, todo mundo vê a pt-BR. As notas técnicas ficam na release, com o link no fim do texto.
 #
 # Contagem por versão: cada app procura atualização em appcast-<a versão dele>.xml (SUFeedURL do TranscreveAI-Info.plist).
 # O GitHub conta os downloads de cada arquivo da release: dá quantos apps de cada versão procuram atualização, sem nada

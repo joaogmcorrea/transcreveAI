@@ -49,16 +49,19 @@ public enum ErroDeTranscricao: LocalizedError, Sendable {
     case idiomaIndisponivel(String)
     case modeloIndisponivel(String)
 
+    /// No idioma do app que usa o pacote (Localizable.xcstrings deste alvo).
     public var errorDescription: String? {
         switch self {
         case .formatoNaoSuportado(let extensao):
-            "Não consegui abrir esse arquivo (.\(extensao))."
+            String(localized: "Não consegui abrir esse arquivo (.\(extensao)).", bundle: .module)
         case .conversaoFalhou(let detalhe):
-            "Não consegui converter o áudio. \(detalhe)".trimmingCharacters(in: .whitespaces)
+            String(localized: "Não consegui converter o áudio. \(detalhe)", bundle: .module)
+                .trimmingCharacters(in: .whitespaces)
         case .idiomaIndisponivel(let idioma):
-            "O Apple Speech não tem o idioma \(idioma)."
+            String(localized: "O Apple Speech não tem o idioma \(idioma).", bundle: .module)
         case .modeloIndisponivel(let detalhe):
-            "O modelo não está pronto. \(detalhe)".trimmingCharacters(in: .whitespaces)
+            String(localized: "O modelo não está pronto. \(detalhe)", bundle: .module)
+                .trimmingCharacters(in: .whitespaces)
         }
     }
 }

@@ -27,7 +27,7 @@ public enum AudioDeEntrada {
         try await converter(url, para: destino, ffmpeg: ffmpeg)
         guard let duracao = duracaoNativa(destino) else {
             try? FileManager.default.removeItem(at: destino)
-            throw ErroDeTranscricao.conversaoFalhou("O arquivo convertido ficou vazio.")
+            throw ErroDeTranscricao.conversaoFalhou(String(localized: "O arquivo convertido ficou vazio.", bundle: .module))
         }
         return AudioPronto(url: destino, duracao: duracao, temporario: true)
     }

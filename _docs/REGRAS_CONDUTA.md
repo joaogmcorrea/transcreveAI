@@ -31,6 +31,6 @@ Estas regras devem ser seguidas estritamente durante o desenvolvimento.
 - **Velocidade é requisito:** o padrão de transcrição é sempre o modelo mais rápido medido no Mac ("Automático"). Qualquer mudança que deixe a transcrição mais lenta precisa ser justificada e aprovada.
 - **UI mínima:** o painel principal mostra só a área de arrastar, o modelo, o idioma e os recentes. Opções novas vão para o menu "…" ou para Ajustes, nunca para a tela principal sem aprovação.
 - **Mockup antes de tela nova:** mudanças visuais relevantes começam por um mockup aprovado pelo usuário.
-- **Interface em pt-BR:** todos os textos visíveis no app em português do Brasil.
+- **Interface em pt-BR, inglês e espanhol** *(14/11/2026; antes, só pt-BR)*: o português é a língua de origem do catálogo de textos; todo texto novo visível no app ganha a tradução em inglês e em espanhol (pedido do owner, 11/11/2026).
 - **Uso próprio, sem sandbox:** não cortar funções que dependem de Acessibilidade (atalho global, colar no app) para caber na App Store.
 - **Chave das atualizações:** `_privado/chave-atualizacoes-ed25519.txt` nunca entra no git, em mensagens ou em logs. Sem ela, os apps instalados não aceitam versões novas. Toda release publicada tem número maior que a anterior, porque o Sparkle compara o `CFBundleVersion`.

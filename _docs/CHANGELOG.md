@@ -18,9 +18,29 @@
 *(Mantenha esta seção no topo para registrar mudanças que ainda não geraram uma nova versão. Assim que fechar a versão, renomeie esse bloco para o número da versão e crie um novo `[Unreleased]` aqui em cima).*
 
 ### Adicionado
+- 
+
+### Alterado
+- 
+
+### Corrigido
+- 
+
+---
+
+## [0.4.1] - 14/11/2026
+
+### Adicionado
 - README do repositório no GitHub, em inglês (só no repositório, o app não muda): o que faz, como usar, motores e velocidade, formatos, privacidade, instalar e compilar.
 - Licença MIT do projeto (`LICENSE` na raiz), pedido do owner. As licenças de terceiros continuam em `files/LICENCAS.md`.
-- GIFs animados no README, em estilo de vídeo-tutorial flat (pedido do owner): soltar e transcrever, arrastar da pilha do Dock e painel fechado com o progresso no ícone. Desenhados quadro a quadro por `_dev/gifs/animacoes.swift`, sem gravação de tela. Tudo em inglês, legendas e interface desenhada (pedido do owner, 11/11/2026); o README avisa que o app é em português.
+- GIFs animados no README, em estilo de vídeo-tutorial flat (pedido do owner): soltar e transcrever, arrastar da pilha do Dock e painel fechado com o progresso no ícone. Desenhados quadro a quadro por `_dev/gifs/animacoes.swift`, sem gravação de tela. Tudo em inglês, legendas e interface desenhada (pedido do owner, 11/11/2026).
+- App em inglês, português e espanhol (pedido do owner, 11/11/2026): segue o idioma do macOS, ou o idioma escolhido para o app em Ajustes do Sistema › Geral › Idioma e Região. Sem teste à mão.
+- Site em `_site/` (pedido do owner, 11/11/2026): uma mesa de macOS que se pode usar, no estilo do vorssaint.com, sem cara de landing page. Arquivos de exemplo na mesa, no Finder e na pilha de Downloads do Dock para arrastar até o ícone da barra; o painel, os menus, os Ajustes, o histórico e o Sair imitam o app. No Dock: baixar o DMG, os Ajustes do app, GitHub, Buy Me a Coffee (buymeacoffee.com/joaocorrea), a pilha de Downloads e o Cutline (à direita da pilha); no celular, o Dock cabe sem espremer os ícones a partir de 320 px. Do design system do Cutline, só o papel de parede e as cores dos ícones; o resto segue o macOS. Inglês, português e espanhol. Ainda não está no ar.
+- Site pronto para subir ao servidor (pedido do owner, 14/11/2026): `_site/gerar.py` monta `_site/dist/` e `_site/transcreveai-site.zip` com uma URL por idioma (`/`, `/pt/`, `/es/`), cada uma com título, descrição, `canonical`, `hreflang`, Open Graph e dados estruturados próprios; imagem de compartilhamento por idioma (a própria página com uma transcrição pronta), favicons, `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` e `.htaccess` para a Hostinger. Trocar o idioma na barra de menus da página muda a URL. Imagens desenhadas por `_site/imagens.mjs` (Chrome sem janela). Passos em `_site/PUBLICAR.md`. Endereço: transcreveai.joaocorrea.design (escolhido pelo owner).
+- Link do site no README e no campo "Website" do repositório no GitHub (pedido do owner, 14/11/2026).
+
+### Alterado
+- Copiar o texto (pedido do owner, 11/11/2026): clicar na transcrição copia tudo (com o mouse em cima, aparece "Clique para copiar" no rodapé) e o aviso "Copiado" aparece por 2 s embaixo no painel, também ao copiar pelo histórico e ao terminar com "Copiar ao terminar". Saiu o botão "Copiar tudo"/"Copiado"; o texto do resultado deixou de ser selecionável. No app e no site; GIFs do README refeitos. Sem teste à mão no app.
 
 ### Corrigido
 - 

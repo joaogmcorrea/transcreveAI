@@ -143,13 +143,14 @@ final class Historico {
         return decodificador
     }()
 
-    /// "Hoje, 10:12", "Ontem, 18:03" ou "9 nov, 14:20".
+    /// "Hoje, 10:12", "Ontem, 18:03" ou "9 de nov, 14:20" (em inglês, "Today, 10:12 AM" ou "Nov 9, 2:20 PM"):
+    /// idioma do app, formato de data e hora do Mac.
     static func quando(_ data: Date) -> String {
         let calendario = Calendar.current
-        let hora = data.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).locale(Locale(identifier: "pt_BR")))
-        if calendario.isDateInToday(data) { return "Hoje, \(hora)" }
-        if calendario.isDateInYesterday(data) { return "Ontem, \(hora)" }
-        let dia = data.formatted(.dateTime.day().month(.abbreviated).locale(Locale(identifier: "pt_BR")))
+        let hora = data.formatted(.dateTime.hour().minute())
+        if calendario.isDateInToday(data) { return String(localized: "Hoje, \(hora)") }
+        if calendario.isDateInYesterday(data) { return String(localized: "Ontem, \(hora)") }
+        let dia = data.formatted(.dateTime.day().month(.abbreviated))
         return "\(dia.replacingOccurrences(of: ".", with: "")), \(hora)"
     }
 }

@@ -20,7 +20,7 @@
 - [x] Progresso no ícone quando o painel está fechado, ✓ e bolinha vermelha de "não visto", e som ao terminar.
 
 ## v0.5.0 — Resultado e exportação
-- [ ] Lista de trechos clicável (copia o trecho). ~~"Copiar tudo"~~ feito na v0.4.
+- [ ] Lista de trechos clicável (copia o trecho). ~~"Copiar tudo"~~ feito na v0.4; *(11/11/2026)* o botão saiu: clicar no texto copia tudo, com o aviso "Copiado" por 2 s (lançado na v0.4.1, 14/11/2026, junto com o app em inglês, português e espanhol e o site).
 - [ ] Exportar `.txt` e `.md` (⌘E / ⇧⌘E).
 - [x] Histórico local e lista de recentes no painel (adiantado na v0.4, pedido do owner), com busca e Ajustes para guardar ou limpar.
 

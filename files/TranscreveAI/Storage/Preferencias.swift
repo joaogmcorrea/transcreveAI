@@ -37,7 +37,7 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
 
     var nome: String {
         switch self {
-        case .automatico: "Automático"
+        case .automatico: String(localized: "Automático")
         case .parakeet: "Parakeet v3"
         case .apple: "Apple Speech"
         case .whisperTurbo: "Whisper Large v3 Turbo"
@@ -47,7 +47,7 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
     /// O texto do botão no rodapé do painel.
     var rotuloCurto: String {
         switch self {
-        case .automatico: "Mais rápido"
+        case .automatico: String(localized: "Mais rápido")
         case .parakeet: "Parakeet v3"
         case .apple: "Apple Speech"
         case .whisperTurbo: "Whisper Turbo"
@@ -56,10 +56,10 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
 
     var descricao: String {
         switch self {
-        case .automatico: "Usa sempre o mais rápido instalado. Hoje: Parakeet v3."
-        case .parakeet: "O mais rápido · download único (470 MB)"
-        case .apple: "Nativo do macOS · sem download"
-        case .whisperTurbo: "Alternativa de qualidade · em breve"
+        case .automatico: String(localized: "Usa sempre o mais rápido instalado. Hoje: Parakeet v3.")
+        case .parakeet: String(localized: "O mais rápido · download único (470 MB)")
+        case .apple: String(localized: "Nativo do macOS · sem download")
+        case .whisperTurbo: String(localized: "Alternativa de qualidade · em breve")
         }
     }
 
@@ -91,9 +91,10 @@ enum IdiomaAudio: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Os idiomas aparecem no próprio idioma (como no seletor de idiomas do sistema); só o "Auto" é traduzido.
     var nome: String {
         switch self {
-        case .auto: "Auto"
+        case .auto: String(localized: "Auto")
         case .portugues: "Português"
         case .ingles: "English"
         case .espanhol: "Español"

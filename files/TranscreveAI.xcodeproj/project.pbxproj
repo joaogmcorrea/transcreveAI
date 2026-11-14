@@ -119,6 +119,8 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				"pt-BR",
+				en,
+				es,
 				Base,
 			);
 			mainGroup = 7C5A00000000000000000004;
@@ -179,7 +181,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -202,7 +204,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};

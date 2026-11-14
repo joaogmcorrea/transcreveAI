@@ -5,6 +5,8 @@ import PackageDescription
 
 let package = Package(
     name: "TranscreveMotores",
+    // As mensagens de erro saem no idioma do app (Localizable.xcstrings do alvo): pt-BR, en e es.
+    defaultLocalization: "pt-BR",
     platforms: [.macOS("26.0")],
     products: [
         .library(name: "TranscreveMotores", targets: ["TranscreveMotores"]),
@@ -18,7 +20,8 @@ let package = Package(
     targets: [
         .target(
             name: "TranscreveMotores",
-            dependencies: [.product(name: "FluidAudio", package: "FluidAudio")]
+            dependencies: [.product(name: "FluidAudio", package: "FluidAudio")],
+            resources: [.process("Localizable.xcstrings")]
         ),
         .executableTarget(
             name: "transcrever",

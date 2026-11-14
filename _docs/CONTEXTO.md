@@ -15,15 +15,22 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 ### Fluxo Principal
 1. **Usuário:** arrasta um áudio para o ícone da barra de menus ou para o painel. Também pode usar "Abrir arquivo…", a seleção do Finder ou o anel de ações.
 2. **App:** decodifica o áudio (AVFoundation e, para formatos não nativos, FFmpeg) e transcreve com o modelo ativo ("Automático" = o mais rápido instalado). O progresso aparece no painel e no ícone da barra, com prévia do texto ao vivo.
-3. **Usuário:** clica num trecho para copiar, usa "Copiar tudo" ou exporta `.txt` / `.md`. Com "Copiar ao terminar" ligado (padrão), o texto já vai para a área de transferência e uma notificação avisa que terminou.
+3. **Usuário:** clica no texto para copiar tudo (aviso "Copiado" por 2 s; o botão "Copiar tudo" saiu em 11/11/2026), clica num trecho para copiar (planejado) ou exporta `.txt` / `.md`. Com "Copiar ao terminar" ligado (padrão), o texto já vai para a área de transferência e uma notificação avisa que terminou.
 4. **Anel de ações:** segurando ⌥ Espaço em qualquer app, abre um menu radial em volta do cursor (inspirado no Actions Ring do Logi Options+) com: transcrever a seleção do Finder, abrir arquivo, copiar a última transcrição, colar no app atual, exportar `.md` e exportar `.txt`. Soltar um áudio no centro do anel também transcreve.
 5. **Ciclo de Vida:** as transcrições ficam num histórico local ("Recentes" no painel). Nada é enviado para a nuvem. Política de retenção do histórico a definir.
 
 ---
 
-## Status Atual (10/11/2026)
+## Status Atual (14/11/2026)
 
 > **Agentes de IA:** Atualizem esta seção a cada nova fase completada, versão lançada ou marco importante atingido. Adicionem a nova fase no topo e movam as anteriores para baixo.
+
+### Fase: v0.4.1 — App em três idiomas, clicar para copiar e site (14/11/2026)
+- **App em inglês, português e espanhol** *(pedido do owner)*: segue o idioma do macOS. Catálogo de textos com o português como origem. Sem teste à mão.
+- **Clicar no texto copia** *(pedido do owner)*: "Clique para copiar" com o mouse em cima e o aviso "Copiado" por 2 s, no lugar do botão "Copiar tudo". O texto do resultado deixou de ser selecionável. Compilado, sem teste à mão.
+- **Site** em `_site/` *(pedido do owner)*: uma mesa de macOS que se pode usar (como o vorssaint.com), não uma landing tradicional. Conferido no navegador (1440×900 e celular, nos três idiomas). **Pronto para subir** *(14/11/2026)*: `python3 _site/gerar.py` gera `_site/transcreveai-site.zip`, com `/`, `/pt/` e `/es/`, imagens de compartilhamento, favicons, sitemap e `.htaccess`; passos em `_site/PUBLICAR.md`. Endereço `transcreveai.joaocorrea.design`, confirmado pelo owner *(14/11/2026)*. Publicar junto com esta versão. Link do site no README e no campo "Website" do repositório no GitHub *(14/11/2026, pedido do owner)*.
+- **Número 0.4.1, não 0.5.0** *(14/11/2026, escolha do owner)*: o ROADMAP segue com a v0.5.0 para o trecho clicável e a exportação.
+- **Release publicada no GitHub** (v0.4.1, 14/11/2026): os apps na v0.4.0 e na v0.3.0 recebem o aviso do Sparkle. **Sem teste à mão:** os três idiomas e o clicar para copiar no app. No Mac do owner (en-BR primeiro na lista de idiomas), o app passa a abrir em inglês.
 
 ### Fase: v0.4.0 — Transcrição, histórico e Ajustes (10/11/2026)
 - **Transcreve de verdade:** "Automático" = Parakeet v3 (224× tempo real num áudio de 3 min no M4 Pro). Na primeira vez, o Apple Speech transcreve enquanto o Parakeet baixa (470 MB) e compila (cerca de 14 s, uma vez por app). O Parakeet fica carregado na memória depois disso e é aquecido na abertura do app. Escolher o Apple Speech à mão mostra a prévia ao vivo. O Whisper Turbo aparece como "em breve" (v0.6).
@@ -80,6 +87,7 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
 - **Ambiente de Deploy:** **fora da App Store e sem sandbox**, porque o atalho global e o "Colar no app" precisam da permissão de Acessibilidade. Instalador DMG no GitHub Releases (`joaogmcorrea/transcreveAI`), atualizado pelo Sparkle 2 com a mesma lógica do Cutline *(10/11/2026)*.
 - **Processo de Deploy:** `./_dev/distribuir.sh --publicar` depois do commit e da tag da versão (skill `versionamento`). O script gera o DMG assinado com EdDSA, o `appcast.xml` e as cópias `appcast-<versão>.xml`, e cria a release. Quem atualiza os apps instalados é a **release**, não o push. A chave privada fica em `_privado/` e **não pode se perder**: sem ela, os apps instalados não aceitam novas versões *(10/11/2026)*.
 - **Versionamento local:** git (commit + tag `vX.Y.Z` via `_docs/versionar.sh`).
+- **Site:** `_site/index.html` é a fonte (prévia local: `python3 -m http.server --directory _site`, *11/11/2026*). `python3 _site/gerar.py` monta o site publicável em `_site/dist/` e no zip (fora do git); sobe para a mesma Hostinger do Cutline (LiteSpeed, `.htaccess`), atrás do Cloudflare, em `public_html/transcreveai/`. Endereço `https://transcreveai.joaocorrea.design`, confirmado pelo owner (constante `SITE`; outro: `--site`). Passo a passo em `_site/PUBLICAR.md` *(14/11/2026)*.
 - **Licença:** MIT, em nome de João Corrêa (`LICENSE` na raiz), escolhida pelo owner. Os componentes de terceiros mantêm as suas (`files/LICENCAS.md`) *(10/11/2026)*.
 
 ### Design System / UI
@@ -88,7 +96,8 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
   - `--surface`: painel `#262628` no escuro e `#F6F6F8` no claro (materiais nativos no app real).
   - `--bg`: segue a aparência do sistema (claro/escuro).
 - **Tipografia:** `SF Pro` (fonte do sistema) para a interface e `SF Mono` para prévias de arquivo.
-- **Estética e Práticas:** minimalismo extremo. Uma única área de arrastar. Segue o modo claro/escuro do sistema. A tela principal mostra só arrastar, modelo, idioma e recentes; o resto fica no menu "…" ou em Ajustes. Textos em pt-BR.
+- **Estética e Práticas:** minimalismo extremo. Uma única área de arrastar. Segue o modo claro/escuro do sistema. A tela principal mostra só arrastar, modelo, idioma e recentes; o resto fica no menu "…" ou em Ajustes. Textos em pt-BR, inglês e espanhol, conforme o idioma do macOS *(11/11/2026; antes, só pt-BR)*.
+- **Site:** imita o macOS escuro (fonte do sistema, azul de destaque do macOS, botões de janela coloridos, vidro, menus e Dock). Do design system do site do Cutline (`Vibecoding/Cutline/_design/site-design-system/`), só o papel de parede (o KV: preto, brilho violeta e a grade do tapete) e as cores dos ícones, a pedido do owner *(11/11/2026)*.
 
 ---
 
@@ -129,6 +138,7 @@ TranscreveAI/
 │   ├── audios/            # Áudios de teste (fora do git)
 │   └── resultados/        # Saídas e relatório do benchmark (fora do git)
 ├── _dev/                  # Distribuição (distribuir.sh, dist/), a receita do FFmpeg (ffmpeg/compilar.sh) e os GIFs do README (gifs/, 10/11/2026)
+├── _site/                 # Site: index.html (fonte, a mesa de macOS), cutline.png, gerar.py → dist/ + zip (fora do git), imagens.mjs → imagens/, PUBLICAR.md (14/11/2026)
 ├── _privado/              # Chave EdDSA das atualizações (fora do git; fazer backup)
 └── files/                 # ← ARQUIVOS DO APP AQUI
     ├── TranscreveAI.xcodeproj
@@ -156,7 +166,7 @@ TranscreveAI/
 | `_docs/SCRIPTS-LOGIC.md` | Mapeamento exato de onde está rodando cada função, scripts base e endpoints. |
 | `_docs/ROADMAP.md` | Lista completa e ordenada de milestones futuros do projeto. |
 | `_docs/REGRAS_CONDUTA.md` | Restrições rígidas específicas do projeto (ex: "Nunca usar shadow DOM"). |
-| `README.md` | Apresentação pública do projeto no GitHub, **em inglês** (pedido do owner; a interface do app e os docs seguem em pt-BR): o que faz, como usar, motores, formatos, privacidade, instalar e compilar. Atualizar quando uma versão mudar o que o app faz *(10/11/2026)*. |
+| `README.md` | Apresentação pública do projeto no GitHub, **em inglês** (pedido do owner; os docs seguem em pt-BR; o app passou a ter inglês e espanhol em 11/11/2026): o que faz, como usar, motores, formatos, privacidade, instalar e compilar. Atualizar quando uma versão mudar o que o app faz *(10/11/2026)*. |
 
 ---
 

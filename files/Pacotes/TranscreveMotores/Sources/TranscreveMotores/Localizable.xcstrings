@@ -1,0 +1,116 @@
+{
+  "sourceLanguage" : "pt-BR",
+  "strings" : {
+    "Não consegui abrir esse arquivo (.%@)." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t open this file (.%@)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pude abrir este archivo (.%@)."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não consegui abrir esse arquivo (.%@)."
+          }
+        }
+      }
+    },
+    "Não consegui converter o áudio. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t convert the audio. %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pude convertir el audio. %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não consegui converter o áudio. %@"
+          }
+        }
+      }
+    },
+    "O Apple Speech não tem o idioma %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Speech doesn’t support the language %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Speech no tiene el idioma %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Apple Speech não tem o idioma %@."
+          }
+        }
+      }
+    },
+    "O arquivo convertido ficou vazio." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The converted file came out empty."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo convertido quedó vacío."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo convertido ficou vazio."
+          }
+        }
+      }
+    },
+    "O modelo não está pronto. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model isn’t ready. %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo no está listo. %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O modelo não está pronto. %@"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TranscreveAI: fast, on-device audio transcription for the Mac</title>
+<meta name="description" content="A menu bar app that turns audio into text in seconds, on your Mac. Try it right here: drag an audio file to the icon at the top of the screen.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="TranscreveAI">
+<meta property="og:description" content="Fast, on-device audio transcription in the Mac menu bar. Free and open source.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238057fb'/%3E%3Cstop offset='1' stop-color='%234a0ff9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='15' fill='url(%23g)'/%3E%3Cpath d='M14 28v8M20.5 22v20M27 15v34M33.5 23v18M40 18v28M46.5 25v14M53 29v6' stroke='%23fff' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* A página é uma mesa de macOS que se pode usar. Do design system do site do Cutline, só o papel de parede
+   (o KV: preto, brilho violeta e a grade do tapete) e as cores dos ícones; o resto imita o macOS escuro. */
+:root {
+  /* Design system do site do Cutline (tokens.css 1.0.0) */
+  --black: #000000;
+  --violet: #4a0ff9;
+  --violet-light: #8057fb;
+  --zinc-100: #f4f4f5;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --glow-hero: radial-gradient(55% 45% at 50% 0%, rgba(74, 15, 249, 0.5), transparent 70%),
+               radial-gradient(45% 40% at 50% 78%, rgba(128, 87, 251, 0.28), transparent 70%);
+  --mask-hero: radial-gradient(70% 50% at 50% 24%, #000, rgba(0, 0, 0, 0.3) 45%, transparent 78%);
+  --tile-app:  linear-gradient(145deg, var(--violet-light), var(--violet) 72%);
+
+  /* macOS, aparência escura */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.16);
+  --label: rgba(255, 255, 255, 0.9);
+  --label-2: rgba(235, 235, 245, 0.62);
+  --label-3: rgba(235, 235, 245, 0.34);
+  --sep: rgba(255, 255, 255, 0.1);
+  --fill: rgba(255, 255, 255, 0.09);
+  --fill-2: rgba(255, 255, 255, 0.05);
+  --fill-3: rgba(255, 255, 255, 0.14);
+  --window: rgba(32, 32, 35, 0.86);
+  --sidebar: rgba(255, 255, 255, 0.05);
+  --material: rgba(36, 36, 40, 0.8);
+  --menu: rgba(44, 44, 48, 0.82);
+  --menubar: rgba(0, 0, 0, 0.24);
+  --dock: rgba(255, 255, 255, 0.11);
+  --paper: #f5f5f7;
+  --red: #ff5f57; --yellow: #febc2e; --green: #28c840; --dot: #ff3b30;
+  --m4a: #ff9500; --opus: #af52de; --mp3: #ff2d55; --pdf: #ff453a; --txt: #8e8e93;
+  --shadow-win: 0 0 0 0.5px rgba(0, 0, 0, 0.7), 0 28px 70px rgba(0, 0, 0, 0.55), 0 8px 22px rgba(0, 0, 0, 0.35);
+  --shadow-menu: 0 0 0 0.5px rgba(0, 0, 0, 0.6), 0 14px 36px rgba(0, 0, 0, 0.45);
+  --blur: blur(30px) saturate(1.8);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: cubic-bezier(0.34, 1.42, 0.64, 1);
+  --mb-h: 30px;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { background: var(--black); color: var(--label); font: 13px/1.38 var(--font); letter-spacing: -0.003em; -webkit-font-smoothing: antialiased; overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: default; text-align: inherit; }
+a { color: inherit; }
+svg { display: block; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+::selection { background: rgba(10, 132, 255, 0.45); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.i { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── Mesa e papel de parede (o KV do Cutline) ─── */
+.mac { position: fixed; inset: 0; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; }
+.wallpaper { position: absolute; inset: 0; z-index: -1; background: var(--glow-hero), var(--black); overflow: hidden; }
+.wallpaper::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); background-size: 48px 48px; -webkit-mask-image: var(--mask-hero); mask-image: var(--mask-hero); }
+.waves { position: absolute; left: -10%; width: 120%; top: 34%; height: 60%; animation: drift 18s ease-in-out infinite alternate; }
+.waves path { fill: none; stroke-linecap: round; }
+@keyframes drift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+
+/* ─── Barra de menus ─── */
+.menubar { position: absolute; inset: 0 0 auto; height: var(--mb-h); z-index: 70; display: flex; align-items: center; padding: 0 8px 0 14px; background: var(--menubar); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); font-size: 13px; font-weight: 500; color: var(--label); }
+.mb-app { font-weight: 700; padding: 0 10px 0 4px; }
+.mb-menus { display: flex; }
+.mb-menus span { padding: 4px 9px; border-radius: 6px; }
+.mb-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.mb-item { position: relative; display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; }
+button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); }
+.mb-item .i { font-size: 15px; }
+.clock { padding: 0 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.status[hidden] { display: none; }
+.status .glyph { position: relative; width: 18px; height: 18px; }
+.status .glyph > svg { position: absolute; inset: 0; width: 18px; height: 18px; transition: opacity 0.2s ease, transform 0.35s var(--spring); }
+.status .ring, .status .tick { opacity: 0; transform: scale(0.6); }
+.status .ring circle { fill: none; stroke-width: 2.2; }
+.status .ring .track { stroke: rgba(255, 255, 255, 0.25); }
+.status .ring .fill { stroke: var(--label); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.status.work .wave, .status.done .wave { opacity: 0; transform: scale(0.6); }
+.status.work .ring, .status.done .tick { opacity: 1; transform: none; }
+.status .pct { display: none; font-variant-numeric: tabular-nums; min-width: 2.2em; }
+.status.show-pct .pct { display: inline; }
+.status .dot { position: absolute; top: 1px; left: 13px; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.6); transform: scale(0); transition: transform 0.35s var(--spring); }
+.status.badge .dot { transform: scale(1); }
+
+/* ─── Menus (barra, painel, botão direito) ─── */
+.menu { position: absolute; z-index: 90; min-width: 200px; max-width: 320px; padding: 5px; border-radius: 12px; background: var(--menu); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--shadow-menu); border: 0.5px solid rgba(255, 255, 255, 0.14); font-size: 13px; }
+.menu[hidden] { display: none; }
+.menu .mi { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: center; gap: 4px 6px; width: 100%; min-height: 24px; padding: 3px 10px 3px 6px; border-radius: 7px; }
+.menu .mi .ck { font-size: 12px; opacity: 0; stroke-width: 2.4; }
+.menu .mi[aria-checked="true"] .ck { opacity: 1; }
+.menu .mi small { grid-column: 2 / 4; margin-top: -3px; font-size: 11px; color: var(--label-2); }
+.menu .mi kbd { font: inherit; color: var(--label-3); }
+.menu .mi:not([disabled]):hover, .menu .mi:not([disabled]):focus { background: var(--accent); color: #fff; outline: none; }
+.menu .mi:not([disabled]):hover small, .menu .mi:not([disabled]):focus small, .menu .mi:not([disabled]):hover kbd, .menu .mi:not([disabled]):focus kbd { color: rgba(255, 255, 255, 0.8); }
+.menu .mi[disabled], .menu .mi[disabled] small { color: var(--label-3); }
+.menu hr { border: 0; height: 1px; margin: 5px 8px; background: var(--sep); }
+.menu .head { padding: 4px 10px 2px 28px; font-size: 11px; font-weight: 600; color: var(--label-3); }
+
+/* ─── Ícones na mesa ─── */
+.desktop { position: absolute; top: calc(var(--mb-h) + 12px); right: 10px; bottom: 100px; display: flex; flex-direction: column; flex-wrap: wrap-reverse; align-content: flex-start; gap: 6px 4px; }
+.item { display: grid; justify-items: center; align-content: start; gap: 3px; width: 112px; padding: 4px 2px; font-size: 12px; font-weight: 500; line-height: 1.25; text-align: center; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); touch-action: none; -webkit-touch-callout: none; }
+.item .ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 10px; }
+.item .nm { max-width: 100%; padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.item.sel .ic { background: rgba(255, 255, 255, 0.14); }
+.item.sel .nm { background: var(--accent); text-shadow: none; }
+.item:focus-visible { outline: none; }
+.item:focus-visible .nm { background: var(--accent); }
+.item.lifted { opacity: 0.4; }
+
+/* Desenhos dos ícones */
+.doc { position: relative; width: 44px; height: 56px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45)); }
+.doc svg { width: 44px; height: 56px; overflow: visible; }
+.doc .p { fill: var(--paper); }
+.doc .f { fill: var(--zinc-300); }
+.doc .g { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.doc .b { position: absolute; left: 4px; right: 4px; bottom: 6px; height: 13px; border-radius: 3px; display: grid; place-items: center; font: 800 8px/1 var(--font); letter-spacing: 0.04em; color: #fff; text-transform: uppercase; text-shadow: none; }
+.tile { display: grid; place-items: center; border-radius: 22.5%; box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.25), 0 3px 8px rgba(0, 0, 0, 0.4); overflow: hidden; }
+.t-app { background: var(--tile-app); }
+.t-dark { background: linear-gradient(180deg, #2c2c30, #111113); color: #fff; }
+.t-gear { background: linear-gradient(180deg, var(--zinc-400), var(--zinc-600)); color: #fff; }
+.t-coffee { background: linear-gradient(180deg, #ffe44d, #ffd400); color: #1c1c1e; }
+.png { display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35)); }
+.dmg { width: 50px; height: 42px; border-radius: 9px; background: linear-gradient(180deg, #fafafa, #d4d4d8); box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 -4px 0 rgba(0, 0, 0, 0.08); display: grid; place-items: center; }
+.dmg .t-app { box-shadow: none; }
+.folder { position: relative; width: 58px; height: 46px; }
+.folder::before { content: ""; position: absolute; left: 2px; top: 0; width: 24px; height: 10px; border-radius: 4px 4px 0 0; background: var(--violet-light); }
+.folder::after { content: ""; position: absolute; inset: 6px 0 0; border-radius: 6px; background: linear-gradient(180deg, var(--violet-light), var(--violet)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+.folder .i { position: absolute; z-index: 1; left: 50%; top: 58%; transform: translate(-50%, -50%); font-size: 20px; color: rgba(255, 255, 255, 0.9); stroke-width: 2.2; }
+
+/* Fantasma durante o arraste */
+.ghost { position: fixed; left: 0; top: 0; z-index: 120; pointer-events: none; margin: -28px 0 0 -22px; }
+.ghost > * { transform: rotate(-4deg) scale(1.05); }
+.mac.dragging, .mac.dragging * { cursor: grabbing !important; }
+
+/* ─── Janelas ─── */
+.window { position: absolute; z-index: 20; display: flex; flex-direction: column; border-radius: 16px; background: var(--window); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--shadow-win); border: 0.5px solid rgba(255, 255, 255, 0.16); overflow: hidden; transition: opacity 0.18s ease, transform 0.3s var(--ease); }
+.window[hidden] { display: none; }
+.window.opening { opacity: 0; transform: scale(0.96); }
+.window.inactive .lights i { background: rgba(255, 255, 255, 0.16); }
+.window.zoomed { left: 8px !important; top: calc(var(--mb-h) + 8px) !important; width: calc(100vw - 16px) !important; height: calc(100dvh - var(--mb-h) - 100px) !important; }
+.lights { display: flex; gap: 8px; padding: 0 2px; }
+.lights i { position: relative; display: grid; place-items: center; width: 12px; height: 12px; border-radius: 50%; }
+.lights i:nth-child(1) { background: var(--red); }
+.lights i:nth-child(2) { background: var(--yellow); }
+.lights i:nth-child(3) { background: var(--green); }
+.lights i svg { width: 8px; height: 8px; stroke: rgba(0, 0, 0, 0.6); stroke-width: 3; fill: none; stroke-linecap: round; opacity: 0; }
+.lights:hover i svg { opacity: 1; }
+.titlebar { position: relative; display: flex; align-items: center; height: 38px; padding: 0 12px; flex: none; }
+.titlebar .ttl { position: absolute; left: 80px; right: 80px; text-align: center; font-weight: 600; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+
+/* Finder */
+.finder { top: calc(var(--mb-h) + 64px); left: clamp(16px, 9vw, 160px); width: min(720px, calc(100vw - 32px)); height: min(430px, calc(100dvh - 190px)); flex-direction: row; }
+.f-side { width: 176px; flex: none; margin: 8px; padding: 12px 8px 8px; border-radius: 12px; background: var(--sidebar); border: 0.5px solid rgba(255, 255, 255, 0.06); }
+.f-side .lights { margin: 0 0 22px 4px; }
+.f-side h4 { margin: 0 8px 4px; font-size: 11px; font-weight: 600; color: var(--label-3); }
+.f-side button { display: flex; align-items: center; gap: 8px; width: 100%; height: 28px; padding: 0 8px; border-radius: 7px; }
+.f-side button .i { font-size: 15px; color: var(--accent); }
+.f-side button.on { background: var(--fill-3); }
+.f-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.f-bar { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 14px 0 6px; flex: none; }
+.f-bar > .lights { display: none; }
+.f-bar .nav { display: flex; padding: 2px; border-radius: 999px; background: var(--fill-2); color: var(--label-2); }
+.f-bar .nav span { display: grid; place-items: center; width: 28px; height: 26px; }
+.f-bar .nav .i { font-size: 15px; }
+.f-bar b { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-bar .sp { flex: 1; }
+.f-bar .pill { display: flex; gap: 2px; padding: 2px; border-radius: 999px; background: var(--fill-2); color: var(--label-2); }
+.f-bar .pill span { display: grid; place-items: center; width: 30px; height: 26px; border-radius: 999px; }
+.f-bar .pill span.on { background: var(--fill-3); color: var(--label); }
+.f-bar .pill .i { font-size: 15px; }
+.f-grid { flex: 1; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); align-content: start; justify-items: center; gap: 10px 4px; padding: 10px 14px 18px; }
+.f-grid .item { color: var(--label); text-shadow: none; }
+.f-empty { grid-column: 1 / -1; padding-top: 60px; text-align: center; color: var(--label-3); }
+.f-open { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 0.5px solid var(--sep); flex: none; }
+.f-open[hidden] { display: none; }
+.f-open .ttl2 { flex: 1; color: var(--label-2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 24px; padding: 0 12px; border-radius: 999px; background: var(--fill-3); font-size: 13px; font-weight: 500; white-space: nowrap; text-decoration: none; }
+.btn:hover { background: rgba(255, 255, 255, 0.2); }
+.btn.blue { background: var(--accent); color: #fff; }
+.btn.blue:hover { background: #2a94ff; }
+.btn[disabled] { opacity: 0.4; pointer-events: none; }
+.btn .i { font-size: 13px; }
+
+/* TextEdit (Leia-me) */
+.textedit { top: calc(var(--mb-h) + 96px); left: clamp(16px, 26vw, 460px); width: min(520px, calc(100vw - 32px)); height: min(470px, calc(100dvh - 210px)); }
+.te-body { flex: 1; overflow: auto; margin: 0 6px 6px; padding: 22px 26px 28px; border-radius: 10px; background: rgba(0, 0, 0, 0.35); font-size: 14px; line-height: 1.55; user-select: text; -webkit-user-select: text; cursor: text; }
+.te-body h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.te-body h2 { font-size: 14px; font-weight: 700; margin: 18px 0 4px; }
+.te-body ol { padding-left: 20px; }
+.te-body a { color: var(--accent); text-decoration: none; }
+.te-body a:hover { text-decoration: underline; }
+.te-body .muted { color: var(--label-2); margin-top: 8px; }
+
+/* Ajustes do TranscreveAI */
+.settings { top: calc(var(--mb-h) + 50px); left: calc(50% - 240px); width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 150px); }
+.form { overflow: auto; padding: 4px 18px 18px; display: grid; gap: 16px; }
+.form h3 { margin: 0 10px 6px; font-size: 13px; font-weight: 700; }
+.group { border-radius: 10px; background: var(--fill-2); border: 0.5px solid rgba(255, 255, 255, 0.07); }
+.row { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 6px 12px; }
+.row + .row { border-top: 0.5px solid var(--sep); }
+.row .l { flex: 1; }
+.row .v { color: var(--label-2); }
+.switch { position: relative; width: 32px; height: 19px; border-radius: 999px; background: var(--fill-3); transition: background-color 0.2s ease; flex: none; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); transition: transform 0.25s var(--spring); }
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(13px); }
+.popup { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px 0 10px; border-radius: 6px; background: var(--fill-3); }
+.popup .i { font-size: 10px; stroke-width: 2.4; color: var(--label-2); }
+
+/* Alerta */
+.alert { top: calc(var(--mb-h) + 90px); left: calc(50% - 150px); width: 300px; padding: 20px 18px 16px; text-align: center; align-items: center; gap: 8px; border-radius: 22px; }
+.alert .tile { margin-bottom: 4px; }
+.alert b { font-size: 14px; }
+.alert p { font-size: 12px; color: var(--label-2); }
+.alert .acts { display: flex; gap: 8px; width: 100%; margin-top: 8px; }
+.alert .acts .btn { flex: 1; height: 28px; }
+
+/* ─── O painel do TranscreveAI (imita o PainelView do app) ─── */
+.panel { position: absolute; z-index: 80; top: calc(var(--mb-h) + 6px); left: 0; width: 380px; padding: 14px; border-radius: 16px; background: var(--material); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--shadow-win); border: 0.5px solid rgba(255, 255, 255, 0.16); opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top center; transition: opacity 0.16s ease, transform 0.3s var(--ease), visibility 0s linear 0.16s; user-select: text; -webkit-user-select: text; }
+.panel.on { opacity: 1; visibility: visible; transform: none; transition: opacity 0.16s ease, transform 0.3s var(--ease); }
+.p-head { display: flex; align-items: center; gap: 10px; min-height: 28px; }
+.p-head .t { flex: 1; min-width: 0; }
+.p-head b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-head small { display: block; font-size: 11.5px; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.more { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; color: var(--label-2); }
+.more:hover, .more.on { background: var(--fill); }
+.more .i { font-size: 17px; }
+.drop { display: grid; place-items: center; align-content: center; gap: 12px; width: 100%; min-height: 188px; margin-top: 12px; border-radius: 14px; border: 2px dashed rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.03); text-align: center; transition: background-color 0.15s ease, border-color 0.15s ease; }
+.drop .ico { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: var(--fill); color: var(--label-2); transition: background-color 0.15s ease, color 0.15s ease; }
+.drop .ico .i { font-size: 27px; stroke-width: 1.6; }
+.drop strong { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+.drop span span { display: block; margin-top: 4px; font-size: 12.5px; color: var(--label-2); }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop.over .ico { background: var(--accent); color: #fff; }
+.p-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.mini { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 6px; background: var(--fill); font-size: 12px; white-space: nowrap; }
+.mini:hover, .mini.on { background: var(--fill-3); }
+.mini .i { font-size: 12px; }
+.mini .cv { font-size: 9px; color: var(--label-2); stroke-width: 2.6; }
+.recent { margin-top: 12px; }
+.recent .hd { display: flex; align-items: center; padding: 0 8px 4px; }
+.recent .hd span { flex: 1; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--label-2); }
+.recent .hd button { font-size: 11.5px; color: var(--accent); }
+.hrow { display: flex; align-items: center; gap: 2px; padding-right: 4px; border-radius: 10px; }
+.hrow:hover { background: var(--fill-2); }
+.hrow .open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 0 6px 8px; }
+.hrow .open > span:last-child { min-width: 0; }
+.hrow .wv { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--fill); color: var(--label-2); flex: none; }
+.hrow .wv .i { font-size: 13px; }
+.hrow b { display: block; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hrow small { display: block; font-size: 11.5px; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.hrow .ib { display: grid; place-items: center; width: 30px; height: 30px; color: var(--label-2); border-radius: 7px; }
+.hrow .ib:hover { color: var(--label); }
+.hrow .ib .i { font-size: 14px; }
+.hrow .del { opacity: 0; }
+.hrow:hover .del, .hrow .del:focus-visible { opacity: 1; }
+.search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 10px 0 8px; padding: 0 8px; border-radius: 8px; background: var(--fill-2); color: var(--label-2); }
+.search input { flex: 1; min-width: 0; font: inherit; color: var(--label); background: none; border: 0; outline: none; }
+.empty-note { padding: 24px 0; text-align: center; color: var(--label-2); }
+.work { margin-top: 14px; }
+.work .line { display: flex; justify-content: space-between; font-weight: 500; }
+.work .line span:last-child { color: var(--label-2); font-weight: 400; font-variant-numeric: tabular-nums; }
+.bar { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--fill); overflow: hidden; }
+.bar i { display: block; height: 100%; min-width: 6px; width: 0; border-radius: 3px; background: var(--accent); }
+.live { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fill-2); }
+.live span { display: block; margin-bottom: 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--label-2); }
+.live p { font-size: 13px; color: var(--label-2); min-height: 2.8em; }
+.tipline { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; font-size: 11.5px; color: var(--label-2); }
+.tipline p { flex: 1; }
+.text { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fill-2); display: grid; gap: 12px; max-height: min(300px, 46dvh); overflow-y: auto; }
+.tbox { position: relative; margin-top: 12px; border-radius: 12px; cursor: pointer; }
+.tbox .text { margin-top: 0; transition: background-color 0.15s ease; }
+.tbox:hover .text, .tbox:focus-visible .text { background: var(--fill); }
+.tbox:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.copyhint { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--label-2); opacity: 0; transition: opacity 0.15s ease; }
+.copyhint .i { font-size: 12px; }
+.panel:has(.tbox:hover) .copyhint, .panel:has(.tbox:focus-visible) .copyhint { opacity: 1; }
+.ptoast { position: absolute; left: 50%; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; background: rgba(62, 62, 68, 0.92); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 0.5px solid rgba(255, 255, 255, 0.16); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35); font-size: 12.5px; font-weight: 500; white-space: nowrap; opacity: 0; transform: translate(-50%, 6px); pointer-events: none; transition: opacity 0.2s ease, transform 0.3s var(--ease); }
+.ptoast.on { opacity: 1; transform: translate(-50%, 0); }
+.ptoast .i { font-size: 13px; stroke-width: 2.4; }
+.para { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 8px; animation: rise 0.6s var(--ease) both; animation-delay: var(--d, 0s); }
+.para time { padding-top: 1px; font-size: 11.5px; color: var(--label-2); font-variant-numeric: tabular-nums; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+.p-row { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+.p-row .sp { flex: 1; }
+.link { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 6px; border-radius: 6px; }
+.link:hover { background: var(--fill); }
+.link .i { font-size: 14px; }
+.msg { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fill-2); }
+.msg .i { font-size: 18px; color: var(--label-2); margin-top: 1px; }
+.msg p { flex: 1; }
+.msg small { display: block; margin-top: 4px; font-size: 12px; color: var(--label-2); }
+
+/* Balão de dica, como um popover do macOS */
+.bubble { position: absolute; z-index: 85; max-width: 240px; padding: 9px 12px; border-radius: 12px; background: var(--menu); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--shadow-menu); border: 0.5px solid rgba(255, 255, 255, 0.16); font-size: 12.5px; line-height: 1.35; opacity: 0; pointer-events: none; transform: translateY(-4px); transition: opacity 0.25s ease, transform 0.35s var(--ease); }
+.bubble.on { opacity: 1; transform: none; }
+.bubble b { display: block; font-weight: 600; }
+.bubble small { display: block; color: var(--label-2); font-size: 11.5px; }
+.bubble::before { content: ""; position: absolute; left: var(--ax, 50%); width: 12px; height: 12px; margin-left: -6px; background: inherit; border: inherit; transform: rotate(45deg); }
+.bubble.down::before { top: -6.5px; border-right: 0; border-bottom: 0; }
+.bubble.up::before { bottom: -6.5px; border-left: 0; border-top: 0; }
+
+/* ─── Dock ─── */
+.dock { position: absolute; left: 50%; bottom: 8px; z-index: 60; transform: translateX(-50%); width: max-content; display: flex; align-items: flex-end; gap: 6px; padding: 7px 8px; border-radius: 24px; background: var(--dock); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 0.5px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+.dk { position: relative; flex: none; display: grid; place-items: center; width: 56px; height: 56px; text-decoration: none; transition: transform 0.25s var(--spring); }
+.dk > .tile, .dk > .folder-tile, .dk > .png { width: 54px; height: 54px; }
+.dk .tile .i { font-size: 28px; stroke-width: 1.9; }
+.dk .run { position: absolute; bottom: -6px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: rgba(255, 255, 255, 0.75); opacity: 0; }
+.dk.running .run { opacity: 1; }
+.dk .lbl { position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); padding: 4px 10px; border-radius: 7px; background: var(--menu); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 0.5px solid rgba(255, 255, 255, 0.14); box-shadow: var(--shadow-menu); font-size: 12.5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s ease; }
+@media (hover: hover) and (pointer: fine) { .dk:hover { transform: translateY(-6px) scale(1.1); } .dk:hover .lbl { opacity: 1; } }
+.dk:focus-visible .lbl { opacity: 1; }
+.dk[aria-expanded="true"] .lbl { opacity: 0 !important; }
+.dk.bounce { animation: bounce 0.55s ease-in-out 2; }
+@keyframes bounce { 50% { transform: translateY(-22px); } }
+.dock .sep { width: 1px; height: 46px; margin: 0 4px 5px; background: rgba(255, 255, 255, 0.2); }
+.folder-tile { display: flex; align-items: center; justify-content: center; }
+.folder-tile .folder { flex: none; transform: scale(0.88); }
+
+/* Pilha de Downloads aberta em leque */
+.fan { position: absolute; z-index: 75; inset: 0; pointer-events: none; }
+.fan .fi { position: absolute; display: flex; align-items: center; gap: 10px; width: auto; padding: 0; pointer-events: auto; opacity: 0; transform: translate(0, 30px) scale(0.5); transition: opacity 0.2s ease, transform 0.35s var(--ease); transition-delay: var(--d, 0s); }
+.fan.on .fi { opacity: 1; transform: none; }
+.fan .fi .ic { width: 54px; height: 60px; }
+.fan .fi .nm { order: -1; padding: 3px 10px; border-radius: 999px; background: rgba(30, 30, 34, 0.85); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); font-size: 12.5px; font-weight: 500; white-space: nowrap; color: #fff; text-shadow: none; }
+.fan .fi:hover .nm, .fan .fi:focus-visible .nm { background: var(--accent); }
+
+/* ─── Telas pequenas ─── */
+@media (max-width: 760px) {
+  :root { --mb-h: 34px; }
+  .mb-menus, .mb-item.deco { display: none; }
+  .desktop { right: 4px; }
+  .item { width: 100px; font-size: 11px; }
+  .item .ic { width: 58px; height: 58px; }
+  .window { left: 8px !important; right: 8px; width: auto !important; top: calc(var(--mb-h) + 8px) !important; max-height: calc(100dvh - var(--mb-h) - 100px); }
+  .finder, .textedit { height: calc(100dvh - var(--mb-h) - 100px); }
+  .f-side { display: none; }
+  .f-bar { padding-left: 12px; }
+  .f-bar > .lights { display: flex; margin-right: 4px; }
+  .f-bar .pill { display: none; }
+  .alert { left: calc(50% - 150px) !important; right: auto; width: 300px !important; }
+  .panel { left: 8px !important; right: 8px; width: auto; top: calc(var(--mb-h) + 4px); }
+  .dock { gap: 6px; padding: 6px 8px; border-radius: 20px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  .dk { width: 46px; height: 46px; }
+  .dk > .tile, .dk > .folder-tile, .dk > .png { width: 44px; height: 44px; }
+  .folder-tile .folder { transform: scale(0.72); }
+  .dk .tile .i { font-size: 23px; }
+  .dock .sep { height: 38px; margin: 0 3px 4px; }
+}
+
+/* Celulares bem estreitos: o Dock encolhe um pouco para caber com folga */
+@media (max-width: 371px) {
+  .dock { gap: 4px; padding: 5px 6px; }
+  .dk { width: 40px; height: 40px; }
+  .dk > .tile, .dk > .folder-tile, .dk > .png { width: 38px; height: 38px; }
+  .folder-tile .folder { transform: scale(0.62); }
+  .dk .tile .i { font-size: 20px; }
+  .dock .sep { height: 32px; margin: 0 2px 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Para leitores de tela e buscadores: o que a página mostra. -->
+<main class="sr-only">
+  <h1>TranscreveAI</h1>
+  <p>A free, open source menu bar app for macOS 26 or later that turns audio into text in seconds. Everything runs on your Mac. This page is a Mac desktop where you can try it: drag an audio file to the icon at the top of the screen.</p>
+  <p><a href="https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg">Download TranscreveAI</a> · <a href="https://github.com/joaogmcorrea/transcreveAI">Source code on GitHub</a></p>
+</main>
+
+<svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="wave" viewBox="0 0 24 24"><path d="M3.5 10.5v3M7 7.5v9M10.5 4.5v15M14 8.5v7M17.5 6v12M21 10v4" /></symbol>
+  <symbol id="tray" viewBox="0 0 24 24"><path d="M4 13h3l3 3h4l3 -3h3" /><path d="M4 13v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-5l-3 -8h-10z" /><path d="M12 4v7" /><path d="M9.5 8.5l2.5 2.5l2.5 -2.5" /></symbol>
+  <symbol id="dots" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3" /></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="M6 9l6 6l6 -6" /></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="M15 6l-6 6l6 6" /></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="M9 6l6 6l-6 6" /></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10" /></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><path d="M8 10a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" /><path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" /></symbol>
+  <symbol id="back" viewBox="0 0 24 24"><path d="M9 14l-4 -4l4 -4" /><path d="M5 10h11a4 4 0 1 1 0 8h-1" /></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></symbol>
+  <symbol id="bolt" viewBox="0 0 24 24"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" /></symbol>
+  <symbol id="mic" viewBox="0 0 24 24"><path d="M9 5a3 3 0 0 1 6 0v5a3 3 0 0 1 -6 0z" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M12 17v4" /></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M3.6 9h16.8" /><path d="M3.6 15h16.8" /><path d="M11.5 3a17 17 0 0 0 0 18" /><path d="M12.5 3a17 17 0 0 1 0 18" /></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></symbol>
+  <symbol id="apps" viewBox="0 0 24 24"><path d="M4 4h6v6h-6z" /><path d="M14 4h6v6h-6z" /><path d="M4 14h6v6h-6z" /><path d="M14 14h6v6h-6z" /></symbol>
+  <symbol id="desk" viewBox="0 0 24 24"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z" /><path d="M7 20h10" /><path d="M9 16v4" /><path d="M15 16v4" /></symbol>
+  <symbol id="docs" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></symbol>
+  <symbol id="dl" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M8 12l4 4l4 -4" /><path d="M12 8v8" /></symbol>
+  <symbol id="arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" /><path d="M18 13l-6 6" /><path d="M6 13l6 6" /></symbol>
+  <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h11" /><path d="M9 12h11" /><path d="M9 18h11" /><path d="M5 6v.01" /><path d="M5 12v.01" /><path d="M5 18v.01" /></symbol>
+  <symbol id="wifi" viewBox="0 0 24 24"><path d="M12 18h.01" stroke-width="3" /><path d="M9.17 15.17a4 4 0 0 1 5.66 0" /><path d="M6.34 12.34a8 8 0 0 1 11.31 0" /><path d="M3.52 9.52a12 12 0 0 1 16.97 0" /></symbol>
+  <symbol id="toggles" viewBox="0 0 24 24"><path d="M6 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M3 9a5 5 0 0 1 5 -5h8a5 5 0 0 1 0 10h-8a5 5 0 0 1 -5 -5" /><path d="M14 15a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M3 15a5 5 0 0 1 5 -5h8a5 5 0 0 1 0 10h-8a5 5 0 0 1 -5 -5" /></symbol>
+  <symbol id="github" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" /></symbol>
+  <symbol id="coffee" viewBox="0 0 24 24"><path d="M4.5 9h11v5a5 5 0 0 1 -5 5h-1a5 5 0 0 1 -5 -5z" /><path d="M15.5 10.5h1.5a2.5 2.5 0 0 1 0 5h-1.7" /><path d="M8 3.5c-.6 .7 -.6 1.6 0 2.3" /><path d="M11.5 3.5c-.6 .7 -.6 1.6 0 2.3" /></symbol>
+  <symbol id="gear" viewBox="0 0 24 24"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></symbol>
+  <symbol id="alert" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 8v4" /><path d="M12 16h.01" /></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></symbol>
+  <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14" /></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14" /><path d="M5 12h14" /></symbol>
+</defs></svg>
+
+<div class="mac" id="mac" data-lang="en">
+  <div class="wallpaper" aria-hidden="true">
+    <svg class="waves" viewBox="0 0 1440 600" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="wg1" x1="0" x2="1"><stop offset="0" stop-color="#8057fb" stop-opacity="0" /><stop offset="0.45" stop-color="#8057fb" stop-opacity="0.55" /><stop offset="1" stop-color="#4a0ff9" stop-opacity="0" /></linearGradient>
+        <linearGradient id="wg2" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0" /><stop offset="0.55" stop-color="#fff" stop-opacity="0.35" /><stop offset="1" stop-color="#fff" stop-opacity="0" /></linearGradient>
+      </defs>
+      <path d="M0 260 C 180 180, 320 340, 480 260 S 780 160, 960 250 S 1260 340, 1440 230" stroke="url(#wg1)" stroke-width="2.5" />
+      <path d="M0 300 C 200 220, 340 380, 520 300 S 800 200, 980 290 S 1280 380, 1440 280" stroke="url(#wg2)" stroke-width="1.5" />
+      <path d="M0 340 C 160 290, 360 410, 540 330 S 820 250, 1000 330 S 1300 410, 1440 320" stroke="url(#wg1)" stroke-width="1.2" />
+      <path d="M0 200 C 220 160, 380 280, 560 210 S 860 130, 1040 200 S 1300 260, 1440 180" stroke="url(#wg2)" stroke-width="1" />
+      <path d="M0 400 C 240 360, 400 470, 600 390 S 900 320, 1080 400 S 1320 460, 1440 380" stroke="url(#wg1)" stroke-width="0.8" />
+    </svg>
+  </div>
+
+  <header class="menubar">
+    <span class="mb-app" id="mb-app">Finder</span>
+    <span class="mb-menus" id="mb-menus" aria-hidden="true"></span>
+    <div class="mb-right">
+      <button class="mb-item status" id="status" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel" aria-label="TranscreveAI">
+        <span class="glyph">
+          <svg class="wave i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2"><use href="#wave"></use></svg>
+          <svg class="ring" viewBox="0 0 18 18" aria-hidden="true"><circle class="track" cx="9" cy="9" r="6.6" /><circle class="fill" cx="9" cy="9" r="6.6" stroke-dasharray="41.47" stroke-dashoffset="41.47" /></svg>
+          <svg class="tick i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 2.6"><use href="#check"></use></svg>
+          <i class="dot"></i>
+        </span>
+        <span class="pct" id="pct">0%</span>
+      </button>
+      <span class="mb-item deco" aria-hidden="true"><svg class="i"><use href="#wifi"></use></svg></span>
+      <button class="mb-item" id="lang-btn" aria-haspopup="menu" aria-label="Language"><span id="lang-code">EN</span></button>
+      <span class="mb-item deco" aria-hidden="true"><svg class="i"><use href="#toggles"></use></svg></span>
+      <span class="clock" id="mb-clock" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <div class="desktop" id="desktop" role="group" aria-label="Desktop"></div>
+
+  <!-- Finder -->
+  <section class="window finder" id="w-finder" hidden aria-labelledby="f-title">
+    <nav class="f-side">
+      <div class="lights" data-drag><i data-act="close"><svg viewBox="0 0 24 24"><use href="#x"></use></svg></i><i data-act="min"><svg viewBox="0 0 24 24"><use href="#minus"></use></svg></i><i data-act="zoom"><svg viewBox="0 0 24 24"><use href="#plus"></use></svg></i></div>
+      <h4 id="f-fav">Favorites</h4>
+      <div id="f-places"></div>
+    </nav>
+    <div class="f-main">
+      <div class="f-bar" data-drag>
+        <div class="lights"><i data-act="close"><svg viewBox="0 0 24 24"><use href="#x"></use></svg></i><i data-act="min"><svg viewBox="0 0 24 24"><use href="#minus"></use></svg></i><i data-act="zoom"><svg viewBox="0 0 24 24"><use href="#plus"></use></svg></i></div>
+        <div class="nav"><span><svg class="i"><use href="#left"></use></svg></span><span><svg class="i"><use href="#right"></use></svg></span></div>
+        <b id="f-title">Downloads</b>
+        <span class="sp"></span>
+        <div class="pill"><span class="on"><svg class="i"><use href="#apps"></use></svg></span><span><svg class="i"><use href="#list"></use></svg></span></div>
+        <div class="pill"><span><svg class="i"><use href="#search"></use></svg></span></div>
+      </div>
+      <div class="f-grid" id="f-grid" role="group"></div>
+      <div class="f-open" id="f-open" hidden><span class="ttl2" id="f-open-title"></span><button class="btn" id="f-cancel"></button><button class="btn blue" id="f-go" disabled></button></div>
+    </div>
+  </section>
+
+  <!-- TextEdit com o Leia-me -->
+  <section class="window textedit" id="w-readme" hidden>
+    <div class="titlebar" data-drag><div class="lights"><i data-act="close"><svg viewBox="0 0 24 24"><use href="#x"></use></svg></i><i data-act="min"><svg viewBox="0 0 24 24"><use href="#minus"></use></svg></i><i data-act="zoom"><svg viewBox="0 0 24 24"><use href="#plus"></use></svg></i></div><span class="ttl" id="readme-title"></span></div>
+    <article class="te-body" id="readme-body"></article>
+  </section>
+
+  <!-- Ajustes do TranscreveAI -->
+  <section class="window settings" id="w-settings" hidden>
+    <div class="titlebar" data-drag><div class="lights"><i data-act="close"><svg viewBox="0 0 24 24"><use href="#x"></use></svg></i><i data-act="min"><svg viewBox="0 0 24 24"><use href="#minus"></use></svg></i><i data-act="zoom"><svg viewBox="0 0 24 24"><use href="#plus"></use></svg></i></div><span class="ttl" id="settings-title"></span></div>
+    <div class="form" id="settings-body"></div>
+  </section>
+
+  <!-- Alerta (Sparkle, confirmações) -->
+  <section class="window alert" id="w-alert" role="alertdialog" hidden></section>
+
+  <div class="panel" id="panel" role="dialog" aria-label="TranscreveAI"><div id="p-body"></div><div class="ptoast" id="ptoast" role="status" aria-live="polite"></div></div>
+  <div class="fan" id="fan"></div>
+  <div class="menu" id="menu" role="menu" hidden></div>
+  <div class="bubble" id="bubble" role="status"></div>
+
+  <nav class="dock" id="dock" aria-label="Dock">
+    <a class="dk" id="dk-dmg" href="https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg"><span class="tile t-app"><svg class="i" style="color: #fff; stroke-width: 2.2"><use href="#arrow-down"></use></svg></span><span class="lbl" id="dk-dmg-lbl">Download TranscreveAI</span></a>
+    <button class="dk running" id="dk-settings"><span class="tile t-gear"><svg class="i" style="font-size: 34px; stroke-width: 1.6"><use href="#gear"></use></svg></span><span class="lbl" id="dk-settings-lbl">TranscreveAI Settings</span><span class="run"></span></button>
+    <a class="dk" id="dk-github" href="https://github.com/joaogmcorrea/transcreveAI" target="_blank" rel="noopener"><span class="tile t-dark"><svg class="i"><use href="#github"></use></svg></span><span class="lbl">GitHub</span><span class="run"></span></a>
+    <a class="dk" id="dk-coffee" href="https://buymeacoffee.com/joaocorrea" target="_blank" rel="noopener"><span class="tile t-coffee"><svg class="i" style="stroke-width: 2"><use href="#coffee"></use></svg></span><span class="lbl" id="dk-coffee-lbl">Buy Me a Coffee</span><span class="run"></span></a>
+    <span class="sep" aria-hidden="true"></span>
+    <button class="dk" id="dk-downloads" aria-expanded="false"><span class="folder-tile"><span class="folder"><svg class="i"><use href="#arrow-down"></use></svg></span></span><span class="lbl" id="dk-downloads-lbl">Downloads</span></button>
+    <a class="dk" id="dk-cutline" href="https://cutline.joaocorrea.design" target="_blank" rel="noopener"><img class="png" src="cutline.png" alt="" width="168" height="168"><span class="lbl">Cutline</span><span class="run"></span></a>
+  </nav>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const mac = $("#mac"), panel = $("#panel"), statusBtn = $("#status"), menu = $("#menu"), bubble = $("#bubble"), fan = $("#fan");
+  const DMG = "https://github.com/joaogmcorrea/transcreveAI/releases/latest/download/TranscreveAI.dmg";
+  const REPO = "https://github.com/joaogmcorrea/transcreveAI";
+  const CUTLINE = "https://cutline.joaocorrea.design";
+  // No site publicado (build.py), cada idioma tem a sua URL: / (en), /pt/ e /es/. O <html> traz o idioma da página
+  // (data-lang, só em /pt/ e /es/) e o caminho até a raiz (data-root). A raiz é fixada agora, na abertura: trocar de
+  // idioma muda a URL, e um caminho relativo montado depois apontaria para a pasta errada.
+  const ROOT = document.documentElement.dataset.root;
+  const BASE = new URL(ROOT || "./", location.href);
+  const CUTLINE_PNG = new URL("cutline.png", BASE).href;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const small = () => innerWidth <= 760;
+  let version = "0.4.0";
+
+  /* ─── Textos ─── */
+  const LOCALE = { en: "en-US", pt: "pt-BR", es: "es" };
+  const T = {
+    en: {
+      title: "TranscreveAI: fast, on-device audio transcription for the Mac",
+      menus: { finder: ["File", "Edit", "View", "Go", "Window", "Help"], textedit: ["File", "Edit", "Format", "View", "Window", "Help"], transcreveai: ["Edit", "Window", "Help"] },
+      favorites: "Favorites", places: { recents: "Recents", applications: "Applications", desktop: "Desktop", documents: "Documents", downloads: "Downloads" },
+      emptyFolder: "No items", trash: "Trash", trashEmpty: "Trash is empty", language: "Language",
+      chooseAudio: "Choose Audio", transcribe: "Transcribe", cancel: "Cancel", ok: "OK",
+      readme: "Read Me.txt",
+      drop: "Drop an audio file here", release: "Release to transcribe", orPick: "or click to choose a file",
+      more: "More options", copyWhenDone: "Copy When Done", soundWhenDone: "Sound When Done", openOnDrag: "Open When Dragging Audio", openAtLogin: "Open at Login",
+      checkUpdates: "Check for Updates…", settings: "Settings…", quit: "Quit TranscreveAI",
+      models: { auto: ["Automatic", "Fastest", "Always uses the fastest one installed. Today: Parakeet v3."], parakeet: ["Parakeet v3", "Parakeet v3", "The fastest · one-time download (470 MB)"], apple: ["Apple Speech", "Apple Speech", "Built into macOS · no download"], whisper: ["Whisper Large v3 Turbo", "Whisper Turbo", "Higher-quality alternative · coming soon"] },
+      audioLanguage: "Audio language", auto: "Auto",
+      recent: "RECENT", seeAll: "See All", seeAllN: (n) => `See All (${n})`, back: "Back", searchHistory: "Search history", nothing: "Nothing found.", noneYet: "No transcriptions yet.",
+      copyTranscription: "Copy the transcription", deleteFromHistory: "Delete from History",
+      transcribing: "Transcribing…", live: "LIVE PREVIEW", tipClose: "You can close the panel: progress shows on the menu bar icon.",
+      transcribedIn: (t) => `transcribed in ${t}`, newOne: "New", clickToCopy: "Click to copy", copied: "Copied",
+      notAudio: "That file doesn’t look like audio.",
+      realTitle: "This Mac is only a demo", realBody: "Your file stayed on your computer. To transcribe it, download TranscreveAI.", download: "Download",
+      today: (h) => `Today, ${h}`,
+      dockDownload: "Download TranscreveAI", dockCoffee: "Buy Me a Coffee", settingsTitle: "TranscreveAI Settings", general: "General", transcription: "Transcription", history: "History", updates: "Updates",
+      sOpenAtLogin: "Open at Login", sOpenOnDrag: "Open the panel when dragging an audio file", sCopy: "Copy the text when done", sSound: "Play a sound when done",
+      model: "Model", loaded: "Loaded and ready", builtIn: "Built into macOS",
+      keep: "Keep transcriptions on this Mac", session: "Erase when the Mac shuts down or restarts",
+      count: (n) => n === 0 ? "No saved transcriptions" : n === 1 ? "1 saved transcription" : `${n} saved transcriptions`,
+      showInFinder: "Show in Finder", clearHistory: "Clear History…", autoUpdates: "Automatically check for updates", versionN: (v) => `Version ${v}`, checkNow: "Check Now",
+      clearTitle: "Clear all history?", clearText: "The transcriptions are removed from this Mac. The original audio files aren’t touched.", clearBtn: (n) => n === 1 ? "Delete 1 Transcription" : `Delete ${n} Transcriptions`,
+      upToDate: "You’re up to date!", upToDateText: (v) => `TranscreveAI ${v} is currently the newest version available.`,
+      hintStatus: "Drag an audio file here", hintStatusSub: "or click the icon",
+      hintMenuBar: "TranscreveAI lives in the menu bar", hintMenuBarSub: "It has no window. Click the icon up here.",
+      hintStack: "Try the Downloads stack too", hintStackSub: "Drag an audio file out of it and the panel opens by itself.",
+      hintQuit: "TranscreveAI quit", hintQuitSub: "Open it again from the Dock.",
+      readmeHtml: (v) => `<h1>TranscreveAI</h1>
+        <p>Audio to text in seconds, right from the menu bar. Drop an audio file on the icon at the top of the screen and the text comes back already copied. Everything runs on your Mac: the audio never leaves it.</p>
+        <p class="muted">This desktop is a demo you can use. The files on it are samples with made-up text.</p>
+        <h2>Install</h2>
+        <ol><li>Open <a href="${DMG}">TranscreveAI.dmg</a> and drag the app to Applications.</li>
+        <li>The first time, macOS says it can’t verify the app. Go to System Settings › Privacy &amp; Security and click Open Anyway.</li>
+        <li>The icon shows up in the menu bar. New versions arrive on their own.</li></ol>
+        <h2>Good to know</h2>
+        <p>Parakeet v3 transcribes about 145 times faster than real time on an M4 Pro. It understands English, Portuguese and Spanish, and the app speaks all three. The model downloads once (470 MB); after that, nothing goes online except update checks.</p>
+        <p class="muted">Version ${v} · macOS 26 or later · Free and open source (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Made by João Corrêa</p>`,
+    },
+    pt: {
+      title: "TranscreveAI: transcrição de áudio rápida e local para Mac",
+      menus: { finder: ["Arquivo", "Editar", "Visualizar", "Ir", "Janela", "Ajuda"], textedit: ["Arquivo", "Editar", "Formatar", "Visualizar", "Janela", "Ajuda"], transcreveai: ["Editar", "Janela", "Ajuda"] },
+      favorites: "Favoritos", places: { recents: "Recentes", applications: "Aplicativos", desktop: "Mesa", documents: "Documentos", downloads: "Downloads" },
+      emptyFolder: "Nenhum item", trash: "Lixo", trashEmpty: "O Lixo está vazio", language: "Idioma",
+      chooseAudio: "Escolher áudio", transcribe: "Transcrever", cancel: "Cancelar", ok: "OK",
+      readme: "Leia-me.txt",
+      drop: "Arraste um áudio aqui", release: "Solte para transcrever", orPick: "ou clique para escolher um arquivo",
+      more: "Mais opções", copyWhenDone: "Copiar ao terminar", soundWhenDone: "Som ao terminar", openOnDrag: "Abrir ao arrastar um áudio", openAtLogin: "Abrir ao iniciar o Mac",
+      checkUpdates: "Procurar atualizações…", settings: "Ajustes…", quit: "Sair do TranscreveAI",
+      models: { auto: ["Automático", "Mais rápido", "Usa sempre o mais rápido instalado. Hoje: Parakeet v3."], parakeet: ["Parakeet v3", "Parakeet v3", "O mais rápido · download único (470 MB)"], apple: ["Apple Speech", "Apple Speech", "Nativo do macOS · sem download"], whisper: ["Whisper Large v3 Turbo", "Whisper Turbo", "Alternativa de qualidade · em breve"] },
+      audioLanguage: "Idioma do áudio", auto: "Auto",
+      recent: "RECENTES", seeAll: "Ver tudo", seeAllN: (n) => `Ver tudo (${n})`, back: "Voltar", searchHistory: "Buscar no histórico", nothing: "Nada encontrado.", noneYet: "Nenhuma transcrição ainda.",
+      copyTranscription: "Copiar a transcrição", deleteFromHistory: "Apagar do histórico",
+      transcribing: "Transcrevendo…", live: "PRÉVIA AO VIVO", tipClose: "Pode fechar o painel: o progresso fica no ícone da barra.",
+      transcribedIn: (t) => `transcrito em ${t}`, newOne: "Novo", clickToCopy: "Clique para copiar", copied: "Copiado",
+      notAudio: "Esse arquivo não parece ser um áudio.",
+      realTitle: "Este Mac é só uma demonstração", realBody: "O seu arquivo ficou no seu computador. Para transcrevê-lo, baixe o TranscreveAI.", download: "Baixar",
+      today: (h) => `Hoje, ${h}`,
+      dockDownload: "Baixar o TranscreveAI", dockCoffee: "Me pague um café", settingsTitle: "Ajustes do TranscreveAI", general: "Geral", transcription: "Transcrição", history: "Histórico", updates: "Atualizações",
+      sOpenAtLogin: "Abrir ao iniciar o Mac", sOpenOnDrag: "Abrir o painel ao arrastar um áudio", sCopy: "Copiar o texto ao terminar", sSound: "Tocar um som ao terminar",
+      model: "Modelo", loaded: "Carregado e pronto", builtIn: "Já vem no macOS",
+      keep: "Guardar as transcrições neste Mac", session: "Apagar ao desligar ou reiniciar o Mac",
+      count: (n) => n === 0 ? "Nenhuma transcrição guardada" : n === 1 ? "1 transcrição guardada" : `${n} transcrições guardadas`,
+      showInFinder: "Mostrar no Finder", clearHistory: "Limpar histórico…", autoUpdates: "Procurar atualizações automaticamente", versionN: (v) => `Versão ${v}`, checkNow: "Procurar agora",
+      clearTitle: "Apagar todo o histórico?", clearText: "As transcrições somem deste Mac. Os áudios originais não são tocados.", clearBtn: (n) => n === 1 ? "Apagar 1 transcrição" : `Apagar ${n} transcrições`,
+      upToDate: "Você está atualizado!", upToDateText: (v) => `O TranscreveAI ${v} é a versão mais recente disponível.`,
+      hintStatus: "Arraste um áudio até aqui", hintStatusSub: "ou clique no ícone",
+      hintMenuBar: "O TranscreveAI fica na barra de menus", hintMenuBarSub: "Ele não tem janela. Clique no ícone aqui em cima.",
+      hintStack: "Teste também a pilha de Downloads", hintStackSub: "Arraste um áudio para fora dela e o painel abre sozinho.",
+      hintQuit: "O TranscreveAI foi fechado", hintQuitSub: "Abra de novo pelo Dock.",
+      readmeHtml: (v) => `<h1>TranscreveAI</h1>
+        <p>Áudio em texto em segundos, direto da barra de menus. Solte um áudio no ícone lá em cima e o texto volta já copiado. Tudo roda no seu Mac: o áudio nunca sai dele.</p>
+        <p class="muted">Esta mesa é uma demonstração que dá para usar. Os arquivos nela são exemplos com texto inventado.</p>
+        <h2>Instalar</h2>
+        <ol><li>Abra o <a href="${DMG}">TranscreveAI.dmg</a> e arraste o app para Aplicativos.</li>
+        <li>Na primeira vez, o macOS diz que não consegue verificar o app. Vá em Ajustes do Sistema › Privacidade e Segurança e clique em Abrir Mesmo Assim.</li>
+        <li>O ícone aparece na barra de menus. As versões novas chegam sozinhas.</li></ol>
+        <h2>Bom saber</h2>
+        <p>O Parakeet v3 transcreve cerca de 145 vezes mais rápido que o tempo real num M4 Pro. Ele entende português, inglês e espanhol, e o app também fala os três. O modelo baixa uma vez (470 MB); depois disso, nada vai para a internet além da busca por atualizações.</p>
+        <p class="muted">Versão ${v} · macOS 26 ou mais recente · Grátis e de código aberto (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Feito por João Corrêa</p>`,
+    },
+    es: {
+      title: "TranscreveAI: transcripción de audio rápida y local para Mac",
+      menus: { finder: ["Archivo", "Edición", "Visualización", "Ir", "Ventana", "Ayuda"], textedit: ["Archivo", "Edición", "Formato", "Visualización", "Ventana", "Ayuda"], transcreveai: ["Edición", "Ventana", "Ayuda"] },
+      favorites: "Favoritos", places: { recents: "Recientes", applications: "Aplicaciones", desktop: "Escritorio", documents: "Documentos", downloads: "Descargas" },
+      emptyFolder: "No hay ítems", trash: "Papelera", trashEmpty: "La Papelera está vacía", language: "Idioma",
+      chooseAudio: "Elegir audio", transcribe: "Transcribir", cancel: "Cancelar", ok: "OK",
+      readme: "Léeme.txt",
+      drop: "Arrastra un audio aquí", release: "Suelta para transcribir", orPick: "o haz clic para elegir un archivo",
+      more: "Más opciones", copyWhenDone: "Copiar al terminar", soundWhenDone: "Sonido al terminar", openOnDrag: "Abrir al arrastrar un audio", openAtLogin: "Abrir al iniciar sesión",
+      checkUpdates: "Buscar actualizaciones…", settings: "Ajustes…", quit: "Salir de TranscreveAI",
+      models: { auto: ["Automático", "Más rápido", "Siempre usa el más rápido instalado. Hoy: Parakeet v3."], parakeet: ["Parakeet v3", "Parakeet v3", "El más rápido · descarga única (470 MB)"], apple: ["Apple Speech", "Apple Speech", "Nativo de macOS · sin descarga"], whisper: ["Whisper Large v3 Turbo", "Whisper Turbo", "Alternativa de calidad · próximamente"] },
+      audioLanguage: "Idioma del audio", auto: "Auto",
+      recent: "RECIENTES", seeAll: "Ver todo", seeAllN: (n) => `Ver todo (${n})`, back: "Volver", searchHistory: "Buscar en el historial", nothing: "No se encontró nada.", noneYet: "Todavía no hay transcripciones.",
+      copyTranscription: "Copiar la transcripción", deleteFromHistory: "Eliminar del historial",
+      transcribing: "Transcribiendo…", live: "VISTA PREVIA EN VIVO", tipClose: "Puedes cerrar el panel: el progreso se ve en el ícono de la barra de menús.",
+      transcribedIn: (t) => `transcrito en ${t}`, newOne: "Nuevo", clickToCopy: "Haz clic para copiar", copied: "Copiado",
+      notAudio: "Ese archivo no parece ser un audio.",
+      realTitle: "Este escritorio es solo una demostración", realBody: "Tu archivo se quedó en tu computadora. Para transcribirlo, descarga TranscreveAI.", download: "Descargar",
+      today: (h) => `Hoy, ${h}`,
+      dockDownload: "Descargar TranscreveAI", dockCoffee: "Invítame un café", settingsTitle: "Ajustes de TranscreveAI", general: "General", transcription: "Transcripción", history: "Historial", updates: "Actualizaciones",
+      sOpenAtLogin: "Abrir al iniciar sesión", sOpenOnDrag: "Abrir el panel al arrastrar un audio", sCopy: "Copiar el texto al terminar", sSound: "Reproducir un sonido al terminar",
+      model: "Modelo", loaded: "Cargado y listo", builtIn: "Incluido en macOS",
+      keep: "Guardar las transcripciones en tu Mac", session: "Borrar al apagar o reiniciar tu Mac",
+      count: (n) => n === 0 ? "No hay transcripciones guardadas" : n === 1 ? "1 transcripción guardada" : `${n} transcripciones guardadas`,
+      showInFinder: "Mostrar en Finder", clearHistory: "Borrar historial…", autoUpdates: "Buscar actualizaciones automáticamente", versionN: (v) => `Versión ${v}`, checkNow: "Buscar ahora",
+      clearTitle: "¿Borrar todo el historial?", clearText: "Las transcripciones se borran de tu Mac. Los audios originales no se tocan.", clearBtn: (n) => n === 1 ? "Borrar 1 transcripción" : `Borrar ${n} transcripciones`,
+      upToDate: "¡Estás al día!", upToDateText: (v) => `TranscreveAI ${v} es la versión más reciente disponible.`,
+      hintStatus: "Arrastra un audio hasta aquí", hintStatusSub: "o haz clic en el ícono",
+      hintMenuBar: "TranscreveAI vive en la barra de menús", hintMenuBarSub: "No tiene ventana. Haz clic en el ícono aquí arriba.",
+      hintStack: "Prueba también la pila de Descargas", hintStackSub: "Arrastra un audio fuera de ella y el panel se abre solo.",
+      hintQuit: "TranscreveAI se cerró", hintQuitSub: "Ábrela de nuevo desde el Dock.",
+      readmeHtml: (v) => `<h1>TranscreveAI</h1>
+        <p>Audio a texto en segundos, desde la barra de menús. Suelta un audio en el ícono de arriba y el texto vuelve ya copiado. Todo corre en tu Mac: el audio nunca sale de ahí.</p>
+        <p class="muted">Este escritorio es una demostración que puedes usar. Los archivos son ejemplos con texto inventado.</p>
+        <h2>Instalar</h2>
+        <ol><li>Abre <a href="${DMG}">TranscreveAI.dmg</a> y arrastra la app a Aplicaciones.</li>
+        <li>La primera vez, macOS dice que no puede verificar la app. Ve a Ajustes del Sistema › Privacidad y seguridad y haz clic en Abrir igualmente.</li>
+        <li>El ícono aparece en la barra de menús. Las versiones nuevas llegan solas.</li></ol>
+        <h2>Bueno saber</h2>
+        <p>Parakeet v3 transcribe unas 145 veces más rápido que el tiempo real con un chip M4 Pro. Entiende español, inglés y portugués, y la app también habla los tres. El modelo se descarga una vez (470 MB); después, nada sale a internet salvo la búsqueda de actualizaciones.</p>
+        <p class="muted">Versión ${v} · macOS 26 o posterior · Gratis y de código abierto (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Hecho por João Corrêa</p>`,
+    },
+  };
+
+  /* Áudios de exemplo. Texto inventado, nada dos áudios de teste do projeto. secs = o tempo que o app levou de verdade. */
+  const AUDIO = {
+    meeting: { ext: "m4a", dur: "12:48", secs: 3.4,
+      name: { en: "meeting.m4a", pt: "reuniao.m4a", es: "reunion.m4a" },
+      text: {
+        en: [["0:00", "Good morning, everyone. Let's start with this week's numbers, then the launch."], ["0:18", "Sales went up twelve percent, driven by the annual plan that went live on Monday."], ["0:41", "Next steps: review the budget by Friday and schedule the presentation with the team."]],
+        pt: [["0:00", "Bom dia, pessoal. Vamos começar pelos números da semana e depois falamos do lançamento."], ["0:18", "As vendas subiram doze por cento, puxadas pelo plano anual que entrou na segunda."], ["0:41", "Próximos passos: revisar o orçamento até sexta e marcar a apresentação com o time."]],
+        es: [["0:00", "Buenos días a todos. Empecemos por los números de la semana y luego hablamos del lanzamiento."], ["0:18", "Las ventas subieron un doce por ciento, impulsadas por el plan anual que salió el lunes."], ["0:41", "Próximos pasos: revisar el presupuesto antes del viernes y agendar la presentación con el equipo."]] } },
+    interview: { ext: "opus", dur: "6:12", secs: 1.7,
+      name: { en: "interview.opus", pt: "entrevista.opus", es: "entrevista.opus" },
+      text: {
+        en: [["0:00", "Thanks for having us. To start, tell us a little about your career so far."], ["0:09", "I started out as a designer, but soon moved into product, and that changed everything."], ["0:27", "What I learned is that the hardest part is deciding what to leave out."]],
+        pt: [["0:00", "Obrigado por receber a gente. Para começar, conta um pouco da sua trajetória."], ["0:09", "Comecei como designer, mas logo fui para produto, e foi aí que tudo mudou."], ["0:27", "O que eu aprendi é que o mais difícil é decidir o que fica de fora."]],
+        es: [["0:00", "Gracias por recibirnos. Para empezar, cuéntanos un poco de tu trayectoria."], ["0:09", "Empecé como diseñador, pero pronto pasé a producto, y ahí cambió todo."], ["0:27", "Lo que aprendí es que lo más difícil es decidir qué queda afuera."]] } },
+    podcast: { ext: "mp3", dur: "38:20", secs: 10.2,
+      name: { en: "podcast-ep12.mp3", pt: "podcast-ep12.mp3", es: "podcast-ep12.mp3" },
+      text: {
+        en: [["0:00", "Hi, and welcome to another episode. Today we're talking about everyday productivity."], ["0:14", "The first tip is simple: before you start, write down what has to be done by the end."], ["0:36", "The second is to protect a block of time with no meetings, every day, at the same hour."]],
+        pt: [["0:00", "Olá, e bem-vindos a mais um episódio. Hoje o assunto é produtividade no dia a dia."], ["0:14", "A primeira dica é simples: anote antes de começar o que precisa estar pronto no fim."], ["0:36", "A segunda é proteger um bloco de tempo sem reuniões, todo dia, no mesmo horário."]],
+        es: [["0:00", "Hola, y bienvenidos a un nuevo episodio. Hoy hablamos de productividad en el día a día."], ["0:14", "El primer consejo es simple: antes de empezar, anota lo que tiene que estar listo al final."], ["0:36", "El segundo es proteger un bloque de tiempo sin reuniones, todos los días, a la misma hora."]] } },
+  };
+  // Tudo o que aparece como arquivo: áudio, imagem de disco, documentos e apps.
+  const FILES = {
+    meeting: { kind: "audio" }, interview: { kind: "audio" }, podcast: { kind: "audio" },
+    dmg: { kind: "dmg", name: () => "TranscreveAI.dmg" },
+    readme: { kind: "readme", name: () => T[lang].readme },
+    report: { kind: "doc", ext: "pdf", name: () => ({ en: "report.pdf", pt: "relatorio.pdf", es: "informe.pdf" })[lang] },
+    notes: { kind: "doc", ext: "txt", name: () => ({ en: "notes.txt", pt: "notas.txt", es: "notas.txt" })[lang] },
+    appTranscreve: { kind: "app", name: () => "TranscreveAI" },
+    appCutline: { kind: "app", name: () => "Cutline" },
+  };
+  const FOLDERS = {
+    recents: ["podcast", "interview", "meeting", "dmg"],
+    applications: ["appCutline", "appTranscreve"],
+    desktop: ["dmg", "meeting", "interview", "readme"],
+    documents: ["readme", "notes"],
+    downloads: ["podcast", "interview", "dmg", "report", "notes"],
+  };
+  const STACK = ["podcast", "interview", "dmg", "report"];   // de baixo (mais novo) para cima
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const ic = (id, cls = "i") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
+  const fname = (k) => FILES[k].kind === "audio" ? AUDIO[k].name[lang] : FILES[k].name();
+  const isAudio = (k) => !!(FILES[k] && FILES[k].kind === "audio");
+  const COLOR = { m4a: "var(--m4a)", opus: "var(--opus)", mp3: "var(--mp3)", pdf: "var(--pdf)", txt: "var(--txt)" };
+  function docSvg(ext, glyph) {
+    const c = COLOR[ext] || "var(--txt)";
+    const g = glyph === "lines" ? `<path class="g" style="stroke: var(--zinc-500)" d="M12 22h20M12 28h20M12 34h14"/>`
+      : glyph === "pdf" ? `<path class="g" style="stroke: ${c}" d="M13 21h18v15h-18zM13 32l5 -4l4 3l3 -2l6 4"/>`
+      : `<path class="g" style="stroke: ${c}" d="M13 27v4M17.5 23v12M22 20v18M26.5 24v10M31 26v6"/>`;
+    return `<span class="doc"><svg viewBox="0 0 44 56" aria-hidden="true"><path class="p" d="M4 2h26l12 12v38a2 2 0 0 1 -2 2H4a2 2 0 0 1 -2 -2V4a2 2 0 0 1 2 -2z"/><path class="f" d="M30 2l12 12H32a2 2 0 0 1 -2 -2z"/>${g}</svg>${glyph === "lines" ? "" : `<span class="b" style="background: ${c}">${ext}</span>`}</span>`;
+  }
+  const appTile = (size) => `<span class="tile t-app" style="width: ${size}px; height: ${size}px"><svg class="i" style="font-size: ${Math.round(size * 0.55)}px; color: #fff; stroke-width: 2.1" aria-hidden="true"><use href="#wave"></use></svg></span>`;
+  function iconFor(k) {
+    const f = FILES[k];
+    if (f.kind === "audio") return docSvg(AUDIO[k].ext, "wave");
+    if (f.kind === "doc") return docSvg(f.ext, f.ext === "pdf" ? "pdf" : "lines");
+    if (f.kind === "readme") return docSvg("txt", "lines");
+    if (f.kind === "dmg") return `<span class="dmg">${appTile(24)}</span>`;
+    if (k === "appCutline") return `<img class="png" src="${CUTLINE_PNG}" alt="" width="56" height="56">`;
+    return appTile(56);
+  }
+
+  /* ─── Estado ─── */
+  let lang = "en";
+  const S = {
+    running: true, open: false, view: "empty", hover: false, job: null, last: null, badge: false, flash: false, autoOpen: false,
+    query: "", error: "", model: "auto", alang: "auto",
+    prefs: { copy: true, sound: true, openOnDrag: true, login: false, keep: true, session: true, autoUpdates: true },   // os padrões do app
+    history: [], used: { stack: false, transcribed: false },
+  };
+
+  /* ─── Idioma ─── */
+  // Ordem: ?lang=, o idioma da URL (/pt/, /es/), a escolha salva, o navegador.
+  const PATHS = { en: "", pt: "pt/", es: "es/" };
+  function firstLang() {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (q && T[q]) return q;
+    const p = document.documentElement.dataset.lang;
+    if (p && T[p]) return p;
+    try { const s = localStorage.getItem("transcreveai-lang"); if (s && T[s]) return s; } catch (e) {}
+    for (const l of (navigator.languages || [navigator.language || "en"])) {
+      const k = String(l).toLowerCase().slice(0, 2);
+      if (T[k]) return k;
+    }
+    return "en";
+  }
+  function setLang(l, save) {
+    lang = l;
+    mac.dataset.lang = l;
+    document.documentElement.lang = l === "pt" ? "pt-BR" : l;
+    document.title = T[l].title;
+    $("#lang-code").textContent = l.toUpperCase();
+    $("#lang-btn").setAttribute("aria-label", T[l].language);
+    if (save) {
+      try { localStorage.setItem("transcreveai-lang", l); } catch (e) {}
+      // A URL acompanha o idioma escolhido, para recarregar ou compartilhar no mesmo idioma.
+      if (ROOT !== undefined) { try { history.replaceState(null, "", new URL(PATHS[l], BASE).href + location.hash); } catch (e) {} }
+    }
+    hideMenu();
+    renderMenubar(); renderDesktop(); renderFinder(); renderReadme(); renderSettings(); renderPanel(); renderStatus(); tick();
+    $("#dk-downloads-lbl").textContent = T[l].places.downloads;
+    $("#dk-dmg-lbl").textContent = T[l].dockDownload;
+    $("#dk-coffee-lbl").textContent = T[l].dockCoffee;
+    $("#dk-settings-lbl").textContent = T[l].settingsTitle;
+    if (fan.classList.contains("on")) renderFan();
+  }
+
+  /* ─── Relógio e barra de menus ─── */
+  function tick() {
+    const d = new Date(), loc = LOCALE[lang];
+    const part = (o) => new Intl.DateTimeFormat(loc, o).format(d).replace(/\./g, "");
+    const time = part({ hour: "numeric", minute: "2-digit" });
+    if (small()) { $("#mb-clock").textContent = time; return; }
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const wd = part({ weekday: "short" }), day = part({ day: "numeric" }), mon = part({ month: "short" });
+    $("#mb-clock").textContent = lang === "en" ? `${wd} ${mon} ${day}  ${time}` : `${cap(wd)} ${day} ${mon}  ${time}`;
+  }
+  setInterval(tick, 15000);
+  let frontApp = "finder";
+  function renderMenubar() {
+    $("#mb-app").textContent = { finder: "Finder", textedit: "TextEdit", transcreveai: "TranscreveAI" }[frontApp];
+    $("#mb-menus").innerHTML = T[lang].menus[frontApp].map((m) => `<span>${esc(m)}</span>`).join("");
+  }
+
+  /* ─── Menus ─── */
+  let menuOwner = null;
+  function showMenu(items, rect, owner, align = "left") {
+    hideMenu();
+    menuOwner = owner || null;
+    if (menuOwner) menuOwner.classList.add("on");
+    menu.innerHTML = items.map((it, i) => {
+      if (it === "-") return "<hr>";
+      if (it.head) return `<div class="head">${esc(it.head)}</div>`;
+      const checkable = it.checked !== undefined;
+      return `<button class="mi" role="${checkable ? "menuitemcheckbox" : "menuitem"}" data-i="${i}"${checkable ? ` aria-checked="${!!it.checked}"` : ""}${it.disabled ? " disabled" : ""}>${ic("check", "i ck")}<span>${esc(it.label)}</span>${it.kbd ? `<kbd>${esc(it.kbd)}</kbd>` : "<span></span>"}${it.sub ? `<small>${esc(it.sub)}</small>` : ""}</button>`;
+    }).join("");
+    menu.hidden = false;
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    let x = align === "right" ? rect.right - w : rect.left;
+    x = Math.max(6, Math.min(x, innerWidth - w - 6));
+    let y = rect.bottom + 4;
+    if (y + h > innerHeight - 6) y = Math.max(6, rect.top - h - 4);
+    menu.style.left = x + "px"; menu.style.top = y + "px";
+    menu.onclick = (e) => {
+      const b = e.target.closest(".mi"); if (!b || b.disabled) return;
+      const it = items[Number(b.dataset.i)];
+      hideMenu();
+      if (it.action) it.action();
+    };
+    const first = menu.querySelector(".mi:not([disabled])");
+    if (first) first.focus({ preventScroll: true });
+  }
+  function hideMenu() {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    if (menuOwner) menuOwner.classList.remove("on");
+    menuOwner = null;
+  }
+  menu.addEventListener("keydown", (e) => {
+    const items = $$(".mi:not([disabled])", menu), i = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  });
+  $("#lang-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const b = e.currentTarget;
+    if (!menu.hidden && menuOwner === b) return hideMenu();
+    closePanel();
+    showMenu([
+      { label: "English", checked: lang === "en", action: () => setLang("en", true) },
+      { label: "Português", checked: lang === "pt", action: () => setLang("pt", true) },
+      { label: "Español", checked: lang === "es", action: () => setLang("es", true) },
+    ], b.getBoundingClientRect(), b, "right");
+  });
+
+  const togglePref = (key) => () => { S.prefs[key] = !S.prefs[key]; renderSettings(); };
+  function appMenuItems() {
+    const t = T[lang];
+    return [
+      { label: t.copyWhenDone, checked: S.prefs.copy, action: togglePref("copy") },
+      { label: t.soundWhenDone, checked: S.prefs.sound, action: togglePref("sound") },
+      { label: t.openOnDrag, checked: S.prefs.openOnDrag, action: togglePref("openOnDrag") },
+      { label: t.openAtLogin, checked: S.prefs.login, action: togglePref("login") },
+      "-",
+      { label: t.checkUpdates, action: checkUpdates },
+      { label: t.settings, kbd: "⌘,", action: () => openWin("w-settings") },
+      "-",
+      { label: t.quit, kbd: "⌘Q", action: quitApp },
+    ];
+  }
+  function statusMenuItems() {
+    const t = T[lang];
+    return [
+      { label: t.checkUpdates, action: checkUpdates },
+      { label: t.settings, kbd: "⌘,", action: () => openWin("w-settings") },
+      "-",
+      { label: t.openAtLogin, checked: S.prefs.login, action: togglePref("login") },
+      "-",
+      { label: t.quit, kbd: "⌘Q", action: quitApp },
+    ];
+  }
+  function modelItems() {
+    const t = T[lang];
+    return Object.keys(t.models).map((k) => ({ label: t.models[k][0], sub: t.models[k][2], checked: S.model === k, disabled: k === "whisper", action: () => { S.model = k; renderPanel(); renderSettings(); } }));
+  }
+  const alangName = () => ({ auto: T[lang].auto, pt: "Português", en: "English", es: "Español" })[S.alang];
+  function langItems() {
+    const t = T[lang];
+    return [{ head: t.audioLanguage }].concat([["auto", t.auto], ["pt", "Português"], ["en", "English"], ["es", "Español"]].map(([k, n]) => ({ label: n, checked: S.alang === k, action: () => { S.alang = k; renderPanel(); renderSettings(); } })));
+  }
+
+  /* ─── Arquivos na mesa, no Finder e na pilha ─── */
+  const itemHtml = (k, cls = "item") => `<button class="${cls}" data-k="${k}"><span class="ic">${iconFor(k)}</span><span class="nm">${esc(fname(k)).replace(/\./g, ".<wbr>")}</span></button>`;
+  function renderDesktop() {
+    $("#desktop").innerHTML = FOLDERS.desktop.map((k) => itemHtml(k)).join("");
+    $$("#desktop .item").forEach(bindItem);
+  }
+  function select(el) { $$(".item.sel").forEach((x) => x.classList.remove("sel")); if (el) el.classList.add("sel"); }
+
+  // Abrir: áudio = "Abrir com › TranscreveAI"; o .dmg baixa o app de verdade.
+  function openItem(k) {
+    const f = FILES[k];
+    if (f.kind === "audio") { if (!S.running) launchApp(false); start(k); return; }
+    if (f.kind === "dmg") { location.href = DMG; return; }
+    if (f.kind === "readme") { openWin("w-readme"); return; }
+    if (k === "appTranscreve") { launchApp(true); return; }
+    if (k === "appCutline") { window.open(CUTLINE, "_blank", "noopener"); return; }
+    nudge($(`[data-k="${k}"] .ic`));   // documento sem app nesta mesa
+  }
+  function nudge(el) { if (el && !reduce) el.animate([{ transform: "none" }, { transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }], { duration: 260 }); }
+
+  // Arrastar (mouse e toque); clique seleciona; dois cliques (ou um toque, ou um clique na pilha) abrem.
+  let dragging = null, swallow = false;
+  function overTarget(x, y) {
+    const inR = (r, pad) => x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad;
+    if (S.running && inR(statusBtn.getBoundingClientRect(), 10)) return "status";
+    if (S.open && inR(panel.getBoundingClientRect(), 0)) return "panel";
+    return null;
+  }
+  function bindItem(el) {
+    const k = el.dataset.k, inFan = !!el.closest(".fan");
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      hideMenu();
+      if (!inFan) select(el);
+      const x0 = e.clientX, y0 = e.clientY, touch = e.pointerType !== "mouse";
+      let ghost = null;
+      const move = (ev) => {
+        if (!ghost) {
+          if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+          ghost = document.createElement("div");
+          ghost.className = "ghost";
+          ghost.innerHTML = iconFor(k);
+          mac.appendChild(ghost);
+          mac.classList.add("dragging");
+          el.classList.add("lifted");
+          dragging = k;
+          hideBubble();
+          if (inFan) { S.used.stack = true; closeFan(); }
+          // Como no app: o painel abre sozinho quando um áudio começa a ser arrastado.
+          if (isAudio(k) && S.running && S.prefs.openOnDrag && !S.open) {
+            if (!S.job) S.view = "empty";
+            openPanel(true);
+          }
+        }
+        ghost.style.transform = `translate(${ev.clientX}px, ${ev.clientY}px)`;
+        const over = !!overTarget(ev.clientX, ev.clientY);
+        statusBtn.classList.toggle("target", over);
+        if (S.view === "empty" && isAudio(k) && over !== S.hover) { S.hover = over; renderPanel(); }
+      };
+      const end = (ev) => {
+        removeEventListener("pointermove", move); removeEventListener("pointerup", end); removeEventListener("pointercancel", end);
+        if (!ghost) {
+          if (ev.type === "pointerup" && (touch || inFan)) { if (inFan) closeFan(); openItem(k); }
+          return;
+        }
+        const target = ev.type === "pointerup" && overTarget(ev.clientX, ev.clientY);
+        ghost.remove(); mac.classList.remove("dragging"); el.classList.remove("lifted"); statusBtn.classList.remove("target");
+        S.hover = false; dragging = null;
+        swallow = true; setTimeout(() => { swallow = false; }, 0);
+        if (target) {
+          if (isAudio(k)) start(k);
+          else { stopJob(); S.view = "error"; S.error = T[lang].notAudio; renderStatus(); if (!S.open) openPanel(); else renderPanel(); }
+        } else if (S.autoOpen) closePanel();
+        else renderPanel();
+      };
+      addEventListener("pointermove", move); addEventListener("pointerup", end); addEventListener("pointercancel", end);
+    });
+    if (!inFan) el.addEventListener("dblclick", () => { if (!swallow) openItem(k); });
+    el.addEventListener("click", (e) => { if (e.detail === 0) { if (inFan) closeFan(); openItem(k); } });   // teclado: Enter ou espaço
+    el.addEventListener("contextmenu", (e) => e.preventDefault());
+  }
+
+  /* ─── Janelas ─── */
+  const WIN_APP = { "w-finder": "finder", "w-readme": "textedit", "w-settings": "transcreveai", "w-alert": "transcreveai" };
+  const order = [];
+  function focusWin(w) {
+    const i = order.indexOf(w); if (i >= 0) order.splice(i, 1);
+    order.push(w);
+    order.forEach((x, n) => { x.style.zIndex = 20 + n; x.classList.toggle("inactive", x !== w); });
+    frontApp = WIN_APP[w.id] || "finder";
+    renderMenubar();
+  }
+  function openWin(id, opts = {}) {
+    const w = $("#" + id);
+    if (id === "w-finder") { finderMode = opts.mode || "browse"; if (opts.place) finderPlace = opts.place; finderSel = null; renderFinder(); }
+    if (w.hidden) {
+      w.hidden = false;
+      if (!reduce) { w.classList.add("opening"); requestAnimationFrame(() => requestAnimationFrame(() => w.classList.remove("opening"))); }
+    }
+    focusWin(w);
+    if (id !== "w-alert") closePanel();
+  }
+  function closeWin(w) {
+    w.hidden = true; w.classList.remove("zoomed");
+    const i = order.indexOf(w); if (i >= 0) order.splice(i, 1);
+    const top = order.filter((x) => !x.hidden).pop();
+    if (top) focusWin(top); else { frontApp = "finder"; renderMenubar(); }
+    if (w.id === "w-finder") finderMode = "browse";
+  }
+  $$(".window").forEach((w) => {
+    w.addEventListener("pointerdown", () => focusWin(w));
+    w.addEventListener("click", (e) => {
+      const l = e.target.closest(".lights i"); if (!l) return;
+      if (l.dataset.act === "close" || l.dataset.act === "min") closeWin(w);
+      if (l.dataset.act === "zoom" && !small()) w.classList.toggle("zoomed");
+    });
+    $$("[data-drag]", w).forEach((bar) => bar.addEventListener("pointerdown", (e) => {
+      if (small() || e.button !== 0 || e.target.closest("button, .lights i, input, a") || w.classList.contains("zoomed")) return;
+      const r = w.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      const move = (ev) => {
+        w.style.left = Math.min(Math.max(ev.clientX - dx, -r.width + 100), innerWidth - 100) + "px";
+        w.style.top = Math.min(Math.max(ev.clientY - dy, 30), innerHeight - 60) + "px";
+      };
+      const up = () => { removeEventListener("pointermove", move); removeEventListener("pointerup", up); };
+      addEventListener("pointermove", move); addEventListener("pointerup", up);
+    }));
+  });
+
+  /* Finder (também é o "Escolher áudio" do app) */
+  let finderPlace = "downloads", finderMode = "browse", finderSel = null;
+  function renderFinder() {
+    const t = T[lang];
+    $("#f-fav").textContent = t.favorites;
+    const icons = { recents: "clock", applications: "apps", desktop: "desk", documents: "docs", downloads: "dl" };
+    $("#f-places").innerHTML = Object.keys(icons).map((p) => `<button class="${p === finderPlace ? "on" : ""}" data-place="${p}">${ic(icons[p])}${esc(t.places[p])}</button>`).join("");
+    $("#f-title").textContent = finderPlace === "trash" ? t.trash : t.places[finderPlace];
+    const list = finderPlace === "trash" ? [] : FOLDERS[finderPlace];
+    $("#f-grid").innerHTML = list.length ? list.map((k) => itemHtml(k)).join("") : `<p class="f-empty">${esc(finderPlace === "trash" ? t.trashEmpty : t.emptyFolder)}</p>`;
+    $$("#f-grid .item").forEach((el) => {
+      bindItem(el);
+      el.addEventListener("pointerdown", () => { finderSel = el.dataset.k; $("#f-go").disabled = !isAudio(finderSel); });
+    });
+    $("#f-open").hidden = finderMode !== "open";
+    $("#f-open-title").textContent = t.chooseAudio;
+    $("#f-cancel").textContent = t.cancel;
+    $("#f-go").textContent = t.transcribe;
+    $("#f-go").disabled = !isAudio(finderSel);
+  }
+  $("#f-places").addEventListener("click", (e) => { const b = e.target.closest("[data-place]"); if (!b) return; finderPlace = b.dataset.place; finderSel = null; renderFinder(); });
+  $("#f-cancel").addEventListener("click", () => closeWin($("#w-finder")));
+  $("#f-go").addEventListener("click", () => { if (isAudio(finderSel)) start(finderSel); });
+
+  /* Leia-me, Ajustes e alertas */
+  function renderReadme() {
+    $("#readme-title").textContent = T[lang].readme;
+    $("#readme-body").innerHTML = T[lang].readmeHtml(version);
+  }
+  const sw = (key, label) => `<div class="row"><span class="l" id="sw-${key}">${esc(label)}</span><button class="switch" role="switch" aria-labelledby="sw-${key}" aria-checked="${S.prefs[key]}" data-pref="${key}"></button></div>`;
+  function renderSettings() {
+    const t = T[lang], n = S.history.length;
+    $("#settings-title").textContent = t.settingsTitle;
+    $("#settings-body").innerHTML = `
+      <section><h3>${esc(t.general)}</h3><div class="group">${sw("login", t.sOpenAtLogin)}${sw("openOnDrag", t.sOpenOnDrag)}${sw("copy", t.sCopy)}${sw("sound", t.sSound)}</div></section>
+      <section><h3>${esc(t.transcription)}</h3><div class="group">
+        <div class="row"><span class="l">${esc(t.model)}</span><button class="popup" data-pop="model">${esc(t.models[S.model][0])}${ic("chev")}</button></div>
+        <div class="row"><span class="l">${esc(t.audioLanguage)}</span><button class="popup" data-pop="alang">${esc(alangName())}${ic("chev")}</button></div>
+        <div class="row"><span class="l">Parakeet v3</span><span class="v">${esc(t.loaded)}</span></div>
+        <div class="row"><span class="l">Apple Speech</span><span class="v">${esc(t.builtIn)}</span></div></div></section>
+      <section><h3>${esc(t.history)}</h3><div class="group">${sw("keep", t.keep)}${sw("session", t.session)}
+        <div class="row"><span class="l v">${esc(t.count(n))}</span><button class="btn" data-act="finder">${esc(t.showInFinder)}</button><button class="btn" data-act="clear"${n ? "" : " disabled"}>${esc(t.clearHistory)}</button></div></div></section>
+      <section><h3>${esc(t.updates)}</h3><div class="group">${sw("autoUpdates", t.autoUpdates)}
+        <div class="row"><span class="l v">${esc(t.versionN(version))}</span><button class="btn" data-act="check">${esc(t.checkNow)}</button></div></div></section>`;
+  }
+  $("#settings-body").addEventListener("click", (e) => {
+    const s = e.target.closest("[data-pref]");
+    if (s) { S.prefs[s.dataset.pref] = !S.prefs[s.dataset.pref]; s.setAttribute("aria-checked", String(S.prefs[s.dataset.pref])); return; }
+    const p = e.target.closest("[data-pop]");
+    if (p) { e.stopPropagation(); showMenu(p.dataset.pop === "model" ? modelItems() : langItems(), p.getBoundingClientRect(), p); return; }
+    const a = e.target.closest("[data-act]");
+    if (!a) return;
+    if (a.dataset.act === "check") checkUpdates();
+    if (a.dataset.act === "finder") openWin("w-finder", { place: "documents" });
+    if (a.dataset.act === "clear") confirmClear();
+  });
+  function alertBox(title, text, buttons) {
+    const w = $("#w-alert");
+    w.innerHTML = `${appTile(60)}<b>${esc(title)}</b><p>${esc(text)}</p><div class="acts">${buttons.map((b, i) => `<button class="btn${b.blue ? " blue" : ""}" data-i="${i}">${esc(b.label)}</button>`).join("")}</div>`;
+    w.onclick = (e) => { const b = e.target.closest("[data-i]"); if (!b) return; const it = buttons[Number(b.dataset.i)]; closeWin(w); if (it.action) it.action(); };
+    openWin("w-alert");
+    const def = w.querySelector(".btn.blue"); if (def) def.focus();
+  }
+  function checkUpdates() { const t = T[lang]; alertBox(t.upToDate, t.upToDateText(version), [{ label: t.ok, blue: true }]); }
+  function confirmClear() {
+    const t = T[lang], n = S.history.length;
+    alertBox(t.clearTitle, t.clearText, [{ label: t.cancel }, { label: t.clearBtn(n), blue: true, action: () => { S.history = []; renderSettings(); renderPanel(); } }]);
+  }
+
+  /* ─── O app: ícone na barra, painel e transcrição ─── */
+  function placePanel() {
+    if (small()) { panel.style.left = ""; return; }
+    const r = statusBtn.getBoundingClientRect(), w = panel.offsetWidth;
+    panel.style.left = Math.round(Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8)) + "px";
+  }
+  function openPanel(auto) {
+    if (!S.running) return;
+    hideMenu(); closeFan();
+    S.open = true; S.autoOpen = !!auto; S.badge = false;
+    renderPanel(); placePanel();
+    panel.classList.add("on");
+    statusBtn.setAttribute("aria-expanded", "true");
+    renderStatus();
+    if (!auto) hideBubble();
+  }
+  function closePanel() {
+    if (!S.open) return;
+    S.open = false; S.autoOpen = false; S.hover = false;
+    panel.classList.remove("on");
+    statusBtn.setAttribute("aria-expanded", "false");
+    renderStatus();
+  }
+  statusBtn.addEventListener("click", (e) => { e.stopPropagation(); hideMenu(); S.open ? closePanel() : openPanel(); });
+  statusBtn.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); closePanel(); hideBubble(); showMenu(statusMenuItems(), statusBtn.getBoundingClientRect(), statusBtn); });
+
+  function renderStatus(p) {
+    statusBtn.hidden = !S.running;
+    statusBtn.classList.toggle("work", !!S.job && !S.flash);
+    statusBtn.classList.toggle("done", !!S.flash);
+    statusBtn.classList.toggle("show-pct", !!S.job && !S.open && !small());
+    statusBtn.classList.toggle("badge", S.badge);
+    $("#dk-settings").classList.toggle("running", S.running);
+    if (p !== undefined) {
+      $(".ring .fill", statusBtn).setAttribute("stroke-dashoffset", String(41.47 * (1 - p)));
+      $("#pct").textContent = Math.round(p * 100) + "%";
+    }
+  }
+
+  const fmtSecs = (n) => new Intl.NumberFormat(LOCALE[lang], { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n) + " s";
+  const timeOf = (d) => new Intl.DateTimeFormat(LOCALE[lang], { hour: "numeric", minute: "2-digit" }).format(d);
+  const engineName = (m) => (m === "apple" ? "Apple Speech" : "Parakeet v3");
+  const head = (title, sub) => `<div class="p-head"><div class="t"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div><button class="more" data-more aria-label="${esc(T[lang].more)}">${ic("dots")}</button></div>`;
+  const histRow = (h, i) => `<div class="hrow"><button class="open" data-h="${i}"><span class="wv">${ic("wave")}</span><span><b>${esc(AUDIO[h.k].name[lang])}</b><small>${esc(T[lang].today(timeOf(h.at)) + " · " + AUDIO[h.k].dur)}</small></span></button><button class="ib del" data-del="${i}" aria-label="${esc(T[lang].deleteFromHistory)}">${ic("trash")}</button><button class="ib" data-copyh="${i}" aria-label="${esc(T[lang].copyTranscription)}">${ic(h.copied ? "check" : "copy")}</button></div>`;
+
+  function renderPanel() {
+    const t = T[lang];
+    let h = "";
+    if (S.view === "empty") {
+      h = head("TranscreveAI");
+      h += `<button class="drop${S.hover ? " over" : ""}" data-pick><span class="ico">${ic("tray")}</span><span><strong>${esc(S.hover ? t.release : t.drop)}</strong><span>${esc(t.orPick)}</span></span></button>`;
+      h += `<div class="p-foot"><button class="mini" data-menu="model">${ic(S.model === "apple" ? "mic" : "bolt")}${esc(t.models[S.model][1])}${ic("chev", "i cv")}</button><button class="mini" data-menu="alang">${ic("globe")}${esc(alangName())}${ic("chev", "i cv")}</button></div>`;
+      if (S.history.length) {
+        const n = S.history.length;
+        h += `<div class="recent"><div class="hd"><span>${esc(t.recent)}</span><button data-all>${esc(n > 3 ? t.seeAllN(n) : t.seeAll)}</button></div>${S.history.slice(0, 3).map(histRow).join("")}</div>`;
+      }
+    } else if (S.view === "list") {
+      const q = S.query.trim().toLowerCase();
+      const items = S.history.map((x, i) => [x, i]).filter(([x]) => !q || AUDIO[x.k].name[lang].toLowerCase().includes(q) || AUDIO[x.k].text[lang].some((p) => p[1].toLowerCase().includes(q)));
+      h = `<div class="p-row" style="margin-top: 0"><button class="link" data-back>${ic("left")}${esc(t.back)}</button><span class="sp"></span><button class="more" data-more aria-label="${esc(t.more)}">${ic("dots")}</button></div>`;
+      h += `<label class="search">${ic("search")}<input type="search" data-q placeholder="${esc(t.searchHistory)}" value="${esc(S.query)}"></label>`;
+      h += items.length ? items.map(([x, i]) => histRow(x, i)).join("") : `<p class="empty-note">${esc(S.history.length ? t.nothing : t.noneYet)}</p>`;
+    } else if (S.view === "work") {
+      const a = AUDIO[S.job.k];
+      h = head(a.name[lang], `${a.dur} · ${engineName(S.job.model)}`);
+      h += `<div class="work"><div class="line"><span>${esc(t.transcribing)}</span><span id="p-pct">${Math.round(S.job.p * 100)}%</span></div><div class="bar"><i id="p-bar" style="width: ${(S.job.p * 100).toFixed(1)}%"></i></div></div>`;
+      if (S.job.model === "apple") h += `<div class="live"><span>${esc(t.live)}</span><p id="p-live"></p></div>`;
+      h += `<div class="tipline"><p>${esc(t.tipClose)}</p><button class="btn" data-cancel>${esc(t.cancel)}</button></div>`;
+    } else if (S.view === "done") {
+      const a = AUDIO[S.last.k];
+      const when = S.last.fromHistory ? t.today(timeOf(S.last.at)) : t.transcribedIn(fmtSecs(S.last.secs));
+      h = head(a.name[lang], `${a.dur} · ${when} · ${engineName(S.last.model)}`);
+      // Clicar no texto copia tudo (como no app); passar o mouse mostra "Clique para copiar".
+      h += `<div class="tbox" data-copy role="button" tabindex="0" aria-label="${esc(t.clickToCopy)}"><div class="text">${a.text[lang].map((p, i) => `<div class="para" style="--d: ${(i * 0.1).toFixed(2)}s"><time>${p[0]}</time><p>${esc(p[1])}</p></div>`).join("")}</div></div>`;
+      h += `<div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.newOne)}</button><span class="sp"></span><span class="copyhint" aria-hidden="true">${ic("copy")}${esc(t.clickToCopy)}</span></div>`;
+    } else if (S.view === "error") {
+      h = head("TranscreveAI");
+      h += `<div class="msg">${ic("alert")}<p>${esc(S.error)}</p></div><div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.newOne)}</button></div>`;
+    } else if (S.view === "notice") {
+      h = head("TranscreveAI");
+      h += `<div class="msg">${ic("lock")}<p><b>${esc(t.realTitle)}</b><small>${esc(t.realBody)}</small></p></div><div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.back)}</button><span class="sp"></span><a class="btn blue" href="${DMG}">${esc(t.download)}</a></div>`;
+    }
+    $("#p-body").innerHTML = h;
+    if (S.view === "list") {
+      const inp = $("[data-q]", panel);
+      inp.addEventListener("input", () => { S.query = inp.value; const pos = inp.selectionStart; renderPanel(); const n = $("[data-q]", panel); n.focus(); n.setSelectionRange(pos, pos); });
+    }
+  }
+
+  panel.addEventListener("click", (e) => {
+    if (e.target.closest("[data-copy]")) return copyResult();
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-more")) { e.stopPropagation(); return showMenu(appMenuItems(), b.getBoundingClientRect(), b, "right"); }
+    if (b.dataset.menu) { e.stopPropagation(); return showMenu(b.dataset.menu === "model" ? modelItems() : langItems(), b.getBoundingClientRect(), b); }
+    if (b.hasAttribute("data-pick")) return openWin("w-finder", { mode: "open", place: "downloads" });
+    if (b.hasAttribute("data-cancel")) { stopJob(); S.view = "empty"; renderPanel(); renderStatus(); return; }
+    if (b.hasAttribute("data-new")) { S.view = "empty"; renderPanel(); return; }
+    if (b.hasAttribute("data-all")) { S.view = "list"; S.query = ""; renderPanel(); return; }
+    if (b.hasAttribute("data-back")) { S.view = "empty"; renderPanel(); return; }
+    if (b.dataset.h !== undefined) { S.last = Object.assign({}, S.history[Number(b.dataset.h)], { fromHistory: true }); S.view = "done"; renderPanel(); return; }
+    if (b.dataset.del !== undefined) { S.history.splice(Number(b.dataset.del), 1); renderPanel(); renderSettings(); return; }
+    if (b.dataset.copyh !== undefined) { const x = S.history[Number(b.dataset.copyh)]; copyText(x.k).then((ok) => { if (!ok) return; toast(); x.copied = true; renderPanel(); setTimeout(() => { x.copied = false; renderPanel(); }, 1500); }); }
+  });
+  panel.addEventListener("keydown", (e) => { if (e.target.closest("[data-copy]") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); copyResult(); } });
+  function copyResult() { if (S.last) copyText(S.last.k).then((ok) => { if (ok) toast(); }); }
+  // "Copiado" por 2 s, embaixo no painel, depois de copiar (como no app).
+  let toastTimer = 0;
+  function toast() {
+    const el = $("#ptoast");
+    el.innerHTML = `${ic("check")}${esc(T[lang].copied)}`;
+    el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("on"), 2000);
+  }
+  function copyText(k) {
+    const s = AUDIO[k].text[lang].map((p) => p[1]).join("\n\n");
+    if (legacyCopy(s)) return Promise.resolve(true);
+    return navigator.clipboard ? navigator.clipboard.writeText(s).then(() => true, () => false) : Promise.resolve(false);
+  }
+  // A cópia clássica funciona no clique mesmo onde a API da área de transferência está bloqueada.
+  function legacyCopy(s) {
+    const active = document.activeElement, ta = document.createElement("textarea");
+    ta.value = s; ta.setAttribute("readonly", ""); ta.style.cssText = "position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none";
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove(); if (active && active.focus) active.focus({ preventScroll: true });
+    return ok;
+  }
+
+  // A demonstração leva o tempo que o app levou de verdade (o Apple Speech, cerca do dobro).
+  function stopJob() { clearInterval(S.timer); S.job = null; }
+  function start(k) {
+    if (!S.running) return;
+    stopJob(); hideBubble(); closeFan();
+    const fw = $("#w-finder"); if (!fw.hidden && finderMode === "open") closeWin(fw);
+    const model = S.model === "apple" ? "apple" : "parakeet";
+    const secs = AUDIO[k].secs * (model === "apple" ? 145 / 73 : 1);
+    S.job = { k, model, secs, t0: performance.now(), p: 0 };
+    S.view = "work"; S.hover = false; S.flash = false;
+    if (!S.open) openPanel(); else renderPanel();
+    S.autoOpen = false;
+    renderStatus(0);
+    S.timer = setInterval(step, 50);
+  }
+  function step() {
+    const j = S.job; if (!j) return;
+    const x = Math.min(1, (performance.now() - j.t0) / (j.secs * 1000));
+    j.p = x < 1 ? 1 - Math.pow(1 - x, 1.35) : 1;
+    const bar = $("#p-bar", panel), pct = $("#p-pct", panel), live = $("#p-live", panel);
+    if (bar) bar.style.width = (j.p * 100).toFixed(1) + "%";
+    if (pct) pct.textContent = Math.round(j.p * 100) + "%";
+    if (live) { const all = AUDIO[j.k].text[lang].map((p) => p[1]).join(" "); live.textContent = all.slice(0, Math.floor(all.length * x)); }
+    renderStatus(j.p);
+    if (x >= 1) finish();
+  }
+  function finish() {
+    const j = S.job;
+    stopJob();
+    const rec = { k: j.k, model: j.model, secs: j.secs, at: new Date(), copied: false };
+    S.last = rec; S.view = "done";
+    if (S.prefs.keep) { S.history.unshift(Object.assign({}, rec)); S.history = S.history.slice(0, 500); }
+    if (!S.open) S.badge = true;
+    S.flash = true;
+    if (S.prefs.sound) chime();
+    renderStatus(); renderSettings();
+    renderPanel();
+    if (S.prefs.copy) copyText(j.k).then((ok) => { if (ok) toast(); });
+    setTimeout(() => { S.flash = false; renderStatus(); }, 1800);
+    if (!S.used.transcribed) {
+      S.used.transcribed = true;
+      if (!S.used.stack) setTimeout(() => { if (!dragging && !fan.classList.contains("on") && !S.used.stack) showBubble($("#dk-downloads"), T[lang].hintStack, T[lang].hintStackSub, "up", 7000); }, 2600);
+    }
+  }
+  let audioCtx = null;
+  function chime() {   // o som de pronto, baixinho
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      [[1046.5, 0], [1568, 0.09]].forEach(([f, d]) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, now + d); g.gain.exponentialRampToValueAtTime(0.06, now + d + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.6);
+        o.connect(g).connect(audioCtx.destination); o.start(now + d); o.stop(now + d + 0.65);
+      });
+    } catch (e) {}
+  }
+
+  function quitApp() {
+    stopJob(); closePanel();
+    S.running = false; S.badge = false; S.view = "empty";
+    ["w-settings", "w-alert"].forEach((id) => { const w = $("#" + id); if (!w.hidden) closeWin(w); });
+    renderStatus();
+    showBubble($("#dk-settings"), T[lang].hintQuit, T[lang].hintQuitSub, "up", 4000);
+  }
+  function bounce(el) { if (reduce) return; el.classList.remove("bounce"); void el.offsetWidth; el.classList.add("bounce"); }
+  function launchApp(showHint) {
+    const was = S.running;
+    if (!was) bounce($("#dk-settings"));
+    S.running = true; renderStatus();
+    // Como o app de verdade: abrir pelo Dock não mostra janela; a dica aponta para o ícone na barra.
+    if (showHint) setTimeout(() => { closePanel(); showBubble(statusBtn, T[lang].hintMenuBar, T[lang].hintMenuBarSub, "down", 5000); }, was ? 0 : 700);
+  }
+
+  /* ─── Dock ─── */
+  // Os Ajustes do app no Dock: abrem a janela de Ajustes (e reabrem o app, se ele tiver sido fechado).
+  $("#dk-settings").addEventListener("click", (e) => { e.stopPropagation(); bounce(e.currentTarget); if (!S.running) { S.running = true; renderStatus(); } openWin("w-settings"); });
+  $("#dk-dmg").addEventListener("click", (e) => bounce(e.currentTarget));
+  $("#dk-coffee").addEventListener("click", (e) => bounce(e.currentTarget));
+  $("#dk-cutline").addEventListener("click", (e) => bounce(e.currentTarget));
+  $("#dk-downloads").addEventListener("click", (e) => { e.stopPropagation(); fan.classList.contains("on") ? closeFan() : openFan(); });
+  function renderFan() {
+    const r = $("#dk-downloads").getBoundingClientRect();
+    const base = innerHeight - r.top + 18;
+    // Como o leque do macOS: sobe em arco a partir da pilha, com o nome à esquerda do ícone.
+    fan.innerHTML = STACK.map((k, i) => {
+      const cx = r.left + r.width / 2 + Math.round(Math.pow(i, 1.7) * 7);
+      return `<button class="fi item" data-k="${k}" style="right: ${Math.round(innerWidth - cx - 27)}px; bottom: ${base + i * 64}px; --d: ${(i * 0.035).toFixed(3)}s"><span class="ic">${iconFor(k)}</span><span class="nm">${esc(fname(k))}</span></button>`;
+    }).join("");
+    $$(".fi", fan).forEach(bindItem);
+  }
+  function openFan() {
+    closePanel(); hideMenu(); hideBubble();
+    renderFan();
+    requestAnimationFrame(() => requestAnimationFrame(() => fan.classList.add("on")));
+    $("#dk-downloads").setAttribute("aria-expanded", "true");
+    S.used.stack = true;
+    const first = $(".fi", fan); if (first) setTimeout(() => first.focus({ preventScroll: true }), 50);
+  }
+  function closeFan() {
+    if (!fan.classList.contains("on")) return;
+    fan.classList.remove("on");
+    $("#dk-downloads").setAttribute("aria-expanded", "false");
+    setTimeout(() => { if (!fan.classList.contains("on")) fan.innerHTML = ""; }, 320);
+  }
+
+  /* ─── Dicas discretas ─── */
+  let bubbleTimer = 0;
+  function showBubble(target, title, sub, dir, ms) {
+    if (!target || target.hidden) return;
+    const r = target.getBoundingClientRect();
+    bubble.innerHTML = `<b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}`;
+    bubble.className = "bubble " + dir;
+    const w = bubble.offsetWidth, h = bubble.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    bubble.style.left = left + "px";
+    bubble.style.top = (dir === "down" ? r.bottom + 10 : r.top - h - 14) + "px";
+    bubble.style.setProperty("--ax", (r.left + r.width / 2 - left) + "px");
+    requestAnimationFrame(() => bubble.classList.add("on"));
+    clearTimeout(bubbleTimer);
+    if (ms) bubbleTimer = setTimeout(hideBubble, ms);
+  }
+  function hideBubble() { bubble.classList.remove("on"); clearTimeout(bubbleTimer); }
+
+  /* ─── Um arquivo de verdade solto na página: não é lido nem enviado ─── */
+  let depth = 0;
+  const hasFiles = (e) => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+  addEventListener("dragenter", (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    if (depth++ === 0 && S.running) { hideBubble(); if (!S.job) S.view = "empty"; if (!S.open) openPanel(true); S.hover = true; renderPanel(); }
+  });
+  addEventListener("dragover", (e) => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = S.running ? "copy" : "none"; } });
+  addEventListener("dragleave", (e) => { if (!hasFiles(e) || --depth > 0) return; depth = 0; S.hover = false; if (S.autoOpen) closePanel(); else renderPanel(); });
+  addEventListener("drop", (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    depth = 0; S.hover = false; S.autoOpen = false;
+    if (!S.running) return;
+    stopJob(); S.view = "notice"; if (!S.open) openPanel(); renderPanel(); renderStatus();
+  });
+
+  /* ─── Cliques fora, Esc, atalhos ─── */
+  document.addEventListener("pointerdown", (e) => {
+    if (mac.classList.contains("dragging")) return;
+    const t = e.target;
+    if (!menu.hidden && !t.closest("#menu")) hideMenu();
+    if (S.open && !t.closest("#panel, #status, #menu")) closePanel();
+    if (fan.classList.contains("on") && !t.closest("#fan, #dk-downloads")) closeFan();
+    if (!t.closest(".item")) select(null);
+    // Um clique na mesa ativa o Finder, como no Mac.
+    if (!t.closest(".window, .menubar, .dock, #panel, #menu, #fan")) { $$(".window").forEach((x) => x.classList.add("inactive")); if (frontApp !== "finder") { frontApp = "finder"; renderMenubar(); } }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { if (!menu.hidden) return hideMenu(); if (fan.classList.contains("on")) return closeFan(); if (S.open) { closePanel(); statusBtn.focus(); } }
+    if ((e.metaKey || e.ctrlKey) && e.key === "," && S.running) { e.preventDefault(); openWin("w-settings"); }
+  });
+  addEventListener("resize", () => { placePanel(); tick(); if (fan.classList.contains("on")) renderFan(); hideBubble(); });
+
+  /* ─── Versão da release mais nova (Leia-me, Ajustes e o alerta de atualização) ─── */
+  fetch("https://api.github.com/repos/joaogmcorrea/transcreveAI/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => { if (j && j.tag_name) { version = String(j.tag_name).replace(/^v/, ""); renderReadme(); renderSettings(); } })
+    .catch(() => {});
+
+  /* ─── Início ─── */
+  setLang(firstLang(), false);
+  setTimeout(() => { if (!S.open && !S.job && !dragging) showBubble(statusBtn, T[lang].hintStatus, T[lang].hintStatusSub, "down", 0); }, reduce ? 0 : 900);
+})();
+</script>
+</body>
+</html>

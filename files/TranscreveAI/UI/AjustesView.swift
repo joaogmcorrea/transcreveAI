@@ -92,15 +92,17 @@ struct AjustesView: View {
             let motor = MotorParakeet.compartilhado
             let pronto = await motor.pronto
             let baixado = await motor.baixado
-            parakeet = pronto ? "Carregado e pronto" : baixado ? "Baixado (~470 MB)" : "Baixa sozinho na primeira transcrição"
+            parakeet = pronto ? String(localized: "Carregado e pronto")
+                : baixado ? String(localized: "Baixado (~470 MB)")
+                : String(localized: "Baixa sozinho na primeira transcrição")
         }
     }
 
     private var contagem: String {
         switch historico.itens.count {
-        case 0: "Nenhuma transcrição guardada"
-        case 1: "1 transcrição guardada"
-        default: "\(historico.itens.count) transcrições guardadas"
+        case 0: String(localized: "Nenhuma transcrição guardada")
+        case 1: String(localized: "1 transcrição guardada")
+        default: String(localized: "\(historico.itens.count) transcrições guardadas")
         }
     }
 
