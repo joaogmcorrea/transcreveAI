@@ -251,6 +251,9 @@ The website ({site}/) is an interactive Mac desktop: visitors drag a sample audi
 ## Key facts
 
 - Drop an audio file on the menu bar icon or on the panel, and the text comes back already copied to the clipboard. Clicking the text copies it again.
+- The text appears in the panel while the rest is still being transcribed (the first part in about 0.1 s); clicking it copies what is ready so far.
+- In the Finder, right-click audio files › Transcribe with TranscreveAI › Copy text or Export as .txt (saved next to the audio file), without opening the panel.
+- Several files at once go into a queue and are transcribed one after another ("Transcribing 2 of 3…").
 - Default engine ("Automatic"): Parakeet v3 (NVIDIA, through FluidAudio on Core ML), about 145 times faster than real time on an M4 Pro. Apple Speech, built into macOS, handles the first file while Parakeet downloads once (470 MB).
 - Any audio format: what macOS opens directly (MP3, M4A/AAC, WAV, AIFF, FLAC, MP4/MOV and more) plus WebM, WMA, MKV and AMR through a bundled FFmpeg.
 - Recent transcriptions stay only on the Mac; by default the history is cleared when the Mac restarts.

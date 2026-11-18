@@ -45,6 +45,28 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 8 — 18/11/2026 (Site imitando a v0.5.0)
+⚠️ RASCUNHO — revisar ao final da sessão ou no início da próxima
+
+### Objetivo
+- Atualizar o site (`_site/index.html`) para imitar a v0.5.0: texto ao vivo, botão direito do Finder, fila e a linha do Finder nos Ajustes, nos três idiomas.
+
+### Descobertas
+- `imagens.mjs` esperava a caixa de texto (`.tbox`) para fotografar; desde o texto ao vivo ela aparece no meio da transcrição. Agora espera o botão "Novo" (`[data-new]`), que só aparece no fim.
+- Nos Ajustes imitados, em espanhol e na largura de celular, a linha do histórico (contagem + dois botões) alargava a janela e cortava os interruptores (já era assim antes). Abaixo de 760 px, as linhas agora quebram (`flex-wrap`).
+
+### Decisões Tomadas
+- O botão "Ajustes do Sistema…" da linha do Finder liga e desliga a extensão direto (no app, abre os Ajustes do Sistema); desligada, o item some do botão direito.
+- Vários arquivos de uma vez no site: ⌘ ou Shift + clique (Ctrl fora do Mac) e ⌘A, como no Finder; dois cliques num áudio da seleção põem todos na fila. No celular, segurar o dedo abre o menu do botão direito, e tocar outro áudio durante uma transcrição põe na fila.
+- O `.txt` exportado vai para a pasta de onde veio o pedido (mesa ou a pasta do Finder); de Recentes, para a pasta de verdade do áudio (`HOME`). Dois cliques nele abrem o texto no TextEdit.
+- Dica nova: na segunda transcrição, com o painel fechado, um balão aponta o botão direito (só com mouse).
+- As imagens de compartilhamento não mudaram (mostram o fim da transcrição, igual à v0.4.1): rodei o `imagens.mjs` para conferir a correção e mantive as antigas.
+
+### Arquivos Modificados/Criados
+- `_site/index.html`, `_site/gerar.py` (llms.txt), `_site/imagens.mjs`.
+
+---
+
 ## Sessão 7 — 17–18/11/2026 (Texto ao vivo, botão direito do Finder e fila, v0.5.0)
 
 ### Objetivo

@@ -113,6 +113,10 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
 .menu .mi[disabled], .menu .mi[disabled] small { color: var(--label-3); }
 .menu hr { border: 0; height: 1px; margin: 5px 8px; background: var(--sep); }
 .menu .head { padding: 4px 10px 2px 28px; font-size: 11px; font-weight: 600; color: var(--label-3); }
+.menu .mi .ico2 { font-size: 14px; }
+.menu .mi .arw { font-size: 11px; stroke-width: 2.4; color: var(--label-2); }
+.menu .mi.open { background: var(--accent); color: #fff; }
+.menu .mi.open .arw, .menu .mi:not([disabled]):hover .arw, .menu .mi:not([disabled]):focus .arw { color: #fff; }
 
 /* ─── Ícones na mesa ─── */
 .desktop { position: absolute; top: calc(var(--mb-h) + 12px); right: 10px; bottom: 100px; display: flex; flex-direction: column; flex-wrap: wrap-reverse; align-content: flex-start; gap: 6px 4px; }
@@ -124,6 +128,9 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
 .item:focus-visible { outline: none; }
 .item:focus-visible .nm { background: var(--accent); }
 .item.lifted { opacity: 0.4; }
+/* O .txt exportado pelo botão direito aparece ao lado do áudio */
+.item.fresh .ic { animation: pop 0.55s var(--spring) both; }
+@keyframes pop { from { opacity: 0; transform: scale(0.4); } }
 
 /* Desenhos dos ícones */
 .doc { position: relative; width: 44px; height: 56px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45)); }
@@ -147,7 +154,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
 
 /* Fantasma durante o arraste */
 .ghost { position: fixed; left: 0; top: 0; z-index: 120; pointer-events: none; margin: -28px 0 0 -22px; }
-.ghost > * { transform: rotate(-4deg) scale(1.05); }
+.ghost > :not(.count) { transform: rotate(-4deg) scale(1.05); }
+.ghost .count { position: absolute; top: -8px; left: 34px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--dot); color: #fff; font: 600 12px/22px var(--font); text-align: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
 .mac.dragging, .mac.dragging * { cursor: grabbing !important; }
 
 /* ─── Janelas ─── */
@@ -280,11 +288,21 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
 .work .line span:last-child { color: var(--label-2); font-weight: 400; font-variant-numeric: tabular-nums; }
 .bar { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--fill); overflow: hidden; }
 .bar i { display: block; height: 100%; min-width: 6px; width: 0; border-radius: 3px; background: var(--accent); }
-.live { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fill-2); }
-.live span { display: block; margin-bottom: 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--label-2); }
-.live p { font-size: 13px; color: var(--label-2); min-height: 2.8em; }
+.work .next { display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: 8px; font-size: 11.5px; color: var(--label-2); }
+.work .next .i { font-size: 12px; }
+.work .next span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .tipline { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; font-size: 11.5px; color: var(--label-2); }
 .tipline p { flex: 1; }
+/* Com o mouse sobre o texto, no lugar da dica: "Clique para copiar o que já saiu" (como no app) */
+.tipline .copyhint { display: none; flex: 1; }
+.panel:has(.tbox:hover) .tipline p, .panel:has(.tbox:focus-visible) .tipline p { display: none; }
+.panel:has(.tbox:hover) .tipline .copyhint, .panel:has(.tbox:focus-visible) .tipline .copyhint { display: inline-flex; }
+.pnote { display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; font-size: 11.5px; color: var(--label-2); }
+.pnote .i { font-size: 13px; margin-top: 1px; }
+/* Um áudio arrastado sobre o painel com um arquivo na tela: o painel inteiro vira o alvo */
+.p-over { position: absolute; inset: 6px; z-index: 2; display: grid; place-items: center; align-content: center; gap: 8px; border-radius: 14px; border: 2px dashed var(--accent); background: rgba(36, 36, 40, 0.92); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); color: var(--accent); font-size: 15px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
+.p-over .i { font-size: 24px; }
+.panel.over .p-over { opacity: 1; }
 .text { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--fill-2); display: grid; gap: 12px; max-height: min(300px, 46dvh); overflow-y: auto; }
 .tbox { position: relative; margin-top: 12px; border-radius: 12px; cursor: pointer; }
 .tbox .text { margin-top: 0; transition: background-color 0.15s ease; }
@@ -297,6 +315,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
 .ptoast.on { opacity: 1; transform: translate(-50%, 0); }
 .ptoast .i { font-size: 13px; stroke-width: 2.4; }
 .para { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 8px; animation: rise 0.6s var(--ease) both; animation-delay: var(--d, 0s); }
+.para.still { animation: none; }
 .para time { padding-top: 1px; font-size: 11.5px; color: var(--label-2); font-variant-numeric: tabular-nums; }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 .p-row { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
@@ -357,6 +376,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   .f-bar > .lights { display: flex; margin-right: 4px; }
   .f-bar .pill { display: none; }
   .alert { left: calc(50% - 150px) !important; right: auto; width: 300px !important; }
+  .row { flex-wrap: wrap; }   /* nos Ajustes, os botões descem para a linha de baixo em vez de cortar a janela */
+  .row .l { min-width: 50%; }
   .panel { left: 8px !important; right: 8px; width: auto; top: calc(var(--mb-h) + 4px); }
   .dock { gap: 6px; padding: 6px 8px; border-radius: 20px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
   .dk { width: 46px; height: 46px; }
@@ -419,6 +440,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   <symbol id="gear" viewBox="0 0 24 24"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></symbol>
   <symbol id="folder" viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></symbol>
   <symbol id="alert" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 8v4" /><path d="M12 16h.01" /></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 11v5" /><path d="M12 8h.01" /></symbol>
   <symbol id="lock" viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></symbol>
   <symbol id="x" viewBox="0 0 24 24"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></symbol>
   <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14" /></symbol>
@@ -498,9 +520,10 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   <!-- Alerta (Sparkle, confirmações) -->
   <section class="window alert" id="w-alert" role="alertdialog" hidden></section>
 
-  <div class="panel" id="panel" role="dialog" aria-label="TranscreveAI"><div id="p-body"></div><div class="ptoast" id="ptoast" role="status" aria-live="polite"></div></div>
+  <div class="panel" id="panel" role="dialog" aria-label="TranscreveAI"><div id="p-body"></div><div class="p-over" id="p-over" aria-hidden="true"></div><div class="ptoast" id="ptoast" role="status" aria-live="polite"></div></div>
   <div class="fan" id="fan"></div>
   <div class="menu" id="menu" role="menu" hidden></div>
+  <div class="menu" id="submenu" role="menu" hidden></div>
   <div class="bubble" id="bubble" role="status"></div>
 
   <nav class="dock" id="dock" aria-label="Dock">
@@ -531,7 +554,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   const CUTLINE_PNG = new URL("cutline.png", BASE).href;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const small = () => innerWidth <= 760;
-  let version = "0.4.0";
+  let version = "0.5.0";
 
   /* ─── Textos ─── */
   const LOCALE = { en: "en-US", pt: "pt-BR", es: "es" };
@@ -550,13 +573,17 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       audioLanguage: "Audio language", auto: "Auto",
       recent: "RECENT", seeAll: "See All", seeAllN: (n) => `See All (${n})`, back: "Back", searchHistory: "Search history", nothing: "Nothing found.", noneYet: "No transcriptions yet.",
       copyTranscription: "Copy the transcription", deleteFromHistory: "Delete from History",
-      transcribing: "Transcribing…", live: "LIVE PREVIEW", tipClose: "You can close the panel: progress shows on the menu bar icon.",
+      transcribing: "Transcribing…", transcribingN: (a, b) => `Transcribing ${a} of ${b}…`, upNext: (names, more) => more ? `Up next: ${names} and ${more} more` : `Up next: ${names}`,
+      tipClose: "You can close the panel: progress shows on the menu bar icon.", copySoFar: "Click to copy what’s ready so far",
       transcribedIn: (t) => `transcribed in ${t}`, newOne: "New", clickToCopy: "Click to copy", copied: "Copied",
+      noteCopiedN: (n) => `Text from ${n} audio files copied.`, noteSaved: (f) => `Saved as ${f}, next to the audio file.`, noteSavedN: (n) => `${n} .txt files saved next to the audio files.`,
+      ctxOpen: "Open", ctxTranscribe: "Transcribe with TranscreveAI", ctxCopy: "Copy text", ctxExport: "Export as .txt",
       notAudio: "That file doesn’t look like audio.",
       realTitle: "This Mac is only a demo", realBody: "Your file stayed on your computer. To transcribe it, download TranscreveAI.", download: "Download",
       today: (h) => `Today, ${h}`,
       dockDownload: "Download TranscreveAI", dockCoffee: "Buy Me a Coffee", settingsTitle: "TranscreveAI Settings", general: "General", transcription: "Transcription", history: "History", updates: "Updates",
       sOpenAtLogin: "Open at Login", sOpenOnDrag: "Open the panel when dragging an audio file", sCopy: "Copy the text when done", sSound: "Play a sound when done",
+      sFinder: "Transcribe from the Finder right-click menu", on: "On", off: "Off", sysSettings: "System Settings…", turnOn: "Turn On…",
       model: "Model", loaded: "Loaded and ready", builtIn: "Built into macOS",
       keep: "Keep transcriptions on this Mac", session: "Erase when the Mac shuts down or restarts",
       count: (n) => n === 0 ? "No saved transcriptions" : n === 1 ? "1 saved transcription" : `${n} saved transcriptions`,
@@ -567,6 +594,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       hintMenuBar: "TranscreveAI lives in the menu bar", hintMenuBarSub: "It has no window. Click the icon up here.",
       hintStack: "Try the Downloads stack too", hintStackSub: "Drag an audio file out of it and the panel opens by itself.",
       hintQuit: "TranscreveAI quit", hintQuitSub: "Open it again from the Dock.",
+      hintCopied: "Copied to the clipboard", hintCopiedSub: "Straight from the right-click menu, without opening the panel.",
+      hintRight: "Right-click an audio file", hintRightSub: "Copy the text or save a .txt next to it, without opening the panel.",
       readmeHtml: (v) => `<h1>TranscreveAI</h1>
         <p>Audio to text in seconds, right from the menu bar. Drop an audio file on the icon at the top of the screen and the text comes back already copied. Everything runs on your Mac: the audio never leaves it.</p>
         <p class="muted">This desktop is a demo you can use. The files on it are samples with made-up text.</p>
@@ -575,6 +604,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
         <li>The first time, macOS says it can’t verify the app. Go to System Settings › Privacy &amp; Security and click Open Anyway.</li>
         <li>The icon shows up in the menu bar. New versions arrive on their own.</li></ol>
         <h2>Good to know</h2>
+        <p>The text shows up in the panel while the rest is still being transcribed. In the Finder, right-click audio files › Transcribe with TranscreveAI to copy the text or save a .txt next to them, without opening the panel. Several files at once are transcribed one after another.</p>
         <p>Parakeet v3 transcribes about 145 times faster than real time on an M4 Pro. It understands English, Portuguese and Spanish, and the app speaks all three. The model downloads once (470 MB); after that, nothing goes online except update checks.</p>
         <p class="muted">Version ${v} · macOS 26 or later · Free and open source (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Made by João Corrêa</p>`,
     },
@@ -592,13 +622,17 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       audioLanguage: "Idioma do áudio", auto: "Auto",
       recent: "RECENTES", seeAll: "Ver tudo", seeAllN: (n) => `Ver tudo (${n})`, back: "Voltar", searchHistory: "Buscar no histórico", nothing: "Nada encontrado.", noneYet: "Nenhuma transcrição ainda.",
       copyTranscription: "Copiar a transcrição", deleteFromHistory: "Apagar do histórico",
-      transcribing: "Transcrevendo…", live: "PRÉVIA AO VIVO", tipClose: "Pode fechar o painel: o progresso fica no ícone da barra.",
+      transcribing: "Transcrevendo…", transcribingN: (a, b) => `Transcrevendo ${a} de ${b}…`, upNext: (names, more) => more ? `Na fila: ${names} e mais ${more}` : `Na fila: ${names}`,
+      tipClose: "Pode fechar o painel: o progresso fica no ícone da barra.", copySoFar: "Clique para copiar o que já saiu",
       transcribedIn: (t) => `transcrito em ${t}`, newOne: "Novo", clickToCopy: "Clique para copiar", copied: "Copiado",
+      noteCopiedN: (n) => `O texto dos ${n} áudios foi copiado.`, noteSaved: (f) => `Salvo como ${f}, ao lado do áudio.`, noteSavedN: (n) => `${n} arquivos .txt salvos ao lado dos áudios.`,
+      ctxOpen: "Abrir", ctxTranscribe: "Transcrever com o TranscreveAI", ctxCopy: "Copiar o texto", ctxExport: "Exportar como .txt",
       notAudio: "Esse arquivo não parece ser um áudio.",
       realTitle: "Este Mac é só uma demonstração", realBody: "O seu arquivo ficou no seu computador. Para transcrevê-lo, baixe o TranscreveAI.", download: "Baixar",
       today: (h) => `Hoje, ${h}`,
       dockDownload: "Baixar o TranscreveAI", dockCoffee: "Me pague um café", settingsTitle: "Ajustes do TranscreveAI", general: "Geral", transcription: "Transcrição", history: "Histórico", updates: "Atualizações",
       sOpenAtLogin: "Abrir ao iniciar o Mac", sOpenOnDrag: "Abrir o painel ao arrastar um áudio", sCopy: "Copiar o texto ao terminar", sSound: "Tocar um som ao terminar",
+      sFinder: "Transcrever pelo botão direito do Finder", on: "Ligado", off: "Desligado", sysSettings: "Ajustes do Sistema…", turnOn: "Ligar…",
       model: "Modelo", loaded: "Carregado e pronto", builtIn: "Já vem no macOS",
       keep: "Guardar as transcrições neste Mac", session: "Apagar ao desligar ou reiniciar o Mac",
       count: (n) => n === 0 ? "Nenhuma transcrição guardada" : n === 1 ? "1 transcrição guardada" : `${n} transcrições guardadas`,
@@ -609,6 +643,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       hintMenuBar: "O TranscreveAI fica na barra de menus", hintMenuBarSub: "Ele não tem janela. Clique no ícone aqui em cima.",
       hintStack: "Teste também a pilha de Downloads", hintStackSub: "Arraste um áudio para fora dela e o painel abre sozinho.",
       hintQuit: "O TranscreveAI foi fechado", hintQuitSub: "Abra de novo pelo Dock.",
+      hintCopied: "Copiado para a área de transferência", hintCopiedSub: "Direto do botão direito, sem abrir o painel.",
+      hintRight: "Clique num áudio com o botão direito", hintRightSub: "Copie o texto ou salve um .txt ao lado dele, sem abrir o painel.",
       readmeHtml: (v) => `<h1>TranscreveAI</h1>
         <p>Áudio em texto em segundos, direto da barra de menus. Solte um áudio no ícone lá em cima e o texto volta já copiado. Tudo roda no seu Mac: o áudio nunca sai dele.</p>
         <p class="muted">Esta mesa é uma demonstração que dá para usar. Os arquivos nela são exemplos com texto inventado.</p>
@@ -617,6 +653,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
         <li>Na primeira vez, o macOS diz que não consegue verificar o app. Vá em Ajustes do Sistema › Privacidade e Segurança e clique em Abrir Mesmo Assim.</li>
         <li>O ícone aparece na barra de menus. As versões novas chegam sozinhas.</li></ol>
         <h2>Bom saber</h2>
+        <p>O texto aparece no painel enquanto o resto ainda é transcrito. No Finder, clique nos áudios com o botão direito › Transcrever com o TranscreveAI para copiar o texto ou salvar um .txt ao lado deles, sem abrir o painel. Vários arquivos de uma vez são transcritos um depois do outro.</p>
         <p>O Parakeet v3 transcreve cerca de 145 vezes mais rápido que o tempo real num M4 Pro. Ele entende português, inglês e espanhol, e o app também fala os três. O modelo baixa uma vez (470 MB); depois disso, nada vai para a internet além da busca por atualizações.</p>
         <p class="muted">Versão ${v} · macOS 26 ou mais recente · Grátis e de código aberto (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Feito por João Corrêa</p>`,
     },
@@ -634,13 +671,17 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       audioLanguage: "Idioma del audio", auto: "Auto",
       recent: "RECIENTES", seeAll: "Ver todo", seeAllN: (n) => `Ver todo (${n})`, back: "Volver", searchHistory: "Buscar en el historial", nothing: "No se encontró nada.", noneYet: "Todavía no hay transcripciones.",
       copyTranscription: "Copiar la transcripción", deleteFromHistory: "Eliminar del historial",
-      transcribing: "Transcribiendo…", live: "VISTA PREVIA EN VIVO", tipClose: "Puedes cerrar el panel: el progreso se ve en el ícono de la barra de menús.",
+      transcribing: "Transcribiendo…", transcribingN: (a, b) => `Transcribiendo ${a} de ${b}…`, upNext: (names, more) => more ? `En cola: ${names} y ${more} más` : `En cola: ${names}`,
+      tipClose: "Puedes cerrar el panel: el progreso se ve en el ícono de la barra de menús.", copySoFar: "Haz clic para copiar lo que ya está listo",
       transcribedIn: (t) => `transcrito en ${t}`, newOne: "Nuevo", clickToCopy: "Haz clic para copiar", copied: "Copiado",
+      noteCopiedN: (n) => `Se copió el texto de los ${n} audios.`, noteSaved: (f) => `Guardado como ${f}, junto al audio.`, noteSavedN: (n) => `${n} archivos .txt guardados junto a los audios.`,
+      ctxOpen: "Abrir", ctxTranscribe: "Transcribir con TranscreveAI", ctxCopy: "Copiar el texto", ctxExport: "Exportar como .txt",
       notAudio: "Ese archivo no parece ser un audio.",
       realTitle: "Este escritorio es solo una demostración", realBody: "Tu archivo se quedó en tu computadora. Para transcribirlo, descarga TranscreveAI.", download: "Descargar",
       today: (h) => `Hoy, ${h}`,
       dockDownload: "Descargar TranscreveAI", dockCoffee: "Invítame un café", settingsTitle: "Ajustes de TranscreveAI", general: "General", transcription: "Transcripción", history: "Historial", updates: "Actualizaciones",
       sOpenAtLogin: "Abrir al iniciar sesión", sOpenOnDrag: "Abrir el panel al arrastrar un audio", sCopy: "Copiar el texto al terminar", sSound: "Reproducir un sonido al terminar",
+      sFinder: "Transcribir con el clic derecho del Finder", on: "Activado", off: "Desactivado", sysSettings: "Ajustes del Sistema…", turnOn: "Activar…",
       model: "Modelo", loaded: "Cargado y listo", builtIn: "Incluido en macOS",
       keep: "Guardar las transcripciones en tu Mac", session: "Borrar al apagar o reiniciar tu Mac",
       count: (n) => n === 0 ? "No hay transcripciones guardadas" : n === 1 ? "1 transcripción guardada" : `${n} transcripciones guardadas`,
@@ -651,6 +692,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       hintMenuBar: "TranscreveAI vive en la barra de menús", hintMenuBarSub: "No tiene ventana. Haz clic en el ícono aquí arriba.",
       hintStack: "Prueba también la pila de Descargas", hintStackSub: "Arrastra un audio fuera de ella y el panel se abre solo.",
       hintQuit: "TranscreveAI se cerró", hintQuitSub: "Ábrela de nuevo desde el Dock.",
+      hintCopied: "Copiado al portapapeles", hintCopiedSub: "Directo desde el clic derecho, sin abrir el panel.",
+      hintRight: "Haz clic derecho en un audio", hintRightSub: "Copia el texto o guarda un .txt junto a él, sin abrir el panel.",
       readmeHtml: (v) => `<h1>TranscreveAI</h1>
         <p>Audio a texto en segundos, desde la barra de menús. Suelta un audio en el ícono de arriba y el texto vuelve ya copiado. Todo corre en tu Mac: el audio nunca sale de ahí.</p>
         <p class="muted">Este escritorio es una demostración que puedes usar. Los archivos son ejemplos con texto inventado.</p>
@@ -659,6 +702,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
         <li>La primera vez, macOS dice que no puede verificar la app. Ve a Ajustes del Sistema › Privacidad y seguridad y haz clic en Abrir igualmente.</li>
         <li>El ícono aparece en la barra de menús. Las versiones nuevas llegan solas.</li></ol>
         <h2>Bueno saber</h2>
+        <p>El texto aparece en el panel mientras el resto todavía se transcribe. En el Finder, haz clic derecho en los audios › Transcribir con TranscreveAI para copiar el texto o guardar un .txt junto a ellos, sin abrir el panel. Varios archivos a la vez se transcriben uno tras otro.</p>
         <p>Parakeet v3 transcribe unas 145 veces más rápido que el tiempo real con un chip M4 Pro. Entiende español, inglés y portugués, y la app también habla los tres. El modelo se descarga una vez (470 MB); después, nada sale a internet salvo la búsqueda de actualizaciones.</p>
         <p class="muted">Versión ${v} · macOS 26 o posterior · Gratis y de código abierto (MIT) · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a><br>Hecho por João Corrêa</p>`,
     },
@@ -703,6 +747,26 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     downloads: ["podcast", "interview", "dmg", "report", "notes"],
   };
   const STACK = ["podcast", "interview", "dmg", "report"];   // de baixo (mais novo) para cima
+  // A pasta de verdade de cada áudio: onde o .txt exportado pelo botão direito vai parar quando o pedido vem de Recentes.
+  const HOME = { meeting: "desktop", interview: "downloads", podcast: "downloads" };
+  // O .txt exportado pelo botão direito do Finder: "<nome do áudio>.txt" ao lado do áudio; se o nome existe, "<nome> 2.txt".
+  const stem = (s) => s.replace(/\.[^.]+$/, "");
+  const fresh = new Set();   // arquivos que acabaram de aparecer (animação de entrada)
+  function exportTxt(k, place) {
+    const list = FOLDERS[place];
+    const n = list.filter((x) => FILES[x].of === k).length + 1;
+    const key = `txt-${k}-${place}-${n}`;
+    FILES[key] = { kind: "export", of: k, name: () => stem(AUDIO[k].name[lang]) + (n > 1 ? ` ${n}` : "") + ".txt" };
+    let i = list.indexOf(k);
+    if (i < 0) i = list.length - 1;
+    while (i + 1 < list.length && FILES[list[i + 1]].of === k) i++;
+    list.splice(i + 1, 0, key);
+    FOLDERS.recents.unshift(key);
+    fresh.add(key);
+    renderDesktop(); renderFinder();
+    setTimeout(() => fresh.delete(key), 700);
+    return key;
+  }
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const ic = (id, cls = "i") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
@@ -721,7 +785,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     const f = FILES[k];
     if (f.kind === "audio") return docSvg(AUDIO[k].ext, "wave");
     if (f.kind === "doc") return docSvg(f.ext, f.ext === "pdf" ? "pdf" : "lines");
-    if (f.kind === "readme") return docSvg("txt", "lines");
+    if (f.kind === "readme" || f.kind === "export") return docSvg("txt", "lines");
     if (f.kind === "dmg") return `<span class="dmg">${appTile(24)}</span>`;
     if (k === "appCutline") return `<img class="png" src="${CUTLINE_PNG}" alt="" width="56" height="56">`;
     return appTile(56);
@@ -732,8 +796,10 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   const S = {
     running: true, open: false, view: "empty", hover: false, job: null, last: null, badge: false, flash: false, autoOpen: false,
     query: "", error: "", model: "auto", alang: "auto",
-    prefs: { copy: true, sound: true, openOnDrag: true, login: false, keep: true, session: true, autoUpdates: true },   // os padrões do app
-    history: [], used: { stack: false, transcribed: false },
+    // Fila (v0.5.0): o que chega durante uma transcrição entra no fim; batch = a leva atual; note = a nota do fim da leva.
+    queue: [], batch: null, note: null, seen: 0, doc: null,
+    prefs: { copy: true, sound: true, openOnDrag: true, login: false, keep: true, session: true, autoUpdates: true, finderExt: true },   // os padrões do app
+    history: [], used: { stack: false, transcribed: false, right: false },
   };
 
   /* ─── Idioma ─── */
@@ -790,17 +856,41 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   }
 
   /* ─── Menus ─── */
-  let menuOwner = null;
+  let menuOwner = null, subOwner = null;
+  const submenu = $("#submenu");
+  function menuHtml(items) {
+    return items.map((it, i) => {
+      if (it === "-") return "<hr>";
+      if (it.head) return `<div class="head">${esc(it.head)}</div>`;
+      const checkable = it.checked !== undefined;
+      const lead = it.icon ? ic(it.icon, "i ico2") : ic("check", "i ck");
+      const tail = it.submenu ? ic("right", "i arw") : it.kbd ? `<kbd>${esc(it.kbd)}</kbd>` : "<span></span>";
+      return `<button class="mi${it.submenu ? " has-sub" : ""}" role="${checkable ? "menuitemcheckbox" : "menuitem"}" data-i="${i}"${checkable ? ` aria-checked="${!!it.checked}"` : ""}${it.submenu ? ` aria-haspopup="menu" aria-expanded="false"` : ""}${it.disabled ? " disabled" : ""}>${lead}<span>${esc(it.label)}</span>${tail}${it.sub ? `<small>${esc(it.sub)}</small>` : ""}</button>`;
+    }).join("");
+  }
+  // Clique: ação ou abre o submenu. Passar o mouse: seleciona o item (como no macOS) e abre ou fecha o submenu.
+  function bindMenu(box, items) {
+    box.onclick = (e) => {
+      const b = e.target.closest(".mi"); if (!b || b.disabled) return;
+      const it = items[Number(b.dataset.i)];
+      if (it.submenu) { e.stopPropagation(); openSub(it.submenu, b, true); return; }
+      hideMenu();
+      if (it.action) it.action();
+    };
+    box.onpointerover = (e) => {
+      if (e.pointerType !== "mouse") return;
+      const b = e.target.closest(".mi"); if (!b || b.disabled) return;
+      b.focus({ preventScroll: true });
+      if (box !== menu) return;
+      const it = items[Number(b.dataset.i)];
+      if (it.submenu) { if (subOwner !== b) openSub(it.submenu, b, false); } else closeSub();
+    };
+  }
   function showMenu(items, rect, owner, align = "left") {
     hideMenu();
     menuOwner = owner || null;
     if (menuOwner) menuOwner.classList.add("on");
-    menu.innerHTML = items.map((it, i) => {
-      if (it === "-") return "<hr>";
-      if (it.head) return `<div class="head">${esc(it.head)}</div>`;
-      const checkable = it.checked !== undefined;
-      return `<button class="mi" role="${checkable ? "menuitemcheckbox" : "menuitem"}" data-i="${i}"${checkable ? ` aria-checked="${!!it.checked}"` : ""}${it.disabled ? " disabled" : ""}>${ic("check", "i ck")}<span>${esc(it.label)}</span>${it.kbd ? `<kbd>${esc(it.kbd)}</kbd>` : "<span></span>"}${it.sub ? `<small>${esc(it.sub)}</small>` : ""}</button>`;
-    }).join("");
+    menu.innerHTML = menuHtml(items);
     menu.hidden = false;
     const w = menu.offsetWidth, h = menu.offsetHeight;
     let x = align === "right" ? rect.right - w : rect.left;
@@ -808,26 +898,49 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     let y = rect.bottom + 4;
     if (y + h > innerHeight - 6) y = Math.max(6, rect.top - h - 4);
     menu.style.left = x + "px"; menu.style.top = y + "px";
-    menu.onclick = (e) => {
-      const b = e.target.closest(".mi"); if (!b || b.disabled) return;
-      const it = items[Number(b.dataset.i)];
-      hideMenu();
-      if (it.action) it.action();
-    };
+    bindMenu(menu, items);
     const first = menu.querySelector(".mi:not([disabled])");
     if (first) first.focus({ preventScroll: true });
   }
+  // O submenu abre ao lado do menu (à direita; sem espaço, à esquerda), alinhado com o item. Numa tela estreita,
+  // sem espaço dos dois lados, abre embaixo do item, para não cobrir o nome dele.
+  function openSub(items, b, focus) {
+    closeSub();
+    subOwner = b; b.classList.add("open"); b.setAttribute("aria-expanded", "true");
+    submenu.innerHTML = menuHtml(items);
+    submenu.hidden = false;
+    const r = b.getBoundingClientRect(), m = menu.getBoundingClientRect(), w = submenu.offsetWidth, h = submenu.offsetHeight;
+    let x = m.right - 3, y = r.top - 5;
+    if (x + w > innerWidth - 6) {
+      x = m.left - w + 3;
+      if (x < 6) { x = r.right - w; y = r.bottom + 2; }
+    }
+    x = Math.max(6, Math.min(x, innerWidth - w - 6));
+    y = Math.max(6, Math.min(y, innerHeight - h - 6));
+    submenu.style.left = x + "px"; submenu.style.top = y + "px";
+    bindMenu(submenu, items);
+    if (focus) { const f = submenu.querySelector(".mi:not([disabled])"); if (f) f.focus({ preventScroll: true }); }
+  }
+  function closeSub() {
+    if (submenu.hidden) return;
+    submenu.hidden = true;
+    if (subOwner) { subOwner.classList.remove("open"); subOwner.setAttribute("aria-expanded", "false"); }
+    subOwner = null;
+  }
   function hideMenu() {
+    closeSub();
     if (menu.hidden) return;
     menu.hidden = true;
     if (menuOwner) menuOwner.classList.remove("on");
     menuOwner = null;
   }
-  menu.addEventListener("keydown", (e) => {
-    const items = $$(".mi:not([disabled])", menu), i = items.indexOf(document.activeElement);
+  [menu, submenu].forEach((box) => box.addEventListener("keydown", (e) => {
+    const items = $$(".mi:not([disabled])", box), i = items.indexOf(document.activeElement);
     if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
     if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
-  });
+    if (e.key === "ArrowRight" && box === menu && document.activeElement.classList.contains("has-sub")) { e.preventDefault(); document.activeElement.click(); }
+    if (e.key === "ArrowLeft" && box === submenu) { e.preventDefault(); const o = subOwner; closeSub(); if (o) o.focus(); }
+  }));
   $("#lang-btn").addEventListener("click", (e) => {
     e.stopPropagation();
     const b = e.currentTarget;
@@ -877,19 +990,37 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   }
 
   /* ─── Arquivos na mesa, no Finder e na pilha ─── */
-  const itemHtml = (k, cls = "item") => `<button class="${cls}" data-k="${k}"><span class="ic">${iconFor(k)}</span><span class="nm">${esc(fname(k)).replace(/\./g, ".<wbr>")}</span></button>`;
+  const itemHtml = (k, cls = "item") => `<button class="${cls}${fresh.has(k) ? " fresh" : ""}" data-k="${k}"><span class="ic">${iconFor(k)}</span><span class="nm">${esc(fname(k)).replace(/\./g, ".<wbr>")}</span></button>`;
   function renderDesktop() {
     $("#desktop").innerHTML = FOLDERS.desktop.map((k) => itemHtml(k)).join("");
     $$("#desktop .item").forEach(bindItem);
   }
-  function select(el) { $$(".item.sel").forEach((x) => x.classList.remove("sel")); if (el) el.classList.add("sel"); }
+  // Seleção como no Finder: clique seleciona um; ⌘ (Ctrl fora do Mac) ou Shift + clique junta outros da mesma pasta.
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  const addKey = (e) => e.shiftKey || (isMac ? e.metaKey : e.ctrlKey);
+  const selKeys = (box) => $$(".item.sel", box).map((x) => x.dataset.k);
+  function select(el) { $$(".item.sel").forEach((x) => x.classList.remove("sel")); if (el) el.classList.add("sel"); selChanged(); }
+  function toggleSel(el) {
+    $$(".item.sel").forEach((x) => { if (x.parentElement !== el.parentElement) x.classList.remove("sel"); });
+    el.classList.toggle("sel");
+    selChanged();
+  }
+  function selChanged() { $("#f-go").disabled = !selKeys($("#f-grid")).some(isAudio); }
+  // A pasta de onde veio um pedido do botão direito (o .txt vai para lá); de Recentes, a pasta de verdade do áudio.
+  const placeOf = (el) => el.closest("#desktop") ? "desktop" : el.closest("#f-grid") ? finderPlace : null;
+  const folderFor = (k, place) => (place && place !== "recents" && FOLDERS[place] && FOLDERS[place].includes(k)) ? place : HOME[k];
 
-  // Abrir: áudio = "Abrir com › TranscreveAI"; o .dmg baixa o app de verdade.
+  // Abrir: áudio = "Abrir com › TranscreveAI"; o .dmg baixa o app de verdade. Vários áudios de uma vez entram na fila.
+  function openKeys(keys) {
+    const audios = keys.filter(isAudio);
+    if (audios.length) receive(audios, "panel"); else openItem(keys[0]);
+  }
   function openItem(k) {
     const f = FILES[k];
-    if (f.kind === "audio") { if (!S.running) launchApp(false); start(k); return; }
+    if (f.kind === "audio") { receive([k], "panel"); return; }
     if (f.kind === "dmg") { location.href = DMG; return; }
-    if (f.kind === "readme") { openWin("w-readme"); return; }
+    if (f.kind === "readme") { S.doc = null; renderReadme(); openWin("w-readme"); return; }
+    if (f.kind === "export") { S.doc = k; renderReadme(); openWin("w-readme"); return; }
     if (k === "appTranscreve") { launchApp(true); return; }
     if (k === "appCutline") { window.open(CUTLINE, "_blank", "noopener"); return; }
     nudge($(`[data-k="${k}"] .ic`));   // documento sem app nesta mesa
@@ -897,36 +1028,56 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   function nudge(el) { if (el && !reduce) el.animate([{ transform: "none" }, { transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }], { duration: 260 }); }
 
   // Arrastar (mouse e toque); clique seleciona; dois cliques (ou um toque, ou um clique na pilha) abrem.
-  let dragging = null, swallow = false;
+  let dragging = null, swallow = false, reduceTimer = 0;
   function overTarget(x, y) {
     const inR = (r, pad) => x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad;
     if (S.running && inR(statusBtn.getBoundingClientRect(), 10)) return "status";
     if (S.open && inR(panel.getBoundingClientRect(), 0)) return "panel";
     return null;
   }
+  // Com um áudio sobre o ícone ou o painel: a área tracejada (painel vazio) ou o painel inteiro vira o alvo.
+  function setHover(v) {
+    if (S.hover === v) return;
+    S.hover = v;
+    panel.classList.toggle("over", v && S.view !== "empty");
+    if (S.view === "empty") renderPanel();
+  }
   function bindItem(el) {
     const k = el.dataset.k, inFan = !!el.closest(".fan");
+    let pressTimer = 0, pressed = false;
     el.addEventListener("pointerdown", (e) => {
       if (e.button !== 0) return;
       e.stopPropagation();
       hideMenu();
-      if (!inFan) select(el);
+      clearTimeout(reduceTimer);
+      pressed = false;
+      // ⌘ + clique (ou Shift) junta à seleção; clicar num item de uma seleção maior a mantém para arrastar todos.
+      let keep = false;
+      if (!inFan) {
+        if (addKey(e)) { toggleSel(el); if (!el.classList.contains("sel")) return; keep = true; }
+        else if (el.classList.contains("sel") && (selKeys(el.parentElement).length > 1 || e.ctrlKey)) keep = true;
+        else select(el);
+      }
+      const keys = inFan ? [k] : selKeys(el.parentElement);
       const x0 = e.clientX, y0 = e.clientY, touch = e.pointerType !== "mouse";
       let ghost = null;
+      // No toque, segurar o dedo abre o menu do botão direito.
+      if (touch && !inFan) pressTimer = setTimeout(() => { if (!ghost) { pressed = true; showContext(el, x0, y0); } }, 550);
       const move = (ev) => {
         if (!ghost) {
-          if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+          if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6 || pressed) return;
+          clearTimeout(pressTimer);
           ghost = document.createElement("div");
           ghost.className = "ghost";
-          ghost.innerHTML = iconFor(k);
+          ghost.innerHTML = iconFor(k) + (keys.length > 1 ? `<span class="count">${keys.length}</span>` : "");
           mac.appendChild(ghost);
           mac.classList.add("dragging");
-          el.classList.add("lifted");
+          $$(".item.sel", el.parentElement).concat(el).forEach((x) => x.classList.add("lifted"));
           dragging = k;
           hideBubble();
           if (inFan) { S.used.stack = true; closeFan(); }
           // Como no app: o painel abre sozinho quando um áudio começa a ser arrastado.
-          if (isAudio(k) && S.running && S.prefs.openOnDrag && !S.open) {
+          if (keys.some(isAudio) && S.running && S.prefs.openOnDrag && !S.open) {
             if (!S.job) S.view = "empty";
             openPanel(true);
           }
@@ -934,29 +1085,54 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
         ghost.style.transform = `translate(${ev.clientX}px, ${ev.clientY}px)`;
         const over = !!overTarget(ev.clientX, ev.clientY);
         statusBtn.classList.toggle("target", over);
-        if (S.view === "empty" && isAudio(k) && over !== S.hover) { S.hover = over; renderPanel(); }
+        if (keys.some(isAudio)) setHover(over);
       };
       const end = (ev) => {
         removeEventListener("pointermove", move); removeEventListener("pointerup", end); removeEventListener("pointercancel", end);
+        clearTimeout(pressTimer);
         if (!ghost) {
+          if (pressed) return;
+          // Clique sem arrastar numa seleção maior: fica só este, mas depois de um instante (dois cliques abrem todos).
+          if (keep && !addKey(e) && ev.type === "pointerup") reduceTimer = setTimeout(() => select(el), 400);
           if (ev.type === "pointerup" && (touch || inFan)) { if (inFan) closeFan(); openItem(k); }
           return;
         }
         const target = ev.type === "pointerup" && overTarget(ev.clientX, ev.clientY);
-        ghost.remove(); mac.classList.remove("dragging"); el.classList.remove("lifted"); statusBtn.classList.remove("target");
-        S.hover = false; dragging = null;
+        ghost.remove(); mac.classList.remove("dragging"); $$(".item.lifted").forEach((x) => x.classList.remove("lifted")); statusBtn.classList.remove("target");
+        setHover(false); dragging = null;
         swallow = true; setTimeout(() => { swallow = false; }, 0);
         if (target) {
-          if (isAudio(k)) start(k);
-          else { stopJob(); S.view = "error"; S.error = T[lang].notAudio; renderStatus(); if (!S.open) openPanel(); else renderPanel(); }
+          if (keys.some(isAudio)) receive(keys, "panel");
+          else if (!S.job) { S.view = "error"; S.error = T[lang].notAudio; S.note = null; renderStatus(); if (!S.open) openPanel(); else renderPanel(); }
         } else if (S.autoOpen) closePanel();
         else renderPanel();
       };
       addEventListener("pointermove", move); addEventListener("pointerup", end); addEventListener("pointercancel", end);
     });
-    if (!inFan) el.addEventListener("dblclick", () => { if (!swallow) openItem(k); });
+    // Dois cliques num áudio de uma seleção maior abrem todos os áudios dela (vão para a fila); noutro arquivo, só ele.
+    if (!inFan) el.addEventListener("dblclick", () => { clearTimeout(reduceTimer); if (swallow) return; const ks = selKeys(el.parentElement); if (isAudio(k)) openKeys(ks.includes(k) ? ks : [k]); else openItem(k); });
     el.addEventListener("click", (e) => { if (e.detail === 0) { if (inFan) closeFan(); openItem(k); } });   // teclado: Enter ou espaço
-    el.addEventListener("contextmenu", (e) => e.preventDefault());
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      clearTimeout(pressTimer);
+      if (inFan || pressed) return;
+      pressed = true;   // o toque que abriu o menu não abre o arquivo ao soltar
+      showContext(el, e.clientX, e.clientY);
+    });
+  }
+  // O botão direito do Finder (v0.5.0): "Transcrever com o TranscreveAI" › Copiar o texto / Exportar como .txt,
+  // sem abrir o painel. O item só aparece com áudios na seleção e com a extensão ligada nos Ajustes.
+  function showContext(el, x, y) {
+    const t = T[lang];
+    if (!el.classList.contains("sel")) select(el);
+    const keys = selKeys(el.parentElement), audios = keys.filter(isAudio), place = placeOf(el);
+    const items = [{ label: t.ctxOpen, action: () => openKeys(keys) }];
+    if (audios.length && S.prefs.finderExt) {
+      const go = (dest) => () => { S.used.right = true; receive(audios, dest, place); };
+      items.push("-", { label: t.ctxTranscribe, icon: "wave", submenu: [{ label: t.ctxCopy, action: go("copy") }, { label: t.ctxExport, action: go("export") }] });
+    }
+    closePanel(); hideBubble();
+    showMenu(items, { left: x, right: x, top: y, bottom: y - 4 });
   }
 
   /* ─── Janelas ─── */
@@ -971,7 +1147,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   }
   function openWin(id, opts = {}) {
     const w = $("#" + id);
-    if (id === "w-finder") { finderMode = opts.mode || "browse"; if (opts.place) finderPlace = opts.place; finderSel = null; renderFinder(); }
+    if (id === "w-finder") { finderMode = opts.mode || "browse"; if (opts.place) finderPlace = opts.place; renderFinder(); }
     if (w.hidden) {
       w.hidden = false;
       if (!reduce) { w.classList.add("opening"); requestAnimationFrame(() => requestAnimationFrame(() => w.classList.remove("opening"))); }
@@ -1006,7 +1182,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   });
 
   /* Finder (também é o "Escolher áudio" do app) */
-  let finderPlace = "downloads", finderMode = "browse", finderSel = null;
+  let finderPlace = "downloads", finderMode = "browse";
   function renderFinder() {
     const t = T[lang];
     $("#f-fav").textContent = t.favorites;
@@ -1015,31 +1191,31 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     $("#f-title").textContent = finderPlace === "trash" ? t.trash : t.places[finderPlace];
     const list = finderPlace === "trash" ? [] : FOLDERS[finderPlace];
     $("#f-grid").innerHTML = list.length ? list.map((k) => itemHtml(k)).join("") : `<p class="f-empty">${esc(finderPlace === "trash" ? t.trashEmpty : t.emptyFolder)}</p>`;
-    $$("#f-grid .item").forEach((el) => {
-      bindItem(el);
-      el.addEventListener("pointerdown", () => { finderSel = el.dataset.k; $("#f-go").disabled = !isAudio(finderSel); });
-    });
+    $$("#f-grid .item").forEach(bindItem);
     $("#f-open").hidden = finderMode !== "open";
     $("#f-open-title").textContent = t.chooseAudio;
     $("#f-cancel").textContent = t.cancel;
     $("#f-go").textContent = t.transcribe;
-    $("#f-go").disabled = !isAudio(finderSel);
+    selChanged();
   }
-  $("#f-places").addEventListener("click", (e) => { const b = e.target.closest("[data-place]"); if (!b) return; finderPlace = b.dataset.place; finderSel = null; renderFinder(); });
+  $("#f-places").addEventListener("click", (e) => { const b = e.target.closest("[data-place]"); if (!b) return; finderPlace = b.dataset.place; renderFinder(); });
   $("#f-cancel").addEventListener("click", () => closeWin($("#w-finder")));
-  $("#f-go").addEventListener("click", () => { if (isAudio(finderSel)) start(finderSel); });
+  // "Abrir arquivo…" aceita vários: entram na fila.
+  $("#f-go").addEventListener("click", () => { const a = selKeys($("#f-grid")).filter(isAudio); if (a.length) receive(a, "panel"); });
 
-  /* Leia-me, Ajustes e alertas */
+  /* Leia-me (ou um .txt exportado, no TextEdit), Ajustes e alertas */
   function renderReadme() {
-    $("#readme-title").textContent = T[lang].readme;
-    $("#readme-body").innerHTML = T[lang].readmeHtml(version);
+    const d = S.doc && FILES[S.doc];
+    $("#readme-title").textContent = d ? d.name() : T[lang].readme;
+    $("#readme-body").innerHTML = d ? AUDIO[d.of].text[lang].map((p) => `<p>${esc(p[1])}</p>`).join("<br>") : T[lang].readmeHtml(version);
   }
   const sw = (key, label) => `<div class="row"><span class="l" id="sw-${key}">${esc(label)}</span><button class="switch" role="switch" aria-labelledby="sw-${key}" aria-checked="${S.prefs[key]}" data-pref="${key}"></button></div>`;
   function renderSettings() {
     const t = T[lang], n = S.history.length;
     $("#settings-title").textContent = t.settingsTitle;
     $("#settings-body").innerHTML = `
-      <section><h3>${esc(t.general)}</h3><div class="group">${sw("login", t.sOpenAtLogin)}${sw("openOnDrag", t.sOpenOnDrag)}${sw("copy", t.sCopy)}${sw("sound", t.sSound)}</div></section>
+      <section><h3>${esc(t.general)}</h3><div class="group">${sw("login", t.sOpenAtLogin)}${sw("openOnDrag", t.sOpenOnDrag)}${sw("copy", t.sCopy)}${sw("sound", t.sSound)}
+        <div class="row"><span class="l">${esc(t.sFinder)}</span><span class="v">${esc(S.prefs.finderExt ? t.on : t.off)}</span><button class="btn" data-act="finderext">${esc(S.prefs.finderExt ? t.sysSettings : t.turnOn)}</button></div></div></section>
       <section><h3>${esc(t.transcription)}</h3><div class="group">
         <div class="row"><span class="l">${esc(t.model)}</span><button class="popup" data-pop="model">${esc(t.models[S.model][0])}${ic("chev")}</button></div>
         <div class="row"><span class="l">${esc(t.audioLanguage)}</span><button class="popup" data-pop="alang">${esc(alangName())}${ic("chev")}</button></div>
@@ -1060,6 +1236,8 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     if (a.dataset.act === "check") checkUpdates();
     if (a.dataset.act === "finder") openWin("w-finder", { place: "documents" });
     if (a.dataset.act === "clear") confirmClear();
+    // No app, o botão abre os Ajustes do Sistema, onde a extensão liga e desliga; aqui, liga e desliga direto.
+    if (a.dataset.act === "finderext") { S.prefs.finderExt = !S.prefs.finderExt; renderSettings(); }
   });
   function alertBox(title, text, buttons) {
     const w = $("#w-alert");
@@ -1119,8 +1297,28 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   const head = (title, sub) => `<div class="p-head"><div class="t"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</div><button class="more" data-more aria-label="${esc(T[lang].more)}">${ic("dots")}</button></div>`;
   const histRow = (h, i) => `<div class="hrow"><button class="open" data-h="${i}"><span class="wv">${ic("wave")}</span><span><b>${esc(AUDIO[h.k].name[lang])}</b><small>${esc(T[lang].today(timeOf(h.at)) + " · " + AUDIO[h.k].dur)}</small></span></button><button class="ib del" data-del="${i}" aria-label="${esc(T[lang].deleteFromHistory)}">${ic("trash")}</button><button class="ib" data-copyh="${i}" aria-label="${esc(T[lang].copyTranscription)}">${ic(h.copied ? "check" : "copy")}</button></div>`;
 
+  // Posição na fila ("2 de 3") e progresso da leva inteira no ícone: com 3 áudios, o fim do primeiro é 33%.
+  function queuePos() {
+    if (!S.job || !S.batch) return null;
+    const total = S.batch.done + 1 + S.queue.length;
+    return total > 1 ? [S.batch.done + 1, total] : null;
+  }
+  const batchProgress = (p) => { const q = queuePos(); return q ? (q[0] - 1 + p) / q[1] : p; };
+  // A nota do fim da leva: onde o texto foi parar.
+  function noteText() {
+    const n = S.note; if (!n) return "";
+    const t = T[lang], parts = [];
+    if (n.copied > 1) parts.push(t.noteCopiedN(n.copied));
+    if (n.exported.length === 1) parts.push(t.noteSaved(fname(n.exported[0])));
+    else if (n.exported.length > 1) parts.push(t.noteSavedN(n.exported.length));
+    return parts.join(" ");
+  }
+
   function renderPanel() {
     const t = T[lang];
+    // A caixa de texto continua a mesma enquanto o texto chega: quem lia no meio não volta ao topo.
+    const oldText = $(".text", panel), same = S.seen > 0 && (S.view === "work" || S.view === "done");
+    const scroll = oldText ? oldText.scrollTop : 0, hadFocus = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest("#p-body [data-copy]"));
     let h = "";
     if (S.view === "empty") {
       h = head("TranscreveAI");
@@ -1136,19 +1334,25 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       h = `<div class="p-row" style="margin-top: 0"><button class="link" data-back>${ic("left")}${esc(t.back)}</button><span class="sp"></span><button class="more" data-more aria-label="${esc(t.more)}">${ic("dots")}</button></div>`;
       h += `<label class="search">${ic("search")}<input type="search" data-q placeholder="${esc(t.searchHistory)}" value="${esc(S.query)}"></label>`;
       h += items.length ? items.map(([x, i]) => histRow(x, i)).join("") : `<p class="empty-note">${esc(S.history.length ? t.nothing : t.noneYet)}</p>`;
-    } else if (S.view === "work") {
-      const a = AUDIO[S.job.k];
-      h = head(a.name[lang], `${a.dur} · ${engineName(S.job.model)}`);
-      h += `<div class="work"><div class="line"><span>${esc(t.transcribing)}</span><span id="p-pct">${Math.round(S.job.p * 100)}%</span></div><div class="bar"><i id="p-bar" style="width: ${(S.job.p * 100).toFixed(1)}%"></i></div></div>`;
-      if (S.job.model === "apple") h += `<div class="live"><span>${esc(t.live)}</span><p id="p-live"></p></div>`;
-      h += `<div class="tipline"><p>${esc(t.tipClose)}</p><button class="btn" data-cancel>${esc(t.cancel)}</button></div>`;
-    } else if (S.view === "done") {
-      const a = AUDIO[S.last.k];
-      const when = S.last.fromHistory ? t.today(timeOf(S.last.at)) : t.transcribedIn(fmtSecs(S.last.secs));
-      h = head(a.name[lang], `${a.dur} · ${when} · ${engineName(S.last.model)}`);
-      // Clicar no texto copia tudo (como no app); passar o mouse mostra "Clique para copiar".
-      h += `<div class="tbox" data-copy role="button" tabindex="0" aria-label="${esc(t.clickToCopy)}"><div class="text">${a.text[lang].map((p, i) => `<div class="para" style="--d: ${(i * 0.1).toFixed(2)}s"><time>${p[0]}</time><p>${esc(p[1])}</p></div>`).join("")}</div></div>`;
-      h += `<div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.newOne)}</button><span class="sp"></span><span class="copyhint" aria-hidden="true">${ic("copy")}${esc(t.clickToCopy)}</span></div>`;
+    } else if (S.view === "work" || S.view === "done") {
+      // Como a Leitura do app (v0.5.0): transcrevendo e pronto são a mesma caixa. Os parágrafos aparecem nela enquanto
+      // o resto é transcrito, nos dois motores; no fim, a barra some e a caixa fica.
+      const j = S.view === "work" ? S.job : null, r = j || S.last, a = AUDIO[r.k];
+      const when = j ? "" : r.fromHistory ? t.today(timeOf(r.at)) : t.transcribedIn(fmtSecs(r.secs));
+      h = head(a.name[lang], [a.dur, when, engineName(r.model)].filter(Boolean).join(" · "));
+      if (j) {
+        const q = queuePos(), more = S.queue.length > 2 ? S.queue.length - 2 : 0;
+        const next = S.queue.length ? t.upNext(S.queue.slice(0, 2).map((x) => AUDIO[x.k].name[lang]).join(", "), more) : "";
+        h += `<div class="work" id="p-work"><div class="line"><span>${esc(q ? t.transcribingN(q[0], q[1]) : t.transcribing)}</span><span id="p-pct">${Math.round(j.p * 100)}%</span></div><div class="bar"><i id="p-bar" style="width: ${(j.p * 100).toFixed(1)}%"></i></div>${next ? `<div class="next">${ic("list")}<span>${esc(next)}</span></div>` : ""}</div>`;
+      }
+      const paras = j ? a.text[lang].slice(0, j.shown) : a.text[lang];
+      // Clicar no texto copia (durante a transcrição, o que já saiu); passar o mouse mostra o aviso no rodapé.
+      if (paras.length) h += `<div class="tbox" data-copy role="button" tabindex="0" aria-label="${esc(j ? t.copySoFar : t.clickToCopy)}"><div class="text">${paras.map((p, i) => `<div class="para${i < S.seen ? " still" : ""}" style="--d: ${(Math.max(0, i - S.seen) * 0.1).toFixed(2)}s"><time>${p[0]}</time><p>${esc(p[1])}</p></div>`).join("")}</div></div>`;
+      S.seen = paras.length;
+      if (!j && noteText()) h += `<p class="pnote">${ic("info")}<span>${esc(noteText())}</span></p>`;
+      h += j
+        ? `<div class="tipline"><p>${esc(t.tipClose)}</p><span class="copyhint" aria-hidden="true">${ic("copy")}${esc(t.copySoFar)}</span><button class="btn" data-cancel>${esc(t.cancel)}</button></div>`
+        : `<div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.newOne)}</button><span class="sp"></span><span class="copyhint" aria-hidden="true">${ic("copy")}${esc(t.clickToCopy)}</span></div>`;
     } else if (S.view === "error") {
       h = head("TranscreveAI");
       h += `<div class="msg">${ic("alert")}<p>${esc(S.error)}</p></div><div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.newOne)}</button></div>`;
@@ -1157,6 +1361,11 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
       h += `<div class="msg">${ic("lock")}<p><b>${esc(t.realTitle)}</b><small>${esc(t.realBody)}</small></p></div><div class="p-row"><button class="link" data-new>${ic("back")}${esc(t.back)}</button><span class="sp"></span><a class="btn blue" href="${DMG}">${esc(t.download)}</a></div>`;
     }
     $("#p-body").innerHTML = h;
+    $("#p-over").innerHTML = `${ic("tray")}<span>${esc(t.release)}</span>`;
+    panel.classList.toggle("over", S.hover && S.view !== "empty");
+    const newText = $(".text", panel);
+    if (newText && same && scroll) newText.scrollTop = scroll;
+    if (hadFocus && $("[data-copy]", panel)) $("[data-copy]", panel).focus({ preventScroll: true });
     if (S.view === "list") {
       const inp = $("[data-q]", panel);
       inp.addEventListener("input", () => { S.query = inp.value; const pos = inp.selectionStart; renderPanel(); const n = $("[data-q]", panel); n.focus(); n.setSelectionRange(pos, pos); });
@@ -1169,16 +1378,22 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     if (b.hasAttribute("data-more")) { e.stopPropagation(); return showMenu(appMenuItems(), b.getBoundingClientRect(), b, "right"); }
     if (b.dataset.menu) { e.stopPropagation(); return showMenu(b.dataset.menu === "model" ? modelItems() : langItems(), b.getBoundingClientRect(), b); }
     if (b.hasAttribute("data-pick")) return openWin("w-finder", { mode: "open", place: "downloads" });
-    if (b.hasAttribute("data-cancel")) { stopJob(); S.view = "empty"; renderPanel(); renderStatus(); return; }
-    if (b.hasAttribute("data-new")) { S.view = "empty"; renderPanel(); return; }
+    // Cancelar para o áudio atual e esvazia a fila (como no app).
+    if (b.hasAttribute("data-cancel")) { stopJob(); S.queue = []; S.note = null; S.view = "empty"; renderPanel(); renderStatus(); return; }
+    if (b.hasAttribute("data-new")) { S.view = "empty"; S.note = null; renderPanel(); return; }
     if (b.hasAttribute("data-all")) { S.view = "list"; S.query = ""; renderPanel(); return; }
     if (b.hasAttribute("data-back")) { S.view = "empty"; renderPanel(); return; }
-    if (b.dataset.h !== undefined) { S.last = Object.assign({}, S.history[Number(b.dataset.h)], { fromHistory: true }); S.view = "done"; renderPanel(); return; }
+    if (b.dataset.h !== undefined) { S.last = Object.assign({}, S.history[Number(b.dataset.h)], { fromHistory: true }); S.view = "done"; S.note = null; S.seen = 0; renderPanel(); return; }
     if (b.dataset.del !== undefined) { S.history.splice(Number(b.dataset.del), 1); renderPanel(); renderSettings(); return; }
     if (b.dataset.copyh !== undefined) { const x = S.history[Number(b.dataset.copyh)]; copyText(x.k).then((ok) => { if (!ok) return; toast(); x.copied = true; renderPanel(); setTimeout(() => { x.copied = false; renderPanel(); }, 1500); }); }
   });
   panel.addEventListener("keydown", (e) => { if (e.target.closest("[data-copy]") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); copyResult(); } });
-  function copyResult() { if (S.last) copyText(S.last.k).then((ok) => { if (ok) toast(); }); }
+  // Clique no texto: no fim, tudo; durante a transcrição, o que já saiu (o resto continua chegando).
+  function copyResult() {
+    const j = S.view === "work" && S.job;
+    const s = j ? textOf(j.k, j.shown) : S.view === "done" && S.last ? textOf(S.last.k) : "";
+    if (s) copyString(s).then((ok) => { if (ok) toast(); });
+  }
   // "Copiado" por 2 s, embaixo no painel, depois de copiar (como no app).
   let toastTimer = 0;
   function toast() {
@@ -1188,8 +1403,9 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove("on"), 2000);
   }
-  function copyText(k) {
-    const s = AUDIO[k].text[lang].map((p) => p[1]).join("\n\n");
+  const textOf = (k, n) => AUDIO[k].text[lang].slice(0, n).map((p) => p[1]).join("\n\n");
+  const copyText = (k) => copyString(textOf(k));
+  function copyString(s) {
     if (legacyCopy(s)) return Promise.resolve(true);
     return navigator.clipboard ? navigator.clipboard.writeText(s).then(() => true, () => false) : Promise.resolve(false);
   }
@@ -1204,48 +1420,105 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   }
 
   // A demonstração leva o tempo que o app levou de verdade (o Apple Speech, cerca do dobro).
+  // Fila (v0.5.0): o primeiro áudio começa; o que chega durante uma transcrição entra no fim, sem cancelar a atual.
+  // dest: "panel" (abrir, arrastar, escolher) ou, pelo botão direito do Finder, "copy" e "export" (sem abrir o painel).
   function stopJob() { clearInterval(S.timer); S.job = null; }
-  function start(k) {
-    if (!S.running) return;
-    stopJob(); hideBubble(); closeFan();
-    const fw = $("#w-finder"); if (!fw.hidden && finderMode === "open") closeWin(fw);
+  function receive(keys, dest, place) {
+    const audios = keys.filter(isAudio);
+    if (!audios.length) return;
+    if (!S.running) launchApp(false);
+    hideBubble(); closeFan();
+    const fw = $("#w-finder"); if (dest === "panel" && !fw.hidden && finderMode === "open") closeWin(fw);
+    const reqs = audios.map((k) => ({ k, dest, place: folderFor(k, place) }));
+    if (S.job) {
+      S.queue.push(...reqs);
+      if (dest === "panel" && !S.open) openPanel(); else renderPanel();
+      S.autoOpen = false;
+      renderStatus(batchProgress(S.job.p));
+      return;
+    }
+    S.batch = { done: 0, copied: [], exported: [] };
+    S.note = null;
+    S.queue = reqs.slice(1);
+    begin(reqs[0], dest === "panel");
+  }
+  function begin(req, show) {
     const model = S.model === "apple" ? "apple" : "parakeet";
-    const secs = AUDIO[k].secs * (model === "apple" ? 145 / 73 : 1);
-    S.job = { k, model, secs, t0: performance.now(), p: 0 };
-    S.view = "work"; S.hover = false; S.flash = false;
-    if (!S.open) openPanel(); else renderPanel();
+    const secs = AUDIO[req.k].secs * (model === "apple" ? 145 / 73 : 1);
+    S.job = Object.assign({}, req, { model, secs, t0: performance.now(), p: 0, shown: 0 });
+    S.view = "work"; S.seen = 0; S.hover = false; S.flash = false;
+    if (show && !S.open) openPanel(); else renderPanel();
     S.autoOpen = false;
-    renderStatus(0);
+    renderStatus(batchProgress(0));
     S.timer = setInterval(step, 50);
   }
   function step() {
     const j = S.job; if (!j) return;
     const x = Math.min(1, (performance.now() - j.t0) / (j.secs * 1000));
     j.p = x < 1 ? 1 - Math.pow(1 - x, 1.35) : 1;
-    const bar = $("#p-bar", panel), pct = $("#p-pct", panel), live = $("#p-live", panel);
+    // Os parágrafos chegam enquanto o resto é transcrito: o primeiro quase na hora (no app, cerca de 0,1 s).
+    const all = AUDIO[j.k].text[lang].length, at = (i) => (i === 0 ? Math.min(0.05, 0.12 / j.secs) : (i / all) * 0.95);
+    let shown = 0;
+    while (shown < all && x >= at(shown)) shown++;
+    if (shown !== j.shown) { j.shown = shown; if (S.view === "work") renderPanel(); }
+    const bar = $("#p-bar", panel), pct = $("#p-pct", panel);
     if (bar) bar.style.width = (j.p * 100).toFixed(1) + "%";
     if (pct) pct.textContent = Math.round(j.p * 100) + "%";
-    if (live) { const all = AUDIO[j.k].text[lang].map((p) => p[1]).join(" "); live.textContent = all.slice(0, Math.floor(all.length * x)); }
-    renderStatus(j.p);
+    renderStatus(batchProgress(j.p));
     if (x >= 1) finish();
   }
   function finish() {
-    const j = S.job;
+    const j = S.job, t = T[lang];
     stopJob();
     const rec = { k: j.k, model: j.model, secs: j.secs, at: new Date(), copied: false };
-    S.last = rec; S.view = "done";
+    S.last = rec;
     if (S.prefs.keep) { S.history.unshift(Object.assign({}, rec)); S.history = S.history.slice(0, 500); }
-    if (!S.open) S.badge = true;
+    S.batch.done++;
+    // Entregar: no painel, "Copiar ao terminar"; pelo Finder, copiar (vários vão juntos, cada um com o nome em cima)
+    // ou gravar o .txt ao lado do áudio.
+    let copied = null;
+    if (j.dest === "panel" && S.prefs.copy) copied = copyText(j.k);
+    if (j.dest === "copy") {
+      const c = S.batch.copied; c.push(j.k);
+      copied = copyString(c.length === 1 ? textOf(c[0]) : c.map((k) => `${AUDIO[k].name[lang]}\n\n${textOf(k)}`).join("\n\n\n"));
+    }
+    if (j.dest === "export") S.batch.exported.push(exportTxt(j.k, j.place));
+    renderSettings();
+    if (S.queue.length) { begin(S.queue.shift(), false); return; }
+    // Fim da leva: a nota, o som, o ✓ no ícone (pelo Finder, sem a bolinha vermelha) e a barra some do painel.
+    S.note = { copied: S.batch.copied.length, exported: S.batch.exported.slice() };
+    S.view = "done";
+    if (!S.open && j.dest === "panel") S.badge = true;
     S.flash = true;
     if (S.prefs.sound) chime();
-    renderStatus(); renderSettings();
-    renderPanel();
-    if (S.prefs.copy) copyText(j.k).then((ok) => { if (ok) toast(); });
+    renderStatus();
+    settle();
+    if (copied) copied.then((ok) => {
+      if (!ok) return;
+      if (S.open) toast();
+      else if (j.dest === "copy") showBubble(statusBtn, S.note && S.note.copied > 1 ? t.noteCopiedN(S.note.copied) : t.hintCopied, t.hintCopiedSub, "down", 4000);
+    });
     setTimeout(() => { S.flash = false; renderStatus(); }, 1800);
     if (!S.used.transcribed) {
       S.used.transcribed = true;
       if (!S.used.stack) setTimeout(() => { if (!dragging && !fan.classList.contains("on") && !S.used.stack) showBubble($("#dk-downloads"), T[lang].hintStack, T[lang].hintStackSub, "up", 7000); }, 2600);
+    } else if (!S.used.right && S.prefs.finderExt && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      // Na segunda transcrição, a dica do botão direito (com o painel fechado, para não cobrir os áudios da mesa).
+      setTimeout(() => {
+        const target = $("#desktop .item[data-k='meeting'] .ic") || $("#desktop .item .ic");
+        if (S.used.right || S.open || dragging || !menu.hidden || fan.classList.contains("on") || !target) return;
+        S.used.right = true;
+        showBubble(target, T[lang].hintRight, T[lang].hintRightSub, "down", 7000);
+      }, 2600);
     }
+  }
+  // No fim, a barra some e a caixa de texto fica onde está (sobe para o lugar do resultado).
+  function settle() {
+    const w = $("#p-work", panel);
+    if (!w || !S.open || reduce) return renderPanel();
+    w.style.overflow = "hidden";
+    const anim = w.animate([{ height: w.offsetHeight + "px", marginTop: getComputedStyle(w).marginTop, opacity: 1 }, { height: "0px", marginTop: "0px", opacity: 0 }], { duration: 300, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "forwards" });
+    anim.onfinish = () => { if (S.view === "done") renderPanel(); };
   }
   let audioCtx = null;
   function chime() {   // o som de pronto, baixinho
@@ -1262,7 +1535,7 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   }
 
   function quitApp() {
-    stopJob(); closePanel();
+    stopJob(); S.queue = []; closePanel();
     S.running = false; S.badge = false; S.view = "empty";
     ["w-settings", "w-alert"].forEach((id) => { const w = $("#" + id); if (!w.hidden) closeWin(w); });
     renderStatus();
@@ -1333,32 +1606,41 @@ button.mb-item:hover, .mb-item.on, .mb-item.target { background: var(--fill-3); 
   addEventListener("dragenter", (e) => {
     if (!hasFiles(e)) return;
     e.preventDefault();
-    if (depth++ === 0 && S.running) { hideBubble(); if (!S.job) S.view = "empty"; if (!S.open) openPanel(true); S.hover = true; renderPanel(); }
+    if (depth++ === 0 && S.running) { hideBubble(); if (!S.job) S.view = "empty"; if (!S.open) openPanel(true); else renderPanel(); setHover(true); }
   });
   addEventListener("dragover", (e) => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = S.running ? "copy" : "none"; } });
-  addEventListener("dragleave", (e) => { if (!hasFiles(e) || --depth > 0) return; depth = 0; S.hover = false; if (S.autoOpen) closePanel(); else renderPanel(); });
+  addEventListener("dragleave", (e) => { if (!hasFiles(e) || --depth > 0) return; depth = 0; setHover(false); if (S.autoOpen) closePanel(); });
   addEventListener("drop", (e) => {
     if (!hasFiles(e)) return;
     e.preventDefault();
     depth = 0; S.hover = false; S.autoOpen = false;
     if (!S.running) return;
-    stopJob(); S.view = "notice"; if (!S.open) openPanel(); renderPanel(); renderStatus();
+    stopJob(); S.queue = []; S.view = "notice"; if (!S.open) openPanel(); renderPanel(); renderStatus();
   });
 
   /* ─── Cliques fora, Esc, atalhos ─── */
   document.addEventListener("pointerdown", (e) => {
     if (mac.classList.contains("dragging")) return;
     const t = e.target;
-    if (!menu.hidden && !t.closest("#menu")) hideMenu();
-    if (S.open && !t.closest("#panel, #status, #menu")) closePanel();
+    if (!menu.hidden && !t.closest("#menu, #submenu")) hideMenu();
+    if (S.open && !t.closest("#panel, #status, #menu, #submenu")) closePanel();
     if (fan.classList.contains("on") && !t.closest("#fan, #dk-downloads")) closeFan();
-    if (!t.closest(".item")) select(null);
+    // Um clique no fundo da mesa ou da janela do Finder tira a seleção; um botão (como "Transcrever") não.
+    if (!t.closest(".item") && (t.closest("#f-grid") || !t.closest(".window, .menubar, .dock, #panel, #menu, #submenu, #fan"))) select(null);
     // Um clique na mesa ativa o Finder, como no Mac.
-    if (!t.closest(".window, .menubar, .dock, #panel, #menu, #fan")) { $$(".window").forEach((x) => x.classList.add("inactive")); if (frontApp !== "finder") { frontApp = "finder"; renderMenubar(); } }
+    if (!t.closest(".window, .menubar, .dock, #panel, #menu, #submenu, #fan")) { $$(".window").forEach((x) => x.classList.add("inactive")); if (frontApp !== "finder") { frontApp = "finder"; renderMenubar(); } }
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { if (!menu.hidden) return hideMenu(); if (fan.classList.contains("on")) return closeFan(); if (S.open) { closePanel(); statusBtn.focus(); } }
     if ((e.metaKey || e.ctrlKey) && e.key === "," && S.running) { e.preventDefault(); openWin("w-settings"); }
+    // ⌘A no Finder: seleciona tudo na janela da frente (ou na mesa), para arrastar ou transcrever vários de uma vez.
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a" && frontApp === "finder" && !S.open && !e.target.closest("input, textarea")) {
+      const fw = $("#w-finder"), box = !fw.hidden && !fw.classList.contains("inactive") ? $("#f-grid") : $("#desktop");
+      e.preventDefault();
+      $$(".item.sel").forEach((x) => x.classList.remove("sel"));
+      $$(".item", box).forEach((x) => x.classList.add("sel"));
+      selChanged();
+    }
   });
   addEventListener("resize", () => { placePanel(); tick(); if (fan.classList.contains("on")) renderFan(); hideBubble(); });
 

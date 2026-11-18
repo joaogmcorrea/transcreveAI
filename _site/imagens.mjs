@@ -164,9 +164,10 @@ async function shareImages(cdp, base) {
       await p.page("Input.dispatchMouseEvent", { type: "mouseReleased", x: r.x, y: r.y, button: "left", clickCount });
     }
     await p.page("Input.dispatchMouseEvent", { type: "mouseMoved", x: OG.width * 0.3, y: OG.height * 0.45 });
-    // Espera a transcrição de exemplo terminar (o tempo que o app levou de verdade) e os parágrafos aparecerem.
+    // Espera a transcrição de exemplo terminar (o tempo que o app levou de verdade). Desde a v0.5.0 a caixa de texto
+    // aparece durante a transcrição: o fim é o botão "Novo" no lugar do Cancelar.
     const t0 = Date.now();
-    while (!(await p.js(`!!document.querySelector("#p-body .tbox")`))) {
+    while (!(await p.js(`!!document.querySelector("#p-body [data-new]")`))) {
       if (Date.now() - t0 > 15000) throw new Error("imagens.mjs: a transcrição de exemplo não terminou");
       await sleep(100);
     }
