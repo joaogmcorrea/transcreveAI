@@ -26,6 +26,23 @@ Escreve `_site/dist/` e `_site/transcreveai-site.zip` (o conteúdo de `dist/`, s
 
 Por SFTP também serve: o conteúdo de `_site/dist/` (incluindo o `.htaccess`) dentro de `public_html/transcreveai/`.
 
+### Pelo terminal (SSH, sem senha) *(18/11/2026)*
+
+`./_site/subir.sh` monta o site e mostra o que mudaria no servidor (envia, cria, apaga), sem enviar nada; `./_site/subir.sh --enviar` envia de verdade. Só vai o que mudou, e o que saiu do `dist/` é apagado do servidor (no máximo 20 arquivos por vez). A pasta precisa terminar em `/transcreveai`, para o `--delete` nunca alcançar o Cutline, e a `.well-known` (certificados) nunca é tocada.
+
+Uma vez só:
+
+1. **Chave:** `~/.ssh/transcreveai_site` (criada em 18/11/2026, sem senha, fora do Dropbox). Se precisar de outra: `ssh-keygen -t ed25519 -N "" -C "transcreveai-site" -f ~/.ssh/transcreveai_site`.
+2. **hPanel › Avançado › Acesso SSH:** ligar o acesso, anotar IP, porta (geralmente 65002) e usuário (`u…`), e em "Chaves SSH" adicionar o conteúdo de `~/.ssh/transcreveai_site.pub`.
+3. **`_privado/site-ssh.conf`** (fora do git), com quatro linhas:
+   ```
+   SSH_HOST=<IP>
+   SSH_PORT=65002
+   SSH_USER=<u…>
+   PASTA=domains/joaocorrea.design/public_html/transcreveai
+   ```
+4. Rodar `./_site/subir.sh` (prévia) e conferir a lista antes do primeiro `--enviar`.
+
 ## 4. Conferir
 
 - https://transcreveai.joaocorrea.design/, `/pt/` e `/es/` abrem no idioma certo; trocar o idioma na barra de menus da página muda a URL.
@@ -35,4 +52,4 @@ Por SFTP também serve: o conteúdo de `_site/dist/` (incluindo o `.htaccess`) d
 
 ## Atualizar depois
 
-Rodar `gerar.py` de novo e subir o zip por cima (Extrair substitui os arquivos). As imagens ficam uma semana no cache: se a imagem de compartilhamento mudou, limpar o cache dela no Cloudflare (Caching › Purge).
+`./_site/subir.sh --enviar` (monta e envia; antes, sem `--enviar`, para ver o que muda). Pelo hPanel: rodar `gerar.py` de novo e subir o zip por cima (Extrair substitui os arquivos). As imagens ficam uma semana no cache: se a imagem de compartilhamento mudou, limpar o cache dela no Cloudflare (Caching › Purge).

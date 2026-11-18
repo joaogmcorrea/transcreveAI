@@ -62,8 +62,12 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 - Dica nova: na segunda transcrição, com o painel fechado, um balão aponta o botão direito (só com mouse).
 - As imagens de compartilhamento não mudaram (mostram o fim da transcrição, igual à v0.4.1): rodei o `imagens.mjs` para conferir a correção e mantive as antigas.
 
+- **Subir por SSH** *(pedido do owner)*: `_site/subir.sh` com uma chave só para o site (`~/.ssh/transcreveai_site`, fora do Dropbox para a parte privada não ir para a nuvem). Nenhuma senha passa pelo agente; o owner cadastra a chave pública no hPanel.
+- O `rsync` do macOS é o openrsync (protocolo 29): aceita `-c`, `--delete-after`, `--max-delete` e `--itemize-changes`. Com `-c` e o `gerar.py` reescrevendo tudo, ele lista todo arquivo como `.f..t` (só a data); sem `-t` lista como `.f..T` toda vez. Por isso o script filtra a saída (`<f`, `cd`, `*deleting`).
+- Um `source` do arquivo de configuração executaria o que estivesse nele (o teste com `SSH_HOST=1.2.3.4;rm` rodou o `rm`): o `subir.sh` lê só as quatro chaves.
+
 ### Arquivos Modificados/Criados
-- `_site/index.html`, `_site/gerar.py` (llms.txt), `_site/imagens.mjs`.
+- `_site/index.html`, `_site/gerar.py` (llms.txt), `_site/imagens.mjs`, `_site/subir.sh` (novo), `_site/PUBLICAR.md`.
 
 ---
 
