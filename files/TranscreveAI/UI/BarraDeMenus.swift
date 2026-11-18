@@ -21,7 +21,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
     private var monitores: [Any] = []
     private var iconeNaTela: NSRect = .zero
     private var abertoPorArraste = false
-    private var arquivoAntesDoArraste: UUID?
+    private var recebimentosAntesDoArraste = 0
 
     init(estado: EstadoApp) {
         self.estado = estado
@@ -81,11 +81,12 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     /// Com o painel fechado, o ícone vira um anel com a porcentagem. Ao terminar, mostra um ✓ por alguns
     /// segundos e depois a bolinha vermelha, que fica até a pessoa abrir o painel (no erro, só a bolinha).
+    /// Texto já copiado ou exportado pelo botão direito do Finder (`.entregue`): só o ✓, sem bolinha.
     private func atualizarIcone(fracao: Double?, fim: EstadoApp.Fim?) {
         progressoNoIcone = fracao
         if fim != nil && !painel.isVisible {
-            resultadoNaoVisto = true
-            if fim == .pronto {
+            resultadoNaoVisto = fim != .entregue
+            if fim == .pronto || fim == .entregue {
                 let ate = Date().addingTimeInterval(4)
                 concluidoAte = ate
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4.1) { [weak self] in
@@ -249,7 +250,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
         let seletor = NSOpenPanel()
         seletor.title = String(localized: "Escolher áudio")
         seletor.prompt = String(localized: "Transcrever")
-        seletor.allowsMultipleSelection = false
+        seletor.allowsMultipleSelection = true  // vários: entram na fila
         seletor.canChooseDirectories = false
         seletor.allowedContentTypes = FormatosAudio.tipos
         if seletor.runModal() == .OK, estado.receber(seletor.urls) {
@@ -286,7 +287,7 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
 
     private func arrasteComecou() {
         guard Preferencia.abrirAoArrastarLigado, !painel.isVisible else { return }
-        arquivoAntesDoArraste = estado.arquivo?.id
+        recebimentosAntesDoArraste = estado.recebimentos
         mostrarPainel(ativar: false)
         abertoPorArraste = true
     }
@@ -295,11 +296,11 @@ final class BarraDeMenus: NSObject, NSWindowDelegate, NSDraggingDestination {
     /// Espera um instante porque a entrega do arquivo chega logo depois do "soltar".
     private func arrasteTerminou() {
         guard abertoPorArraste else { return }
-        let antes = arquivoAntesDoArraste
+        let antes = recebimentosAntesDoArraste
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self, self.abertoPorArraste, self.painel.isVisible else { return }
             self.abertoPorArraste = false
-            if self.estado.arquivo?.id == antes {
+            if self.estado.recebimentos == antes {
                 self.fecharPainel()
             } else {
                 NSApp.activate()

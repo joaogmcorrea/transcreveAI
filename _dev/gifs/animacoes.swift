@@ -497,7 +497,9 @@ struct Demo {
 
 enum Conteudo {
     case vazio(arrastando: CGFloat)
-    case trabalhando(Demo, fracao: CGFloat)
+    /// O texto aparece enquanto transcreve (v0.5.0). `saindo` (0 a 1): a barra some e a caixa sobe até o lugar do
+    /// resultado, sem o texto sumir (como no app, em que a caixa é a mesma do começo ao fim).
+    case trabalhando(Demo, fracao: CGFloat, saindo: CGFloat = 0)
     /// `aviso`: o "Copied" que aparece por 2 s embaixo do painel depois de copiar (0 a 1).
     case pronto(Demo, revelar: CGFloat, aviso: CGFloat = 0)
 }
@@ -514,11 +516,32 @@ func alturaDosParagrafos(_ demo: Demo) -> CGFloat {
     return 24 + textos.reduce(0, +) + CGFloat(textos.count - 1) * 12
 }
 
+/// Quanto de cada parágrafo já apareceu (0 a 1) com a transcrição em `fracao`. Cada um surge de uma vez (em cerca de
+/// 0,1 s), como os pedaços do Parakeet no app; um crescimento lento mexia no painel em quase todo quadro e deixava
+/// os GIFs com 3,3 MB em vez de 2.
+func aparecidos(_ demo: Demo, _ fracao: CGFloat) -> [CGFloat] {
+    let n = CGFloat(demo.paragrafos.count)
+    return demo.paragrafos.indices.map { saida(limitar((fracao * n - CGFloat($0) - 0.15) * 7)) }
+}
+
+/// A altura da caixa de texto com os parágrafos que já apareceram (0 enquanto nada saiu).
+func alturaDosAparecidos(_ demo: Demo, _ a: [CGFloat]) -> CGFloat {
+    var h: CGFloat = 0
+    for (i, paragrafo) in demo.paragrafos.enumerated() {
+        let texto = alturaDoBloco(paragrafo.1, largura: larguraDoParagrafo, fonteDoParagrafo, entrelinha: 2)
+        h += (texto + (i == 0 ? 24 : 12)) * a[i]
+    }
+    return h
+}
+
 func alturaInterna(_ c: Conteudo) -> CGFloat {
     switch c {
-    case .vazio: 30 + 12 + 188 + 12 + 22
-    case .trabalhando: 34 + 12 + 29 + 12 + 30
-    case .pronto(let demo, _, _): 34 + 12 + alturaDosParagrafos(demo) + 12 + 24
+    case .vazio: return 30 + 12 + 188 + 12 + 22
+    case .trabalhando(let demo, let fracao, let saindo):
+        let a = aparecidos(demo, fracao)
+        let andamento = 34 + 12 + 29 + 12 + alturaDosAparecidos(demo, a) + 12 * a[0] + 30
+        return mix(andamento, alturaInterna(.pronto(demo, revelar: 1)), suave(saindo))
+    case .pronto(let demo, _, _): return 34 + 12 + alturaDosParagrafos(demo) + 12 + 24
     }
 }
 
@@ -578,18 +601,50 @@ func conteudo(_ c: Conteudo, _ r: CGRect) {
         let modelo = botaoPequeno("Fastest", simbolo: "bolt", x: r.minX, y: linha, seta: true)
         _ = botaoPequeno("Auto", simbolo: "globe", x: modelo.maxX + 8, y: linha, seta: true)
 
-    case .trabalhando(let demo, let fracao):
+    case .trabalhando(let demo, let fracao, let saindo):
         cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · Parakeet v3")
         let topo = r.minY + 46
-        texto("Transcribing…", x: r.minX, y: topo + 8, fonte(12.5, .medium), Cor.tinta)
-        texto("\(Int(fracao * 100))%", x: r.maxX, y: topo + 8, fonte(12.5, numeros: true), Cor.cinza, alinhar: .direita)
-        let trilho = CGRect(x: r.minX, y: topo + 23, width: r.width, height: 6)
-        caixa(trilho, raio: 3, Cor.preto.a(0.1))
-        caixa(CGRect(x: trilho.minX, y: trilho.minY, width: max(6, trilho.width * fracao), height: 6), raio: 3, Cor.azul)
-        let dica = topo + 29 + 12
-        bloco("You can close the panel: progress shows on the menu bar icon.", x: r.minX, y: dica, largura: r.width - 96,
-              fonte(11.5), Cor.cinza)
-        _ = botaoPequeno("Cancel", simbolo: nil, direita: r.maxX, y: dica + 3)
+        let some = 1 - suave(saindo)
+        camada(some) {
+            texto("Transcribing…", x: r.minX, y: topo + 8, fonte(12.5, .medium), Cor.tinta)
+            texto("\(Int(fracao * 100))%", x: r.maxX, y: topo + 8, fonte(12.5, numeros: true), Cor.cinza,
+                  alinhar: .direita)
+            let trilho = CGRect(x: r.minX, y: topo + 23, width: r.width, height: 6)
+            caixa(trilho, raio: 3, Cor.preto.a(0.1))
+            caixa(CGRect(x: trilho.minX, y: trilho.minY, width: max(6, trilho.width * fracao), height: 6), raio: 3,
+                  Cor.azul)
+        }
+        // O texto que já saiu, na mesma caixa do resultado; no fim ela sobe para o lugar da barra.
+        let a = aparecidos(demo, fracao)
+        let caixaDoTexto = CGRect(x: r.minX, y: topo + 41 * some, width: r.width, height: alturaDosAparecidos(demo, a))
+        if a[0] > 0 {
+            caixa(caixaDoTexto, raio: 12, Cor.preto.a(0.05 * a[0]))
+            recortado(caixaDoTexto, raio: 12) {
+                var y = caixaDoTexto.minY + 12
+                for (i, paragrafo) in demo.paragrafos.enumerated() where a[i] > 0 {
+                    let h = alturaDoBloco(paragrafo.1, largura: larguraDoParagrafo, fonteDoParagrafo, entrelinha: 2)
+                    let base = y
+                    camada(a[i]) {
+                        let dy = (1 - a[i]) * 8
+                        texto(paragrafo.0, x: caixaDoTexto.minX + 12, y: base + 9 + dy, fonte(11.5, numeros: true),
+                              Cor.cinza)
+                        bloco(paragrafo.1, x: caixaDoTexto.minX + 60, y: base + dy, largura: larguraDoParagrafo,
+                              fonteDoParagrafo, Cor.tinta, entrelinha: 2)
+                    }
+                    y += (h + 12) * a[i]
+                }
+            }
+        }
+        let dica = caixaDoTexto.maxY + 12 * a[0]
+        camada(some) {
+            bloco("You can close the panel: progress shows on the menu bar icon.", x: r.minX, y: dica,
+                  largura: r.width - 96, fonte(11.5), Cor.cinza)
+            _ = botaoPequeno("Cancel", simbolo: nil, direita: r.maxX, y: dica + 3)
+        }
+        camada(suave(saindo)) {
+            simbolo("arrow.uturn.backward", x: r.minX + 7, y: dica + 11, tamanho: 11, Cor.tinta, peso: .medium)
+            texto("New", x: r.minX + 19, y: dica + 11, fonte(13), Cor.tinta)
+        }
 
     case .pronto(let demo, let revelar, let aviso):
         cabecalho(r, titulo: demo.arquivo.nome, detalhe: "\(demo.duracao) · transcribed in \(demo.tempo) · Parakeet v3")
@@ -710,7 +765,6 @@ func soltar(_ t: Double) {
 
     let arrastando = fase(t, 3.62, 3.76)
     let progresso = suave(fase(t, 4.4, 6.3))
-    let revelar = fase(t, 6.6, 7.7)
     if t < 4.1 {
         painel(abertura: abertura, .vazio(arrastando: arrastando))
     } else if t < 4.4 {
@@ -719,10 +773,9 @@ func soltar(_ t: Double) {
     } else if t < 6.35 {
         painel(abertura: 1, .trabalhando(reuniao, fracao: progresso))
     } else if t < 6.7 {
-        painel(abertura: 1, .trabalhando(reuniao, fracao: 1), para: .pronto(reuniao, revelar: 0),
-               transicao: fase(t, 6.35, 6.7))
+        painel(abertura: 1, .trabalhando(reuniao, fracao: 1, saindo: fase(t, 6.35, 6.7)))
     } else {
-        painel(abertura: 1, .pronto(reuniao, revelar: revelar, aviso: fase(t, 7.2, 7.45) * (1 - fase(t, 9.2, 9.5))))
+        painel(abertura: 1, .pronto(reuniao, revelar: 1, aviso: fase(t, 7.2, 7.45) * (1 - fase(t, 9.2, 9.5))))
     }
 
     let p = ponto([
@@ -740,8 +793,9 @@ func soltar(_ t: Double) {
     cursor(p, pressionado: (t > 1.27 && t < 1.42) || (t > 2.8 && t < 4.05))
     legendas([
         Passo(inicio: 0.3, fim: 2.75, numero: 1, texto: "Click the icon in the menu bar"),
-        Passo(inicio: 2.75, fim: 6.45, numero: 2, texto: "Drag an audio file onto the panel"),
-        Passo(inicio: 6.45, fim: 9.95, numero: 3, texto: "The text is ready, already copied"),
+        Passo(inicio: 2.75, fim: 4.7, numero: 2, texto: "Drag an audio file onto the panel"),
+        Passo(inicio: 4.7, fim: 6.45, numero: 3, texto: "Read it while it transcribes"),
+        Passo(inicio: 6.45, fim: 9.95, numero: 4, texto: "The text is ready, already copied"),
     ], t)
 }
 
@@ -757,7 +811,6 @@ func arrastarDoDock(_ t: Double) {
 
     let arrastando = fase(t, 4.22, 4.36)
     let progresso = suave(fase(t, 4.95, 6.4))
-    let revelar = fase(t, 6.7, 7.8)
     if t < 4.65 {
         painel(abertura: abertura, .vazio(arrastando: arrastando))
     } else if t < 4.95 {
@@ -766,10 +819,9 @@ func arrastarDoDock(_ t: Double) {
     } else if t < 6.45 {
         painel(abertura: 1, .trabalhando(entrevista, fracao: progresso))
     } else if t < 6.8 {
-        painel(abertura: 1, .trabalhando(entrevista, fracao: 1), para: .pronto(entrevista, revelar: 0),
-               transicao: fase(t, 6.45, 6.8))
+        painel(abertura: 1, .trabalhando(entrevista, fracao: 1, saindo: fase(t, 6.45, 6.8)))
     } else {
-        painel(abertura: 1, .pronto(entrevista, revelar: revelar, aviso: fase(t, 7.3, 7.55) * (1 - fase(t, 9.3, 9.6))))
+        painel(abertura: 1, .pronto(entrevista, revelar: 1, aviso: fase(t, 7.3, 7.55) * (1 - fase(t, 9.3, 9.6))))
     }
 
     let item = posicoesDoLeque[1]

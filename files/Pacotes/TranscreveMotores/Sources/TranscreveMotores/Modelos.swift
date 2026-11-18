@@ -34,7 +34,7 @@ public enum Etapa: Sendable, Equatable {
 
 public struct Progresso: Sendable {
     public var etapa: Etapa
-    /// O texto que já saiu (o Apple Speech entrega aos poucos; o Parakeet entrega tudo no fim).
+    /// O texto que já saiu (os dois motores entregam aos poucos: o Apple Speech frase a frase, o Parakeet aos pedaços).
     public var previa: [Segmento]
 
     public init(etapa: Etapa, previa: [Segmento] = []) {

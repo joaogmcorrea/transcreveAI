@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- A extensão do Finder (botão direito). O resto do Info.plist é gerado pelo Xcode (GENERATE_INFOPLIST_FILE).
+     Fica fora da pasta TranscreveFinder/ porque a pasta sincronizada copiaria o arquivo como recurso. -->
+<plist version="1.0">
+<dict>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionAttributes</key>
+		<dict/>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.FinderSync</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).FinderSync</string>
+	</dict>
+</dict>
+</plist>

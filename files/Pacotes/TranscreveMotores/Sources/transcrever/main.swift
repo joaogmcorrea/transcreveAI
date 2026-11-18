@@ -1,6 +1,7 @@
 // transcrever <áudio> [parakeet|apple] [idioma] — testa os motores pelo terminal, sem o app.
 // O FFmpeg (formatos que o macOS não abre) vem de TRANSCREVE_FFMPEG ou do Homebrew.
 import Foundation
+import os
 import TranscreveMotores
 
 let argumentos = CommandLine.arguments
@@ -19,7 +20,11 @@ func relogio(_ segundos: TimeInterval) -> String {
     return String(format: "%02d:%02d", total / 60, total % 60)
 }
 
+// Quando o primeiro texto apareceu (a prévia ao vivo do painel).
+let primeiroTexto = OSAllocatedUnfairLock<Date?>(initialState: nil)
+
 let progresso: @Sendable (Progresso) -> Void = { p in
+    if !p.previa.isEmpty { primeiroTexto.withLock { if $0 == nil { $0 = Date() } } }
     if case .transcrevendo(let fracao) = p.etapa {
         FileHandle.standardError.write("\r  \(Int(fracao * 100))%   ".data(using: .utf8)!)
     } else {
@@ -54,8 +59,9 @@ do {
     for paragrafo in Paragrafos.agrupar(frases) {
         print("[\(relogio(paragrafo.inicio))] \(paragrafo.texto)")
     }
-    print(String(format: "\n%@ · áudio %.0f s · transcrito em %.2f s (%.0f× tempo real) · %d frases",
-                 motor.nome, audio.duracao, tempo, audio.duracao / max(tempo, 0.001), frases.count))
+    let primeiro = primeiroTexto.withLock { $0 }.map { String(format: " · primeiro texto em %.2f s", $0.timeIntervalSince(inicio)) } ?? ""
+    print(String(format: "\n%@ · áudio %.0f s · transcrito em %.2f s (%.0f× tempo real) · %d frases%@",
+                 motor.nome, audio.duracao, tempo, audio.duracao / max(tempo, 0.001), frases.count, primeiro))
 } catch {
     print("erro: \(error.localizedDescription)")
     exit(1)

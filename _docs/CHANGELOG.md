@@ -28,6 +28,21 @@
 
 ---
 
+## [0.5.0] - 18/11/2026
+
+### Adicionado
+- Texto ao vivo enquanto transcreve (pedido do owner, 17/11/2026): o Parakeet passou a entregar o texto aos pedaços, e o painel mostra os parágrafos na mesma caixa do resultado enquanto o resto é transcrito. O primeiro texto aparece em cerca de 0,1 s, qualquer que seja a duração do áudio. Clicar no texto durante a transcrição copia o que já saiu (escolha do owner). A caixa é a mesma quando termina: quem estava lendo no meio não volta para o topo.
+- Botão direito do Finder (pedido do owner, 17/11/2026, como o PowerClick): "Transcrever com o TranscreveAI" › "Copiar o texto" ou "Exportar como .txt", em áudios e vídeos. Transcreve em segundo plano, sem abrir o painel (progresso e ✓ no ícone da barra, som ao terminar). O `.txt` fica ao lado do áudio (`nome.txt`, ou `nome 2.txt` se já existir). Extensão do Finder (alvo `TranscreveFinder`), ligada sozinha na primeira abertura e também em Ajustes › Geral. O app só aceita pedidos da própria extensão. Testado pelo owner (o item aparece e funciona); sem teste à mão dentro do Dropbox e com vários arquivos.
+- Fila (escolha do owner): vários áudios de uma vez (Finder, arrastar, "Abrir arquivo…" com seleção múltipla) são transcritos um depois do outro; um áudio que chega durante uma transcrição entra no fim da fila. O painel mostra "Transcrevendo 2 de 3…" e quem vem depois; o ícone mostra o progresso da fila inteira. No "Copiar o texto" com vários áudios, vai tudo junto, cada texto com o nome do arquivo em cima.
+
+### Alterado
+- O áudio é lido e convertido aos poucos, junto com a transcrição: 10 min de áudio passaram de 2,7 s para 2,4 s; 60 min ficaram iguais (13,0 s antes, 13,2 s agora), no M4 Pro.
+- Um áudio solto durante uma transcrição entra na fila, em vez de cancelar a atual.
+- Os GIFs do README mostram o texto aparecendo durante a transcrição.
+- Número da versão: 0.5.0 (escolha do owner); os marcos seguintes do ROADMAP andaram uma casa (trecho clicável e exportação no painel na v0.6.0, Whisper na v0.7.0, notificação na v0.8.0, anel na v0.9.0).
+
+---
+
 ## [0.4.1] - 14/11/2026
 
 ### Adicionado

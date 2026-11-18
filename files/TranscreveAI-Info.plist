@@ -16,6 +16,19 @@
 	<true/>
 	<key>SUVerifyUpdateBeforeExtraction</key>
 	<true/>
+	<!-- Os pedidos do botão direito do Finder (extensão TranscreveFinder): transcreveai://copiar?arquivo=… e
+	     transcreveai://exportar?arquivo=…. O app só aceita os que vêm da própria extensão (AppDelegate). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>io.github.joaogmcorrea.transcreveai</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>transcreveai</string>
+			</array>
+		</dict>
+	</array>
 	<!-- "Abrir com" no Finder e arquivos soltos no ícone do app no Dock/Finder: qualquer áudio ou vídeo. -->
 	<key>CFBundleDocumentTypes</key>
 	<array>

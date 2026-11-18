@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "pt-BR",
   "strings" : {
+    "%lld arquivos .txt salvos ao lado dos áudios." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld .txt files saved next to the audio files."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld archivos .txt guardados junto a los audios."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld arquivos .txt salvos ao lado dos áudios."
+          }
+        }
+      }
+    },
     "%lld transcrições" : {
       "localizations" : {
         "en" : {
@@ -195,6 +217,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir o painel ao arrastar um áudio"
+          }
+        }
+      }
+    },
+    "Ajustes do Sistema…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Settings…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes del Sistema…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes do Sistema…"
           }
         }
       }
@@ -705,6 +749,28 @@
         }
       }
     },
+    "Clique para copiar o que já saiu" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to copy what’s ready so far"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz clic para copiar lo que ya está listo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clique para copiar o que já saiu"
+          }
+        }
+      }
+    },
     "Convertendo o áudio…" : {
       "localizations" : {
         "en" : {
@@ -833,6 +899,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar o texto ao terminar"
+          }
+        }
+      }
+    },
+    "Desligado" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desligado"
           }
         }
       }
@@ -1079,6 +1167,50 @@
         }
       }
     },
+    "Ligado" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activado"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ligado"
+          }
+        }
+      }
+    },
+    "Ligar…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ligar…"
+          }
+        }
+      }
+    },
     "Limpar histórico…" : {
       "localizations" : {
         "en" : {
@@ -1233,6 +1365,50 @@
         }
       }
     },
+    "Na fila: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up next: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cola: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na fila: %@"
+          }
+        }
+      }
+    },
+    "Na fila: %@ e mais %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up next: %@ and %lld more"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cola: %@ y %lld más"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na fila: %@ e mais %lld"
+          }
+        }
+      }
+    },
     "Nada encontrado." : {
       "localizations" : {
         "en" : {
@@ -1365,6 +1541,28 @@
         }
       }
     },
+    "Não consegui transcrever: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t transcribe: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pude transcribir: %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não consegui transcrever: %@."
+          }
+        }
+      }
+    },
     "Não encontrei essa transcrição no histórico." : {
       "localizations" : {
         "en" : {
@@ -1431,6 +1629,28 @@
         }
       }
     },
+    "O texto dos %lld áudios foi copiado." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text from %lld audio files copied."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se copió el texto de los %lld audios."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O texto dos %lld áudios foi copiado."
+          }
+        }
+      }
+    },
     "Ontem, %@" : {
       "localizations" : {
         "en" : {
@@ -1449,28 +1669,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ontem, %@"
-          }
-        }
-      }
-    },
-    "PRÉVIA AO VIVO" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LIVE PREVIEW"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "VISTA PREVIA EN VIVO"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PRÉVIA AO VIVO"
           }
         }
       }
@@ -1673,6 +1871,28 @@
         }
       }
     },
+    "Salvo como %@, ao lado do áudio." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved as %@, next to the audio file."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardado como %@, junto al audio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvo como %@, ao lado do áudio."
+          }
+        }
+      }
+    },
     "Solte para transcrever" : {
       "localizations" : {
         "en" : {
@@ -1805,6 +2025,28 @@
         }
       }
     },
+    "Transcrevendo %lld de %lld…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribing %lld of %lld…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribiendo %lld de %lld…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrevendo %lld de %lld…"
+          }
+        }
+      }
+    },
     "Transcrevendo…" : {
       "localizations" : {
         "en" : {
@@ -1845,6 +2087,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transcrever"
+          }
+        }
+      }
+    },
+    "Transcrever pelo botão direito do Finder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribe from the Finder right-click menu"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribir con el clic derecho del Finder"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrever pelo botão direito do Finder"
           }
         }
       }

@@ -20,12 +20,15 @@ Transcription apps tend to be slow and crowded with options. TranscreveAI does o
 
 ## How to use
 
-There are four ways to hand it an audio file:
+There are five ways to hand it an audio file:
 
 - **Click the menu bar icon** and drop the file on the panel, or click the drop area to pick a file.
 - **Drop it right on the menu bar icon.**
 - **Start dragging** an audio file in Finder, on the Desktop or from a Dock stack. The panel opens by itself and closes again if you drop the file somewhere else.
 - **Open With › TranscreveAI** in Finder.
+- **Right-click** audio or video files in Finder › **Transcribe with TranscreveAI** › **Copy text** or **Export as .txt**. It runs in the background without opening the panel: the menu bar icon shows the progress and a check mark, and the `.txt` lands next to the audio file.
+
+The text shows up while the rest is still being transcribed (the first paragraph in about 0.1 s), so you can start reading right away. Drop or pick several files and they're transcribed one after another.
 
 ![Dragging an audio file from a Dock stack opens the panel by itself](_dev/gifs/dock.gif)
 
@@ -38,7 +41,9 @@ Right-click the icon for Check for Updates, Settings, Open at Login and Quit. Pr
 ## Features
 
 - **On-device transcription:** nothing goes to the cloud.
-- **Text in paragraphs**, each with its timestamp. Click the text to copy all of it; a "Copied" toast confirms it.
+- **Text as it's transcribed**, in paragraphs, each with its timestamp. Click the text to copy all of it (or, while it's still working, what's ready so far); a "Copied" toast confirms it.
+- **Finder right-click menu:** copy the text or export a `.txt` without opening the panel. The extension turns itself on the first time you open the app; you can switch it in Settings › General.
+- **Queue:** several files at once are transcribed one after another. With **Copy text**, all of them go to the clipboard together, each under its file name.
 - **History** with search: reopen, copy or delete past transcriptions (a trash button shows on hover). By default, history is erased when you shut down or restart the Mac. You can change that in Settings › History.
 - **Model and language** pickers at the bottom of the panel and in Settings. Languages: Auto, Portuguese, English and Spanish.
 - **Automatic updates** through [Sparkle](https://sparkle-project.org), verified with EdDSA signatures.
@@ -49,7 +54,7 @@ Right-click the icon for Check for Updates, Settings, Open at Login and Quit. Pr
 |---|---|---|
 | **Automático** (default) | Always picks the fastest installed engine. Today that's Parakeet v3. | — |
 | **Parakeet v3** (NVIDIA, through [FluidAudio](https://github.com/FluidInference/FluidAudio)) | The fastest. Detects the language by itself. | 470 MB, once |
-| **Apple Speech** | Built into macOS. Shows a live preview. | None |
+| **Apple Speech** | Built into macOS. | None |
 | **Whisper Large v3 Turbo** | Higher-quality alternative | Coming soon |
 
 On the first transcription, Apple Speech handles the file while Parakeet downloads and gets compiled for the Neural Engine (about 14 s, only once). From then on, Automático uses Parakeet.
@@ -122,10 +127,10 @@ open files/TranscreveAI.xcodeproj
 
 ## What's next
 
-- **v0.5:** click a passage to copy it, and export to `.txt` / `.md`.
-- **v0.6:** Whisper Large v3 Turbo.
-- **v0.7:** a notification when a transcription finishes.
-- **v0.8:** an action ring on the ⌥ Space shortcut.
+- **v0.6:** click a passage to copy it, and export to `.txt` / `.md` from the panel.
+- **v0.7:** Whisper Large v3 Turbo.
+- **v0.8:** a notification when a transcription finishes.
+- **v0.9:** an action ring on the ⌥ Space shortcut.
 - **v1.0:** polish and tests with long recordings.
 
 The full roadmap is in [`_docs/ROADMAP.md`](_docs/ROADMAP.md), and the changes in each version are in [`_docs/CHANGELOG.md`](_docs/CHANGELOG.md) (both in Portuguese).

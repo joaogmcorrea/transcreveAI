@@ -21,8 +21,9 @@ struct AjustesView: View {
     @State private var podeProcurar = false
     @State private var confirmarLimpeza = false
     @State private var parakeet: String = "…"
+    @State private var finderAtivo = MenuDoFinder.ativo
 
-    static let tamanho = NSSize(width: 480, height: 660)
+    static let tamanho = NSSize(width: 480, height: 704)
 
     var body: some View {
         Form {
@@ -33,6 +34,13 @@ struct AjustesView: View {
                 Toggle("Abrir o painel ao arrastar um áudio", isOn: $abrirAoArrastar)
                 Toggle("Copiar o texto ao terminar", isOn: $copiarAoTerminar)
                 Toggle("Tocar um som ao terminar", isOn: $somAoTerminar)
+                // A extensão liga e desliga nos Ajustes do Sistema; o estado é relido quando o app volta à frente.
+                LabeledContent("Transcrever pelo botão direito do Finder") {
+                    HStack(spacing: 8) {
+                        Text(finderAtivo ? "Ligado" : "Desligado").foregroundStyle(.secondary)
+                        Button(finderAtivo ? "Ajustes do Sistema…" : "Ligar…") { MenuDoFinder.abrirAjustesDoSistema() }
+                    }
+                }
             }
 
             Section("Transcrição") {
@@ -88,6 +96,9 @@ struct AjustesView: View {
             Text("As transcrições somem deste Mac. Os áudios originais não são tocados.")
         }
         .onReceive(Atualizacoes.atualizador.publisher(for: \.canCheckForUpdates)) { podeProcurar = $0 }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            finderAtivo = MenuDoFinder.ativo
+        }
         .task {
             let motor = MotorParakeet.compartilhado
             let pronto = await motor.pronto

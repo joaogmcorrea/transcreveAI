@@ -13,17 +13,26 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 - **Velocidade e privacidade:** o padrão é sempre o modelo mais rápido medido no Mac, e nenhum áudio ou texto sai da máquina.
 
 ### Fluxo Principal
-1. **Usuário:** arrasta um áudio para o ícone da barra de menus ou para o painel. Também pode usar "Abrir arquivo…", a seleção do Finder ou o anel de ações.
-2. **App:** decodifica o áudio (AVFoundation e, para formatos não nativos, FFmpeg) e transcreve com o modelo ativo ("Automático" = o mais rápido instalado). O progresso aparece no painel e no ícone da barra, com prévia do texto ao vivo.
+1. **Usuário:** arrasta um áudio para o ícone da barra de menus ou para o painel. Também pode usar "Abrir arquivo…", a seleção do Finder ou o anel de ações. Vários áudios de uma vez entram numa fila *(17/11/2026)*.
+2. **App:** decodifica o áudio (AVFoundation e, para formatos não nativos, FFmpeg) e transcreve com o modelo ativo ("Automático" = o mais rápido instalado). O progresso aparece no painel e no ícone da barra, e o texto aparece no painel enquanto o resto é transcrito (o primeiro trecho em cerca de 0,1 s) *(17/11/2026)*.
+   - **Botão direito do Finder** *(17/11/2026)*: "Transcrever com o TranscreveAI" › "Copiar o texto" ou "Exportar como .txt" (ao lado do áudio), em segundo plano, sem abrir o painel.
 3. **Usuário:** clica no texto para copiar tudo (aviso "Copiado" por 2 s; o botão "Copiar tudo" saiu em 11/11/2026), clica num trecho para copiar (planejado) ou exporta `.txt` / `.md`. Com "Copiar ao terminar" ligado (padrão), o texto já vai para a área de transferência e uma notificação avisa que terminou.
 4. **Anel de ações:** segurando ⌥ Espaço em qualquer app, abre um menu radial em volta do cursor (inspirado no Actions Ring do Logi Options+) com: transcrever a seleção do Finder, abrir arquivo, copiar a última transcrição, colar no app atual, exportar `.md` e exportar `.txt`. Soltar um áudio no centro do anel também transcreve.
 5. **Ciclo de Vida:** as transcrições ficam num histórico local ("Recentes" no painel). Nada é enviado para a nuvem. Política de retenção do histórico a definir.
 
 ---
 
-## Status Atual (14/11/2026)
+## Status Atual (18/11/2026)
 
 > **Agentes de IA:** Atualizem esta seção a cada nova fase completada, versão lançada ou marco importante atingido. Adicionem a nova fase no topo e movam as anteriores para baixo.
+
+### Fase: v0.5.0 — Texto ao vivo, botão direito do Finder e fila (18/11/2026)
+- **Número 0.5.0** *(18/11/2026, escolha do owner)*: os marcos seguintes do ROADMAP andaram uma casa (trecho clicável e exportação no painel na v0.6, Whisper na v0.7, notificação na v0.8, anel na v0.9).
+- **Release publicada no GitHub** (v0.5.0, 18/11/2026): os apps na v0.4.1 e anteriores recebem o aviso do Sparkle. Os GIFs do README mostram o texto aparecendo durante a transcrição.
+- **Texto ao vivo** *(pedido do owner)*: o Parakeet transcreve aos pedaços (o primeiro de até 15 s, o segundo de 4 min, os outros de 10 min), com as emendas em pausas e 1 s de margem de cada lado; o painel mostra os parágrafos na caixa do resultado enquanto o resto chega. Clicar copia o que já saiu (escolha do owner). Mockup aprovado no chat (sem mudar o canvas). Velocidade medida: igual ou melhor que antes (10 min: 2,7 → 2,4 s; 60 min: 13,0 → 13,2 s).
+- **Botão direito do Finder** *(pedido do owner, como o PowerClick)*: submenu Copiar o texto / Exportar como .txt, sem abrir o painel (mudança pedida pelo owner no meio da tarefa). Extensão do Finder `TranscreveFinder` (sandbox), ligada sozinha na primeira abertura; linha nos Ajustes para ligar e desligar.
+- **Fila** *(escolha do owner)*: vários arquivos são transcritos um depois do outro.
+- **Testado por mim:** texto ao vivo e fila no painel (fotos), exportar e copiar pelo endereço da extensão, recusa de pedidos que não vêm dela, a extensão carregada pelo Finder. **Testado pelo owner** *(18/11/2026)*: o item do botão direito aparece e funciona (depois da correção da extensão, que travava fora da thread principal). **Sem teste à mão:** dentro do Dropbox (que tem extensão própria) e com vários arquivos.
 
 ### Fase: v0.4.1 — App em três idiomas, clicar para copiar e site (14/11/2026)
 - **App em inglês, português e espanhol** *(pedido do owner)*: segue o idioma do macOS. Catálogo de textos com o português como origem. Sem teste à mão.
@@ -58,10 +67,10 @@ App nativo para macOS (Swift + SwiftUI) que vive na **barra de menus**. O usuár
 ### Pendências para Futuro (Roadmap Curto)
 - [x] Benchmark de motores em pt-BR (concluído na v0.2.0, 10/11/2026).
 - [x] Criar o projeto Xcode (app de menu bar, macOS 26+), com atualizações pelo Sparkle (v0.3.0, 10/11/2026).
-- [ ] Criar o certificado de assinatura "TranscreveAI" no Acesso às Chaves antes do anel (v0.8), para o macOS não pedir de novo a permissão de Acessibilidade a cada versão.
+- [ ] Criar o certificado de assinatura "TranscreveAI" no Acesso às Chaves antes do anel (v0.9; era v0.8 até 18/11/2026), para o macOS não pedir de novo a permissão de Acessibilidade a cada versão.
 - [x] Pipeline de áudio: AVFoundation + FFmpeg embutido (v0.4.0, 10/11/2026).
-- [ ] Painel: transcrição clicável e exportação `.txt` / `.md` (v0.5). Área de arrastar, progresso e prévia ao vivo prontos na v0.4.0 *(10/11/2026)*.
-- [ ] Notificação ao terminar (v0.7). Progresso no ícone, som e "Copiar ao terminar" prontos na v0.4.0 *(10/11/2026)*.
+- [ ] Painel: transcrição clicável e exportação `.txt` / `.md` (v0.6; era v0.5 até 18/11/2026). Área de arrastar, progresso e prévia ao vivo prontos na v0.4.0 *(10/11/2026)*. Texto ao vivo com o Parakeet e `.txt` pelo botão direito do Finder *(17/11/2026)*.
+- [ ] Notificação ao terminar (v0.8; era v0.7 até 18/11/2026). Progresso no ícone, som e "Copiar ao terminar" prontos na v0.4.0 *(10/11/2026)*.
 - [ ] Anel de ações com atalho global ⌥ Espaço.
 - [ ] Repetir o benchmark com áudio longo (30 min ou mais) e transcrição de referência antes da v1.0.
 
@@ -117,7 +126,9 @@ BenchmarkModelo  — modelo e velocidade medida no Mac do usuário (× tempo rea
 - **Qualquer formato:** tenta o AVFoundation primeiro e cai para o FFmpeg embutido (WAV 16 kHz mono temporário, apagado no fim). Se nada decodificar, mostra um erro claro.
 - **Idioma no Apple Speech:** ele não detecta o idioma sozinho; no "Auto" usa **pt-BR** (o idioma do sistema errava num Mac em inglês). O Parakeet detecta sozinho *(10/11/2026)*.
 - **Segundo plano:** fechar o painel só esconde a janela; a transcrição continua (sem App Nap nem sono do Mac) até terminar ou até o Cancelar. Ao terminar com o painel fechado: som, ✓ no ícone e bolinha vermelha até abrir o painel *(10/11/2026)*.
-- **Exportação:** `.txt` = só o texto, em parágrafos. `.md` = título, metadados (duração, idioma, data) e `**[mm:ss]**` em cada parágrafo.
+- **Exportação:** `.txt` = só o texto, em parágrafos. `.md` = título, metadados (duração, idioma, data) e `**[mm:ss]**` em cada parágrafo. Pelo botão direito do Finder, o `.txt` fica ao lado do áudio (`nome.txt`; se existir, `nome 2.txt`; sem permissão de escrita, em Downloads) *(17/11/2026)*.
+- **Fila:** um áudio que chega durante uma transcrição entra no fim da fila (antes, cancelava a atual). O Cancelar para o atual e esvazia a fila *(17/11/2026)*.
+- **Pedidos do Finder:** chegam pelo endereço `transcreveai://copiar|exportar?arquivo=…`; o app só aceita os que vêm de um processo dentro de uma `TranscreveFinder.appex` com o identificador `io.github.joaogmcorrea.transcreveai.finder` (um site não consegue mandar o app transcrever um arquivo do Mac) *(17/11/2026)*.
 - **Copiar ao terminar:** ligado por padrão. Ao concluir, a transcrição inteira (parágrafos separados por linha em branco) vai para a área de transferência. **Som ao terminar** (Glass; Basso no erro) também vem ligado.
 
 ---
@@ -145,13 +156,15 @@ TranscreveAI/
     ├── TranscreveAI-Info.plist   # Chaves do Sparkle e tipos de arquivo
     ├── LICENCAS.md + LICENSE-*.txt   # Licenças de terceiros (Sparkle, FluidAudio, fastcluster)
     ├── Pacotes/TranscreveMotores/   # Pacote Swift local: Parakeet, Apple Speech, conversão, parágrafos e o CLI `transcrever`
+    ├── TranscreveFinder/  # Extensão do Finder (botão direito), pasta sincronizada do alvo TranscreveFinder (17/11/2026)
+    ├── TranscreveFinder-Info.plist + TranscreveFinder.entitlements   # NSExtension (com.apple.FinderSync) e o sandbox
     ├── Vendor/ffmpeg/     # FFmpeg mínimo (binário + licença + versão), gerado por _dev/ffmpeg/compilar.sh
     └── TranscreveAI/      # Pasta sincronizada do alvo (arquivo novo entra sozinho)
         ├── App/           # Entrada do app, estado e atualizações (Sparkle)
         ├── UI/            # Ícone da barra, painel, Ajustes; depois transcrição e anel
         ├── Audio/         # Formatos aceitos (a conversão fica no pacote TranscreveMotores)
-        ├── Transcription/ # WhisperKit e benchmark local do Automático (v0.6); os motores atuais estão no pacote
-        ├── Export/        # Geração de .txt e .md: v0.5
+        ├── Transcription/ # WhisperKit e benchmark local do Automático (v0.7); os motores atuais estão no pacote
+        ├── Export/        # Geração de .txt (17/11/2026) e .md (v0.6)
         └── Storage/       # Preferências e histórico (10/11/2026)
 ```
 

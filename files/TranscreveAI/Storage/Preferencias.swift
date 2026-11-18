@@ -32,7 +32,7 @@ enum ModeloTranscricao: String, CaseIterable, Identifiable {
         return salvo?.disponivel == true ? salvo! : .automatico
     }
 
-    /// O Whisper Turbo (WhisperKit) entra na v0.6.
+    /// O Whisper Turbo (WhisperKit) entra na v0.7.
     var disponivel: Bool { self != .whisperTurbo }
 
     var nome: String {

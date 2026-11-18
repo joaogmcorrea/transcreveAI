@@ -42,12 +42,14 @@ struct PainelView: View {
                             verTudo: { estado.mostrandoHistorico = true })
                     }
                 }
-            case .trabalhando(let trabalho):
-                Andamento(trabalho: trabalho, cancelar: estado.cancelar)
-            case .pronto(let transcricao):
-                Resultado(transcricao: transcricao, nota: estado.notaDoModelo, copiar: estado.copiarResultado, novo: estado.limpar)
+            case .trabalhando, .pronto:
+                // Um caso só para os dois: a caixa de texto continua a mesma quando a transcrição termina, e quem
+                // estava lendo no meio não volta para o topo.
+                Leitura(estado: estado)
             case .erro(let mensagem):
-                Falha(mensagem: mensagem, tentarDeNovo: estado.tentarDeNovo, novo: estado.limpar)
+                Falha(
+                    mensagem: mensagem, nota: estado.notaDaFila, tentarDeNovo: estado.tentarDeNovo,
+                    novo: estado.limpar)
             }
         }
         .padding(14)
@@ -242,151 +244,107 @@ struct PainelView: View {
     }
 }
 
-// MARK: - Transcrevendo
+// MARK: - Transcrevendo e transcrição pronta
 
-private struct Andamento: View {
-    let trabalho: EstadoApp.Trabalho
-    let cancelar: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(titulo).font(.system(size: 12.5, weight: .medium))
-                    Spacer()
-                    if let fracao {
-                        Text("\(Int(fracao * 100))%")
-                            .font(.system(size: 12.5))
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
-                }
-                if let fracao {
-                    // Barra própria (como no mockup): a nativa anima atrasada em relação ao número.
-                    GeometryReader { area in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(Color.primary.opacity(0.1))
-                            Capsule().fill(Color.accentColor)
-                                .frame(width: max(6, area.size.width * min(1, fracao)))
-                        }
-                    }
-                    .frame(height: 6)
-                } else {
-                    ProgressView().progressViewStyle(.linear)
-                }
-            }
-
-            if !trabalho.previa.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("PRÉVIA AO VIVO")
-                        .font(.system(size: 11, weight: .semibold))
-                        .tracking(0.6)
-                        .foregroundStyle(.secondary)
-                    ForEach(trabalho.previa.suffix(4), id: \.self) { frase in
-                        Text(frase.texto)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                // Ancorada no fim: a frase mais nova sempre aparece inteira; as antigas saem por cima.
-                .frame(height: 150, alignment: .bottom)
-                .clipped()
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.05)))
-            }
-
-            HStack(spacing: 10) {
-                Text("Pode fechar o painel: o progresso fica no ícone da barra.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-                Button("Cancelar", action: cancelar)
-                    .controlSize(.small)
-            }
-        }
-    }
-
-    private var titulo: String {
-        switch trabalho.etapa {
-        case .convertendo: String(localized: "Convertendo o áudio…")
-        case .preparandoModelo:
-            trabalho.baixando != nil
-                ? String(localized: "Baixando o \(trabalho.motor.nome) (uma vez só)…")
-                : String(localized: "Preparando o \(trabalho.motor.nome)…")
-        case .transcrevendo: String(localized: "Transcrevendo…")
-        }
-    }
-
-    private var fracao: Double? {
-        if let baixando = trabalho.baixando { return baixando }
-        if case .transcrevendo(let fracao) = trabalho.etapa { return fracao }
-        return nil
-    }
-}
-
-// MARK: - Transcrição pronta
-
-private struct Resultado: View {
-    let transcricao: EstadoApp.Transcricao
-    let nota: String?
-    let copiar: () -> Void
-    let novo: () -> Void
+/// O texto aparece enquanto o resto é transcrito (pedido do owner, 17/11/2026) e fica na mesma caixa quando termina.
+/// Clicar no texto copia: durante a transcrição, o que já saiu; no fim, tudo.
+private struct Leitura: View {
+    let estado: EstadoApp
     @State private var sobre = false
 
+    private var trabalho: EstadoApp.Trabalho? {
+        if case .trabalhando(let trabalho) = estado.fase { return trabalho }
+        return nil
+    }
+
+    private var transcricao: EstadoApp.Transcricao? {
+        if case .pronto(let transcricao) = estado.fase { return transcricao }
+        return nil
+    }
+
+    private var paragrafos: [Segmento] { trabalho?.paragrafos ?? transcricao?.paragrafos ?? [] }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if transcricao.paragrafos.isEmpty {
+            if let trabalho { Andamento(trabalho: trabalho, posicao: estado.posicaoNaFila, fila: estado.fila) }
+
+            if !paragrafos.isEmpty {
+                caixaDeTexto
+            } else if transcricao != nil {
                 Label("Não encontrei fala nesse áudio.", systemImage: "waveform.slash")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.05)))
-            } else {
-                // Clicar no texto copia tudo (pedido do owner): no lugar do botão "Copiar tudo".
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(Array(transcricao.paragrafos.enumerated()), id: \.offset) { _, paragrafo in
-                            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                                Text(FormatosAudio.formatar(duracao: paragrafo.inicio))
-                                    .font(.system(size: 11.5))
-                                    .foregroundStyle(.secondary)
-                                    .monospacedDigit()
-                                    .frame(width: 38, alignment: .leading)
-                                Text(paragrafo.texto)
-                                    .font(.system(size: 13.5))
-                                    .lineSpacing(2)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .onTapGesture(perform: copiar)
+            }
+
+            if transcricao != nil {
+                ForEach([estado.notaDaFila, estado.notaDoModelo].compactMap { $0 }, id: \.self) { nota in
+                    Label(nota, systemImage: nota == estado.notaDoModelo ? "arrow.down.circle" : "info.circle")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(maxHeight: 312)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(sobre ? 0.08 : 0.05)))
-                .onHover { dentro in withAnimation(.easeOut(duration: 0.15)) { sobre = dentro } }
-                .pointerStyle(.link)
-                .accessibilityElement(children: .combine)
-                .accessibilityAddTraits(.isButton)
-                .accessibilityHint(Text("Clique para copiar"))
-                .accessibilityAction(.default, copiar)
             }
 
-            if let nota {
-                Label(nota, systemImage: "arrow.down.circle")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            rodape
+        }
+    }
 
+    private var caixaDeTexto: some View {
+        // Clicar no texto copia (pedido do owner): no lugar do botão "Copiar tudo".
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(paragrafos.enumerated()), id: \.offset) { _, paragrafo in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(FormatosAudio.formatar(duracao: paragrafo.inicio))
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                            .frame(width: 38, alignment: .leading)
+                        Text(paragrafo.texto)
+                            .font(.system(size: 13.5))
+                            .lineSpacing(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: estado.copiarResultado)
+        }
+        .frame(maxHeight: 312)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(sobre ? 0.08 : 0.05)))
+        .onHover { dentro in withAnimation(.easeOut(duration: 0.15)) { sobre = dentro } }
+        .pointerStyle(.link)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(Text(trabalho == nil ? "Clique para copiar" : "Clique para copiar o que já saiu"))
+        .accessibilityAction(.default, estado.copiarResultado)
+    }
+
+    @ViewBuilder private var rodape: some View {
+        if trabalho != nil {
+            HStack(spacing: 10) {
+                Group {
+                    if sobre && !paragrafos.isEmpty {
+                        Label("Clique para copiar o que já saiu", systemImage: "doc.on.doc")
+                    } else {
+                        Text("Pode fechar o painel: o progresso fica no ícone da barra.")
+                    }
+                }
+                .font(.system(size: 11.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Button("Cancelar", action: estado.cancelar)
+                    .controlSize(.small)
+            }
+        } else {
             HStack {
-                Button(action: novo) {
+                Button(action: estado.limpar) {
                     Label("Novo", systemImage: "arrow.uturn.backward")
                 }
                 .buttonStyle(.borderless)
@@ -400,6 +358,79 @@ private struct Resultado: View {
                 }
             }
         }
+    }
+}
+
+/// Etapa, porcentagem e barra do áudio atual; com uma fila, a posição e quem vem depois.
+private struct Andamento: View {
+    let trabalho: EstadoApp.Trabalho
+    let posicao: (atual: Int, total: Int)?
+    let fila: [EstadoApp.Pedido]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(titulo).font(.system(size: 12.5, weight: .medium))
+                Spacer()
+                if let fracao {
+                    Text("\(Int(fracao * 100))%")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            if let fracao {
+                // Barra própria (como no mockup): a nativa anima atrasada em relação ao número.
+                GeometryReader { area in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.primary.opacity(0.1))
+                        Capsule().fill(Color.accentColor)
+                            .frame(width: max(6, area.size.width * min(1, fracao)))
+                    }
+                }
+                .frame(height: 6)
+            } else {
+                ProgressView().progressViewStyle(.linear)
+            }
+            if let proximos {
+                Label(proximos, systemImage: "list.bullet")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
+    }
+
+    private var titulo: String {
+        switch trabalho.etapa {
+        case .convertendo: String(localized: "Convertendo o áudio…")
+        case .preparandoModelo:
+            trabalho.baixando != nil
+                ? String(localized: "Baixando o \(trabalho.motor.nome) (uma vez só)…")
+                : String(localized: "Preparando o \(trabalho.motor.nome)…")
+        case .transcrevendo:
+            if let posicao {
+                String(localized: "Transcrevendo \(posicao.atual) de \(posicao.total)…")
+            } else {
+                String(localized: "Transcrevendo…")
+            }
+        }
+    }
+
+    /// "Na fila: b.m4a, c.mp3 e mais 2".
+    private var proximos: String? {
+        guard !fila.isEmpty else { return nil }
+        let nomes = fila.prefix(2).map(\.arquivo.nome).joined(separator: ", ")
+        return fila.count > 2
+            ? String(localized: "Na fila: \(nomes) e mais \(fila.count - 2)")
+            : String(localized: "Na fila: \(nomes)")
+    }
+
+    private var fracao: Double? {
+        if let baixando = trabalho.baixando { return baixando }
+        if case .transcrevendo(let fracao) = trabalho.etapa { return fracao }
+        return nil
     }
 }
 
@@ -421,6 +452,8 @@ private struct AvisoCopiado: View {
 
 private struct Falha: View {
     let mensagem: String
+    /// No fim de uma fila: o que deu certo antes deste áudio.
+    let nota: String?
     let tentarDeNovo: () -> Void
     let novo: () -> Void
 
@@ -433,6 +466,12 @@ private struct Falha: View {
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.primary.opacity(0.05)))
+            if let nota {
+                Label(nota, systemImage: "info.circle")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack {
                 Button(action: novo) {
                     Label("Novo", systemImage: "arrow.uturn.backward")

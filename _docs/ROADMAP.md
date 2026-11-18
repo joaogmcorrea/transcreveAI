@@ -19,21 +19,29 @@
 - [x] Transcrição com Parakeet v3 (FluidAudio), com progresso no painel e prévia ao vivo. Na primeira execução, usar o Apple Speech enquanto o Parakeet baixa e compila.
 - [x] Progresso no ícone quando o painel está fechado, ✓ e bolinha vermelha de "não visto", e som ao terminar.
 
-## v0.5.0 — Resultado e exportação
+## v0.5.0 — Texto ao vivo, botão direito do Finder e fila (pedido do owner, 18/11/2026)
+*(O número 0.5.0 foi escolha do owner; os marcos de baixo andaram uma casa.)*
+- [x] Transcrição aos pedaços: o texto aparece enquanto o resto é transcrito; clicar copia o que já saiu.
+- [x] Botão direito do Finder: Copiar o texto ou Exportar como .txt, sem abrir o painel.
+- [x] Fila de vários áudios.
+- [x] Teste à mão do owner: o item do botão direito aparece e funciona (18/11/2026).
+- [ ] Ainda sem teste à mão: dentro do Dropbox e com vários arquivos.
+
+## v0.6.0 — Resultado e exportação
 - [ ] Lista de trechos clicável (copia o trecho). ~~"Copiar tudo"~~ feito na v0.4; *(11/11/2026)* o botão saiu: clicar no texto copia tudo, com o aviso "Copiado" por 2 s (lançado na v0.4.1, 14/11/2026, junto com o app em inglês, português e espanhol e o site).
-- [ ] Exportar `.txt` e `.md` (⌘E / ⇧⌘E).
+- [ ] Exportar `.txt` e `.md` (⌘E / ⇧⌘E). *(17/11/2026: o `.txt` já sai pelo botão direito do Finder, `Export/Exportacao.swift`; falta no painel e o `.md`.)*
 - [x] Histórico local e lista de recentes no painel (adiantado na v0.4, pedido do owner), com busca e Ajustes para guardar ou limpar.
 
-## v0.6.0 — Modelos e modo Automático
+## v0.7.0 — Modelos e modo Automático
 - [ ] Seletor de modelo e de idioma.
 - [ ] Download do Whisper Large v3 Turbo (WhisperKit) sob demanda, uma única vez.
 - [ ] Benchmark local e modo "Automático" (mais rápido instalado) como padrão.
 
-## v0.7.0 — Fluxo sem abrir o painel
+## v0.8.0 — Fluxo sem abrir o painel
 - [ ] Notificação ao terminar. ~~"Copiar ao terminar" (ligado por padrão)~~ feito na v0.4.
 - [x] Menu "…": Copiar ao terminar, Abrir ao iniciar o Mac, Ajustes, Sair (v0.3; Som ao terminar e Abrir ao arrastar na v0.4).
 
-## v0.8.0 — Anel de ações
+## v0.9.0 — Anel de ações
 - [ ] Atalho global ⌥ Espaço (segurar e soltar), com pedido de permissão de Acessibilidade.
 - [ ] Ações: transcrever seleção do Finder, abrir arquivo, copiar última, colar no app, exportar `.md`, exportar `.txt`. Soltar um áudio no centro do anel transcreve.
 

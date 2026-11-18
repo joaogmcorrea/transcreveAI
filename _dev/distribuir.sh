@@ -44,10 +44,12 @@ MINIMO=$(info LSMinimumSystemVersion)
 
 if security find-identity -v -p codesigning | grep -q "\"$CERTIFICADO\""; then
     echo "Assinando com o certificado \"$CERTIFICADO\"…"
-    # De dentro para fora, como pede o Sparkle (sem --deep).
+    # De dentro para fora, como pede o Sparkle (sem --deep). A extensão do Finder mantém o sandbox
+    # (--preserve-metadata=entitlements), que a Apple exige nas extensões.
     SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
     for parte in "$SPARKLE"/Versions/B/XPCServices/*.xpc "$SPARKLE/Versions/B/Autoupdate" \
-                 "$SPARKLE/Versions/B/Updater.app" "$SPARKLE" "$APP/Contents/Helpers/ffmpeg" "$APP"; do
+                 "$SPARKLE/Versions/B/Updater.app" "$SPARKLE" "$APP/Contents/Helpers/ffmpeg" \
+                 "$APP/Contents/PlugIns/TranscreveFinder.appex" "$APP"; do
         codesign --force --sign "$CERTIFICADO" --preserve-metadata=entitlements "$parte"
     done
 else

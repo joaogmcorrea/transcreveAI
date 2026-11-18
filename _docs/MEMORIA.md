@@ -45,6 +45,39 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 ---
 -->
 
+## Sessão 7 — 17–18/11/2026 (Texto ao vivo, botão direito do Finder e fila, v0.5.0)
+
+### Objetivo
+Pedidos do owner: "hoje os áudios têm que ser transcritos 100% antes de ser possível ler; quero que ele transcreva em tempo real" e "me dê a opção de transcrever clicando com o botão direito em cima dos arquivos compatíveis (como o powerclick.kilicov.dev)". No meio da tarefa: no botão direito, em vez de abrir o painel, duas opções dentro de "Transcrever": copiar o texto ou exportar como .txt.
+
+### Decisões Tomadas
+- **Mockup aprovado no chat** (widget, sem mexer no canvas): o texto aparece na mesma caixa do resultado, de cima para baixo, com a barra no topo. Escolhas do owner: clicar durante a transcrição copia o que já saiu; vários arquivos no Finder = **fila** (um depois do outro), não só o primeiro.
+- **A fila vale para tudo** (arrastar vários, "Abrir arquivo…" com seleção múltipla, Finder). Um áudio solto durante uma transcrição agora espera a vez (antes cancelava a atual). Cancelar esvazia a fila.
+- **Botão direito = segundo plano:** Copiar o texto (vários áudios vão juntos, cada um com o nome do arquivo em cima) ou Exportar como .txt (`nome.txt` ao lado do áudio; `nome 2.txt` se existir; sem permissão, Downloads). Não abre o painel; ✓ no ícone sem a bolinha vermelha (`Fim.entregue`) e som. O "Copiar ao terminar" não vale para o Finder (a ação já diz o que fazer).
+- **Extensão do Finder** (FinderSync, alvo `TranscreveFinder`, sandbox exigido pela Apple) passa os caminhos ao app por `transcreveai://copiar|exportar?arquivo=…`. O app só aceita pedidos de um processo dentro de uma `.appex` com o identificador da extensão (remetente pelo `keySenderPIDAttr` do evento + `proc_pidpath`), para um site não conseguir mandar o app transcrever um arquivo do Mac. O app liga a extensão sozinho na primeira abertura (`pluginkit -e use`, uma vez; chave `menuDoFinderAtivado`) e há uma linha nos Ajustes.
+- **Pedaços do Parakeet:** 14 s (com a margem, 15 s = um passo do modelo), depois 4 min, depois 10 min. Emendas no trecho de 200 ms mais quieto dos 5 s antes do alvo, com 1 s de margem de cada lado; de cada pedaço só entram as palavras que começam entre as emendas dele.
+- **Versão 0.5.0** (escolha do owner, 18/11/2026), contra a recomendação de 0.4.2 (o precedente da v0.4.1 era usar o PATCH entre marcos). Os marcos seguintes do ROADMAP andaram uma casa: trecho clicável e exportação no painel na v0.6, Whisper na v0.7, notificação na v0.8, anel na v0.9.
+- **GIFs do README** imitam o painel novo: os parágrafos surgem durante a transcrição e, no fim, a barra some e a caixa sobe até o lugar do resultado. Deixar o parágrafo crescer devagar mexia no painel em quase todo quadro e levou os GIFs de cerca de 2 MB para 3,3 MB (o `diff_mode=rectangle` só economiza quando pouco muda); com cada parágrafo surgindo em cerca de 0,1 s, ficaram com 2,3 MB.
+
+### Descobertas
+- **Velocidade (M4 Pro, com o owner usando o Mac):** antes, 10 min em 2,7 s e 60 min em 13,0 s; agora 2,4 s e 13,2 s, primeiro texto em 0,1 s. Ganho nos áudios médios porque a leitura do próximo pedaço corre junto com a transcrição do atual (o FluidAudio convertia o arquivo inteiro antes de começar). Dobrar o pedaço aos poucos (15, 30, 60…) deixava 10 min 15% mais lentos: cada emenda desperdiça o fim de uma janela interna do FluidAudio.
+- **FluidAudio por dentro:** acima de 30 s (`streamingThreshold`), `transcribe(url)` converte para um arquivo temporário com o `AVAudioConverter` na qualidade padrão; até 30 s, com "Mastering". Converter tudo em "Mastering" deixava a leitura tão lenta quanto a transcrição. O `ChunkProcessor` usa janelas de 15 s com 2 s de sobreposição e 4 trabalhadores em paralelo. Os `tokenTimings` já vêm com espaço no lugar do "▁" (agrupar palavras por "▁" juntou um pedaço inteiro numa palavra só).
+- **Emendas:** corte seco numa pausa comia palavras ("mas essa semana" → "mas Semana"). Com 1 s de margem, os dois pedaços às vezes discordam de que lado da emenda a palavra começa ("Qu Quando"), e o pedaço de depois começa com maiúscula ("um link Do que"). `Emenda.costurar` tira a palavra repetida e copia a caixa do pedaço anterior, que ouviu a frase desde o começo.
+- **Qualidade:** sem transcrição de referência, comparei com o antigo: 2,6% a 14% de palavras diferentes. Mas o próprio antigo muda 11,5% só deslocando o áudio meio segundo (o novo, 13,7%): a diferença é do tamanho da variação do Parakeet nestes áudios informais. O Parakeet às vezes inventa trechos em inglês no idioma automático, no antigo e no novo.
+- **Extensão ad-hoc funciona:** o pkd aceitou a extensão assinada ad-hoc (com o sandbox) e o Finder a carregou. Teste do remetente: um processo em sandbox dentro de uma `.appex` falsa com o nosso identificador foi aceito; `open` e um programa comum foram recusados. O `open` some antes do app ler o pedido, por isso o remetente aparece como "?".
+- **Armadilhas de teste:** `CFFIXED_USER_HOME` muda as pastas do `FileManager` (histórico, modelos) mas **não** o `defaults`/UserDefaults: um `defaults write` assim gravou nas preferências reais do owner (desfeito na hora). Para testes, usar o domínio de argumentos (`-somAoTerminar '<false/>'`), que não grava nada. No zsh, `log` é um comando interno: usar `/usr/bin/log`. Com o owner usando o Mac, o painel fecha no primeiro clique dele; fotografar só a janela do painel (`screencapture -l <número da janela>`) e rápido. Duas cópias do app com o mesmo identificador (a do Xcode e a de teste) disputam o endereço `transcreveai://` e a extensão: no fim, desregistrar a de teste (`lsregister -u`, `pluginkit -r`) e apagar.
+- **FinderSync fora da thread principal (bug achado pelo owner, 17/11/2026):** o Finder chama `menu(for:)` (e as ações) numa fila do XPC (`com.apple.NSXPCConnection.user.endpoint`), não na thread principal. A primeira versão usava `MainActor.assumeIsolated` (exigido pelo Swift 6 com isolamento `MainActor`) e a extensão travava a cada clique com o botão direito (`EXC_BREAKPOINT` em `dispatch_assert_queue`, relatório em `~/Library/Logs/DiagnosticReports/TranscreveFinder-*.ips`): o item nunca aparecia. Correção: o alvo da extensão compila em Swift 5, sem isolamento padrão, e monta o `NSMenu` na fila em que o Finder pede, como o modelo da Apple. Para conferir: `nm` no `TranscreveFinder.debug.dylib` não deve ter `assumeIsolated`/`checkIsolated`. Diagnóstico de extensão: primeiro procurar o `.ips` dela.
+
+### Arquivos Modificados/Criados
+- `files/Pacotes/TranscreveMotores/Sources/TranscreveMotores/LeitorDeAmostras.swift` (novo), `MotorParakeet.swift` (pedaços, `Pedacos`, `Emenda`), `Modelos.swift`, `Sources/transcrever/main.swift` (tempo do primeiro texto).
+- `files/TranscreveAI/App/EstadoApp.swift` (destinos, fila, rodadas), `AppDelegate.swift` (pedidos do Finder, `MenuDoFinder`), `UI/PainelView.swift` (`Leitura`), `UI/BarraDeMenus.swift`, `UI/AjustesView.swift`, `Export/Exportacao.swift` (novo), `Localizable.xcstrings`.
+- `files/TranscreveFinder/` (novo alvo), `files/TranscreveFinder-Info.plist`, `files/TranscreveFinder.entitlements`, `files/TranscreveAI-Info.plist` (esquema `transcreveai`), `project.pbxproj`, `_dev/distribuir.sh` (assina a extensão).
+
+### Problemas Conhecidos ou Riscos Futuros
+- **Testado pelo owner (18/11/2026):** o item do botão direito aparece e funciona. **Sem teste à mão:** dentro do Dropbox (que tem extensão do Finder própria; a Apple pode dar a pasta a uma extensão só) e com vários arquivos.
+- A regra de áudio aceito (`FormatosAudio.aceita`) está copiada na extensão: mudar as duas juntas.
+- O botão direito não avisa nada além do ✓ e do som (a notificação do sistema é da v0.7).
+
 ## Sessão 6 — 14/11/2026 (Site pronto para subir ao servidor, v0.4.1)
 
 ### Objetivo
