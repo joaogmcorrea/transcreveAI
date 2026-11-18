@@ -98,7 +98,7 @@ Lista completa e ordenada em `_docs/ROADMAP.md`.
 - **Processo de Deploy:** `./_dev/distribuir.sh --publicar` depois do commit e da tag da versão (skill `versionamento`). O script gera o DMG assinado com EdDSA, o `appcast.xml` e as cópias `appcast-<versão>.xml`, e cria a release. Quem atualiza os apps instalados é a **release**, não o push. A chave privada fica em `_privado/` e **não pode se perder**: sem ela, os apps instalados não aceitam novas versões *(10/11/2026)*.
 - **Versionamento local:** git (commit + tag `vX.Y.Z` via `_docs/versionar.sh`).
 - **Site:** `_site/index.html` é a fonte (prévia local: `python3 -m http.server --directory _site`, *11/11/2026*). `python3 _site/gerar.py` monta o site publicável em `_site/dist/` e no zip (fora do git); sobe para a mesma Hostinger do Cutline (LiteSpeed, `.htaccess`), atrás do Cloudflare, em `public_html/transcreveai/`. Endereço `https://transcreveai.joaocorrea.design`, confirmado pelo owner (constante `SITE`; outro: `--site`). Passo a passo em `_site/PUBLICAR.md` *(14/11/2026)*. **Subir pelo terminal** *(18/11/2026, pedido do owner)*: `./_site/subir.sh` (prévia) e `--enviar`, por SSH com a chave `~/.ssh/transcreveai_site`; o endereço do servidor fica em `_privado/site-ssh.conf`.
-- **Licença:** MIT, em nome de João Corrêa (`LICENSE` na raiz), escolhida pelo owner. Os componentes de terceiros mantêm as suas (`files/LICENCAS.md`) *(10/11/2026)*.
+- **Licença:** MIT, em nome de João Corrêa (`LICENSE` na raiz), escolhida pelo owner. Os componentes de terceiros mantêm as suas (`files/LICENCAS.md`) *(10/11/2026)*. O site não fala de licença nem de código aberto, só que o app é grátis (pedido do owner, 18/11/2026).
 
 ### Design System / UI
 - **Cores Principais:**

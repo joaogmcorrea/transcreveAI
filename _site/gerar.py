@@ -36,7 +36,6 @@ SITE = "https://transcreveai.joaocorrea.design"
 REPO = "https://github.com/joaogmcorrea/transcreveAI"
 DOWNLOAD = f"{REPO}/releases/latest/download/TranscreveAI.dmg"
 RELEASE_API = "https://api.github.com/repos/joaogmcorrea/transcreveAI/releases/latest"
-MIT = "https://opensource.org/license/mit"
 
 PAGES = {
     "en": {
@@ -47,12 +46,12 @@ PAGES = {
         "description": "A menu bar app that turns audio into text in seconds, on your Mac. "
                        "Try it right here: drag an audio file to the icon at the top of the screen.",
         "og_title": "TranscreveAI",
-        "og_description": "Fast, on-device audio transcription in the Mac menu bar. Free and open source.",
+        "og_description": "Fast, on-device audio transcription in the Mac menu bar. Free.",
         "og_image": "og-image.png",
         "og_image_alt": "A Mac desktop with the TranscreveAI panel open under the menu bar icon, showing a meeting "
                         "transcribed in 3.4 seconds and the Copied notice.",
         "main": """<h1>TranscreveAI</h1>
-  <p>A free, open source menu bar app for macOS 26 or later that turns audio into text in seconds. Everything runs on your Mac. This page is a Mac desktop where you can try it: drag an audio file to the icon at the top of the screen.</p>
+  <p>A free menu bar app for macOS 26 or later that turns audio into text in seconds. Everything runs on your Mac. This page is a Mac desktop where you can try it: drag an audio file to the icon at the top of the screen.</p>
   <p><a href="{download}">Download TranscreveAI</a> · <a href="{repo}">Source code on GitHub</a></p>""",
     },
     "pt": {
@@ -63,12 +62,12 @@ PAGES = {
         "description": "Um app de barra de menus que transforma áudio em texto em segundos, no seu Mac. "
                        "Experimente aqui mesmo: arraste um áudio até o ícone no alto da tela.",
         "og_title": "TranscreveAI",
-        "og_description": "Transcrição de áudio rápida e local na barra de menus do Mac. Grátis e de código aberto.",
+        "og_description": "Transcrição de áudio rápida e local na barra de menus do Mac. Grátis.",
         "og_image": "og-image-pt.png",
         "og_image_alt": "Uma mesa de Mac com o painel do TranscreveAI aberto embaixo do ícone da barra de menus, "
                         "mostrando uma reunião transcrita em 3,4 segundos e o aviso Copiado.",
         "main": """<h1>TranscreveAI</h1>
-  <p>Um app grátis e de código aberto para a barra de menus do macOS 26 ou mais recente, que transforma áudio em texto em segundos. Tudo roda no seu Mac. Esta página é uma mesa de Mac onde dá para experimentar: arraste um áudio até o ícone no alto da tela.</p>
+  <p>Um app grátis para a barra de menus do macOS 26 ou mais recente, que transforma áudio em texto em segundos. Tudo roda no seu Mac. Esta página é uma mesa de Mac onde dá para experimentar: arraste um áudio até o ícone no alto da tela.</p>
   <p><a href="{download}">Baixar o TranscreveAI</a> · <a href="{repo}">Código no GitHub</a></p>""",
     },
     "es": {
@@ -79,12 +78,12 @@ PAGES = {
         "description": "Una app de la barra de menús que convierte audio en texto en segundos, en tu Mac. "
                        "Pruébala aquí mismo: arrastra un audio hasta el ícono de arriba de la pantalla.",
         "og_title": "TranscreveAI",
-        "og_description": "Transcripción de audio rápida y local en la barra de menús de tu Mac. Gratis y de código abierto.",
+        "og_description": "Transcripción de audio rápida y local en la barra de menús de tu Mac. Gratis.",
         "og_image": "og-image-es.png",
         "og_image_alt": "Un escritorio de Mac con el panel de TranscreveAI abierto debajo del ícono de la barra de "
                         "menús, con una reunión transcrita en 3,4 segundos y el aviso Copiado.",
         "main": """<h1>TranscreveAI</h1>
-  <p>Una app gratuita y de código abierto para la barra de menús de macOS 26 o posterior, que convierte audio en texto en segundos. Todo corre en tu Mac. Esta página es un escritorio de Mac donde puedes probarla: arrastra un audio hasta el ícono de arriba de la pantalla.</p>
+  <p>Una app gratuita para la barra de menús de macOS 26 o posterior, que convierte audio en texto en segundos. Todo corre en tu Mac. Esta página es un escritorio de Mac donde puedes probarla: arrastra un audio hasta el ícono de arriba de la pantalla.</p>
   <p><a href="{download}">Descargar TranscreveAI</a> · <a href="{repo}">Código en GitHub</a></p>""",
     },
 }
@@ -129,13 +128,13 @@ def structured_data(site, page, version):
             {"@type": "SoftwareApplication", "@id": f"{site}/#app", "name": "TranscreveAI",
              "description": page["description"], "url": f"{site}/",
              "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 26 or later",
-             "softwareVersion": version, "downloadUrl": DOWNLOAD, "isAccessibleForFree": True, "license": MIT,
+             "softwareVersion": version, "downloadUrl": DOWNLOAD, "isAccessibleForFree": True,
              "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
              "author": {"@id": f"{site}/#author"}, "image": f"{site}/icon-512.png",
              "screenshot": f"{site}/{page['og_image']}", "inLanguage": APP_LANGUAGES,
              "releaseNotes": f"{REPO}/releases"},
             {"@type": "SoftwareSourceCode", "@id": f"{site}/#code", "name": "TranscreveAI", "codeRepository": REPO,
-             "programmingLanguage": "Swift", "license": MIT, "targetProduct": {"@id": f"{site}/#app"},
+             "programmingLanguage": "Swift", "targetProduct": {"@id": f"{site}/#app"},
              "author": {"@id": f"{site}/#author"}},
         ],
     }
@@ -244,7 +243,7 @@ def sitemap(site, day):
 def llms(site, version):
     return f"""# TranscreveAI
 
-> TranscreveAI is a free, open source menu bar app for macOS 26 or later that turns audio files into text in seconds, on the Mac itself. No audio or text leaves the Mac.
+> TranscreveAI is a free menu bar app for macOS 26 or later that turns audio files into text in seconds, on the Mac itself. No audio or text leaves the Mac.
 
 The website ({site}/) is an interactive Mac desktop: visitors drag a sample audio file to the TranscreveAI icon in the menu bar and watch the panel transcribe it. The samples have made-up text; nothing dropped on the page is read or uploaded.
 
@@ -258,7 +257,7 @@ The website ({site}/) is an interactive Mac desktop: visitors drag a sample audi
 - Any audio format: what macOS opens directly (MP3, M4A/AAC, WAV, AIFF, FLAC, MP4/MOV and more) plus WebM, WMA, MKV and AMR through a bundled FFmpeg.
 - Recent transcriptions stay only on the Mac; by default the history is cleared when the Mac restarts.
 - Interface in English, Portuguese and Spanish, following the Mac's language.
-- Latest version: {version}. Free, MIT license, made by João Corrêa. Updates arrive through Sparkle.
+- Latest version: {version}. Free, made by João Corrêa. Updates arrive through Sparkle.
 
 ## Links
 

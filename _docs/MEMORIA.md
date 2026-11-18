@@ -61,6 +61,7 @@ TEMPLATE PARA NOVAS SESSÕES (COPIE ESTE BLOCO E COLOQUE NO TOPO)
 - O `.txt` exportado vai para a pasta de onde veio o pedido (mesa ou a pasta do Finder); de Recentes, para a pasta de verdade do áudio (`HOME`). Dois cliques nele abrem o texto no TextEdit.
 - Dica nova: na segunda transcrição, com o painel fechado, um balão aponta o botão direito (só com mouse).
 - As imagens de compartilhamento não mudaram (mostram o fim da transcrição, igual à v0.4.1): rodei o `imagens.mjs` para conferir a correção e mantive as antigas.
+- **O site diz só "grátis"** *(pedido do owner)*: saíram "código aberto" e "MIT" do texto de compartilhamento, do Sobre (Leia-me), da introdução para buscadores, do `llms.txt` e do JSON-LD (`license`), nos três idiomas. O repositório continua com a `LICENSE` MIT; o site só não fala de licença. Os links para o GitHub ficaram.
 
 - **Subir por SSH** *(pedido do owner)*: `_site/subir.sh` com uma chave só para o site (`~/.ssh/transcreveai_site`, fora do Dropbox para a parte privada não ir para a nuvem). Nenhuma senha passa pelo agente; o owner cadastra a chave pública no hPanel.
 - O `rsync` do macOS é o openrsync (protocolo 29): aceita `-c`, `--delete-after`, `--max-delete` e `--itemize-changes`. Com `-c` e o `gerar.py` reescrevendo tudo, ele lista todo arquivo como `.f..t` (só a data); sem `-t` lista como `.f..T` toda vez. Por isso o script filtra a saída (`<f`, `cd`, `*deleting`).
